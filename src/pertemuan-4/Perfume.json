@@ -1,0 +1,522 @@
+[
+  {
+    "id": 1,
+    "name": "Humans ALPHA",
+    "brand": "Maison Luxe",
+    "description": "A rich and opulent fragrance with deep oud wood notes, perfect for special occasions.",
+    "price": 850000,
+    "category": "Oriental",
+    "gender": "Unisex",
+    "image": "https://madeforhmns.com/cdn/shop/files/Alpha-3.png?v=1739624155",
+    "tags": ["Oud", "Woody", "Luxury", "Evening"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "12+ hours"
+    },
+    "notes": {
+      "top": ["Saffron", "Rose"],
+      "middle": ["Oud", "Sandalwood"],
+      "base": ["Amber", "Musk"]
+    },
+    "origin": {
+      "country": "France",
+      "city": "Paris",
+      "house": "Maison Luxe Parfums"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Humans ORGSM",
+    "brand": "Belle Époque",
+    "description": "A delicate floral bouquet evoking the freshness of white flowers in spring.",
+    "price": 420000,
+    "category": "Floral",
+    "gender": "Women",
+    "image": "https://down-id.img.susercontent.com/file/id-11134207-7qul7-lgf61mrz74rs71",
+    "tags": ["Floral", "Fresh", "Spring", "Feminine"],
+    "details": {
+      "volume": "50ml",
+      "concentration": "Eau de Toilette",
+      "longevity": "6-8 hours"
+    },
+    "notes": {
+      "top": ["Bergamot", "Lemon"],
+      "middle": ["Jasmine", "White Rose", "Lily"],
+      "base": ["White Musk", "Cedarwood"]
+    },
+    "origin": {
+      "country": "France",
+      "city": "Grasse",
+      "house": "Belle Époque Atelier"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Humans FARHAMPTON",
+    "brand": "Dark Matter",
+    "description": "A mysterious and seductive dark fragrance for the bold and confident.",
+    "price": 680000,
+    "category": "Chypre",
+    "gender": "Men",
+    "image": "https://madeforhmns.com/cdn/shop/files/Farhampton-3_64281528-0355-43d9-a215-5bf1eccbc758.png?v=1770277998",
+    "tags": ["Dark", "Seductive", "Woody", "Night"],
+    "details": {
+      "volume": "75ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "10-12 hours"
+    },
+    "notes": {
+      "top": ["Black Pepper", "Cardamom"],
+      "middle": ["Leather", "Tobacco", "Iris"],
+      "base": ["Vetiver", "Dark Amber", "Oakmoss"]
+    },
+    "origin": {
+      "country": "United Kingdom",
+      "city": "London",
+      "house": "Dark Matter Fragrances"
+    }
+  },
+  {
+    "id": 4,
+    "name": "Humans ORGSM",
+    "brand": "Sea Breeze",
+    "description": "A fresh aquatic fragrance inspired by the Mediterranean sea breeze.",
+    "price": 320000,
+    "category": "Aquatic",
+    "gender": "Men",
+    "image": "https://madeforhmns.com/cdn/shop/files/Darker-1_f56395ea-afc5-4f1f-9609-ae848d098b92.png?v=1739518105",
+    "tags": ["Fresh", "Aquatic", "Marine", "Summer"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Eau de Toilette",
+      "longevity": "5-7 hours"
+    },
+    "notes": {
+      "top": ["Sea Salt", "Grapefruit", "Mint"],
+      "middle": ["Aquatic Notes", "Driftwood"],
+      "base": ["White Musk", "Ambergris"]
+    },
+    "origin": {
+      "country": "Italy",
+      "city": "Milan",
+      "house": "Sea Breeze Italia"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Humans ADDICT",
+    "brand": "Jardin Secret",
+    "description": "An eternal rose captured in a bottle, romantic and timeless.",
+    "price": 560000,
+    "category": "Floral",
+    "gender": "Women",
+    "image": "https://madeforhmns.com/cdn/shop/files/Addict-100ml-1_4734d2f2-8511-456e-a959-d2d1968f3e6c_1080x.png?v=1741672596",
+    "tags": ["Rose", "Romantic", "Classic", "Feminine"],
+    "details": {
+      "volume": "50ml",
+      "concentration": "Extrait de Parfum",
+      "longevity": "12+ hours"
+    },
+    "notes": {
+      "top": ["Rose Absolute", "Pink Pepper"],
+      "middle": ["Bulgarian Rose", "Peony", "Lychee"],
+      "base": ["Patchouli", "Sandalwood", "Musk"]
+    },
+    "origin": {
+      "country": "Bulgaria",
+      "city": "Valley of Roses",
+      "house": "Jardin Secret Parfums"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Humans DANKER",
+    "brand": "Zest Lab",
+    "description": "An energizing burst of citrus fruits that awakens the senses every morning.",
+    "price": 280000,
+    "category": "Citrus",
+    "gender": "Unisex",
+    "image": "https://madeforhmns.com/cdn/shop/files/CATALOG_RESIZE3.png?v=1724060641",
+    "tags": ["Citrus", "Fresh", "Energizing", "Morning"],
+    "details": {
+      "volume": "30ml",
+      "concentration": "Eau de Cologne",
+      "longevity": "3-4 hours"
+    },
+    "notes": {
+      "top": ["Lemon", "Orange", "Grapefruit"],
+      "middle": ["Neroli", "Green Tea"],
+      "base": ["White Musk", "Vetiver"]
+    },
+    "origin": {
+      "country": "Spain",
+      "city": "Seville",
+      "house": "Zest Laboratory"
+    }
+  },
+  {
+    "id": 7,
+    "name": "Humans PHILEA",
+    "brand": "Eastern Tales",
+    "description": "Smooth and creamy sandalwood wrapped in silk, a journey to the East.",
+    "price": 490000,
+    "category": "Woody",
+    "gender": "Unisex",
+    "image": "https://cdn.shopify.com/s/files/1/0249/6341/6160/files/5_2d76d1c0-702e-40a2-8a78-66a7df38c49f.jpg?v=1763797626",
+    "tags": ["Woody", "Creamy", "Warm", "Exotic"],
+    "details": {
+      "volume": "75ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "10-12 hours"
+    },
+    "notes": {
+      "top": ["Cardamom", "Bergamot"],
+      "middle": ["Sandalwood", "Vanilla Orchid"],
+      "base": ["Amber", "White Musk", "Benzoin"]
+    },
+    "origin": {
+      "country": "India",
+      "city": "Mysore",
+      "house": "Eastern Tales Atelier"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Humans Perfection",
+    "brand": "Arabian Nights",
+    "description": "A velvety smooth oud fragrance inspired by the mystical Arabian nights.",
+    "price": 920000,
+    "category": "Oriental",
+    "gender": "Unisex",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTI1ru8-G-Dfq8STlLdBseRUMzFHdUOHZMqgg&s",
+    "tags": ["Oud", "Luxury", "Oriental", "Intense"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Extrait de Parfum",
+      "longevity": "24+ hours"
+    },
+    "notes": {
+      "top": ["Taif Rose", "Saffron"],
+      "middle": ["Agarwood", "Frankincense"],
+      "base": ["Musk", "Amber", "Sandalwood"]
+    },
+    "origin": {
+      "country": "UAE",
+      "city": "Dubai",
+      "house": "Arabian Nights Perfumery"
+    }
+  },
+  {
+    "id": 9,
+    "name": "Humans Sore",
+    "brand": "Nature's Breath",
+    "description": "Walk through a lush green forest after morning rain with this earthy fragrance.",
+    "price": 370000,
+    "category": "Green",
+    "gender": "Unisex",
+    "image": "https://cdn.shopify.com/s/files/1/0249/6341/6160/files/6_c4c49420-d28b-465c-993b-5162cb022cbb.jpg?v=1763797626",
+    "tags": ["Green", "Earthy", "Fresh", "Natural"],
+    "details": {
+      "volume": "50ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "7-9 hours"
+    },
+    "notes": {
+      "top": ["Eucalyptus", "Green Leaves", "Pine"],
+      "middle": ["Petrichor", "Moss", "Fern"],
+      "base": ["Oakmoss", "Cedarwood", "Earth"]
+    },
+    "origin": {
+      "country": "Germany",
+      "city": "Black Forest",
+      "house": "Nature's Breath GmbH"
+    }
+  },
+  {
+    "id": 10,
+    "name": "Human Haik",
+    "brand": "Golden Hour",
+    "description": "The warm glow of an amber sunset captured in a bottle, rich and comforting.",
+    "price": 510000,
+    "category": "Oriental",
+    "gender": "Women",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7Lz-eTjHhhmigAGhj5qpxh1_ZX_UCbIubXQ&s",
+    "tags": ["Amber", "Warm", "Sweet", "Evening"],
+    "details": {
+      "volume": "75ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "10-12 hours"
+    },
+    "notes": {
+      "top": ["Mandarin", "Peach", "Apricot"],
+      "middle": ["Amber", "Jasmine", "Ylang-Ylang"],
+      "base": ["Vanilla", "Benzoin", "Labdanum"]
+    },
+    "origin": {
+      "country": "Morocco",
+      "city": "Marrakech",
+      "house": "Golden Hour Parfums"
+    }
+  },
+  {
+    "id": 11,
+    "name": "Humans Uncharted",
+    "brand": "Provence Pure",
+    "description": "An authentic Provençal lavender field experience, calming and elegant.",
+    "price": 310000,
+    "category": "Aromatic",
+    "gender": "Unisex",
+    "image": "https://down-id.img.susercontent.com/file/id-11134207-7rasd-m4fofgzjmd2bd4",
+    "tags": ["Lavender", "Aromatic", "Calming", "Classic"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Eau de Toilette",
+      "longevity": "6-8 hours"
+    },
+    "notes": {
+      "top": ["Lavender", "Bergamot"],
+      "middle": ["Geranium", "Rosemary"],
+      "base": ["Musk", "Oakmoss", "Sandalwood"]
+    },
+    "origin": {
+      "country": "France",
+      "city": "Provence",
+      "house": "Provence Pure Atelier"
+    }
+  },
+  {
+    "id": 12,
+    "name": "Humans Essence",
+    "brand": "Gentleman's Club",
+    "description": "A bold and sophisticated blend of tobacco and leather for the modern gentleman.",
+    "price": 750000,
+    "category": "Chypre",
+    "gender": "Men",
+    "image": "https://madeforhmns.com/cdn/shop/files/EoS-1_62ecb5de-eb89-4dd7-85c9-d51150602276_1080x.png?v=1739624030",
+    "tags": ["Leather", "Tobacco", "Masculine", "Bold"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "12+ hours"
+    },
+    "notes": {
+      "top": ["Black Pepper", "Rum"],
+      "middle": ["Tobacco Leaf", "Leather", "Clove"],
+      "base": ["Dark Patchouli", "Vetiver", "Labdanum"]
+    },
+    "origin": {
+      "country": "United Kingdom",
+      "city": "London",
+      "house": "Gentleman's Club Fragrances"
+    }
+  },
+  {
+    "id": 13,
+    "name": "Humans ADDICT",
+    "brand": "Sakura Dreams",
+    "description": "The ephemeral beauty of cherry blossoms in spring, light and romantic.",
+    "price": 395000,
+    "category": "Floral",
+    "gender": "Women",
+    "image": "https://www.bandaneiragrooming.com/wp-content/uploads/2022/11/3-2.jpg",
+    "tags": ["Cherry", "Floral", "Sweet", "Japanese"],
+    "details": {
+      "volume": "50ml",
+      "concentration": "Eau de Toilette",
+      "longevity": "5-7 hours"
+    },
+    "notes": {
+      "top": ["Cherry", "Pink Pepper", "Yuzu"],
+      "middle": ["Sakura", "Peony", "Almond Blossom"],
+      "base": ["White Musk", "Sandalwood", "Vanilla"]
+    },
+    "origin": {
+      "country": "Japan",
+      "city": "Kyoto",
+      "house": "Sakura Dreams Japan"
+    }
+  },
+  {
+    "id": 14,
+    "name": "Midnight Musk",
+    "brand": "Luna Noir",
+    "description": "A captivating musk that blooms after midnight, sensual and mysterious.",
+    "price": 445000,
+    "category": "Musk",
+    "gender": "Unisex",
+    "image": "https://madeforhmns.com/cdn/shop/files/CATALOG_RESIZE17.png?v=1724070702",
+    "tags": ["Musk", "Sensual", "Night", "Mysterious"],
+    "details": {
+      "volume": "75ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "9-11 hours"
+    },
+    "notes": {
+      "top": ["Black Currant", "Midnight Violet"],
+      "middle": ["White Musk", "Orris", "Heliotrope"],
+      "base": ["Cashmeran", "Ambrette", "Benzyl Benzoate"]
+    },
+    "origin": {
+      "country": "France",
+      "city": "Paris",
+      "house": "Luna Noir Parfums"
+    }
+  },
+  {
+    "id": 15,
+    "name": "Coconut Paradise",
+    "brand": "Tropical Escape",
+    "description": "A tropical getaway in a bottle, coconut bliss with exotic florals.",
+    "price": 260000,
+    "category": "Gourmand",
+    "gender": "Women",
+    "image": "https://madeforhmns.com/cdn/shop/files/CATALOG_RESIZE11.png?v=1724069768",
+    "tags": ["Coconut", "Tropical", "Sweet", "Exotic"],
+    "details": {
+      "volume": "30ml",
+      "concentration": "Eau de Toilette",
+      "longevity": "4-6 hours"
+    },
+    "notes": {
+      "top": ["Coconut", "Pineapple", "Papaya"],
+      "middle": ["Frangipani", "Hibiscus", "Tiare"],
+      "base": ["Vanilla", "Coconut Milk", "Musk"]
+    },
+    "origin": {
+      "country": "Maldives",
+      "city": "Male",
+      "house": "Tropical Escape Co."
+    }
+  },
+  {
+    "id": 16,
+    "name": "Vetiver Storm",
+    "brand": "Raw Earth",
+    "description": "Earthy vetiver with a stormy intensity, grounding and powerful.",
+    "price": 580000,
+    "category": "Woody",
+    "gender": "Men",
+    "image": "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full/catalog-image/MTA-139358016/hmns_hmns_hair_-_body_mist_-_my_1st_o_250ml_full04_o0271aoo.png",
+    "tags": ["Vetiver", "Earthy", "Intense", "Masculine"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "10-12 hours"
+    },
+    "notes": {
+      "top": ["Ginger", "Elemi"],
+      "middle": ["Vetiver", "Cedarwood", "Birch"],
+      "base": ["Oud", "Patchouli", "Smoke"]
+    },
+    "origin": {
+      "country": "Haiti",
+      "city": "Port-au-Prince",
+      "house": "Raw Earth Perfumes"
+    }
+  },
+  {
+    "id": 17,
+    "name": "Vanilla Dreams",
+    "brand": "Sweet Whispers",
+    "description": "A dreamy sweet vanilla wrapped in warm spices, comforting and addictive.",
+    "price": 340000,
+    "category": "Gourmand",
+    "gender": "Women",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0wXWGxBAxeGDqVgftJbF5xN1C_NVU8Fxxjg&s",
+    "tags": ["Vanilla", "Sweet", "Warm", "Gourmand"],
+    "details": {
+      "volume": "50ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "8-10 hours"
+    },
+    "notes": {
+      "top": ["Cinnamon", "Cardamom", "Nutmeg"],
+      "middle": ["Vanilla Absolute", "Heliotrope"],
+      "base": ["Tonka Bean", "Benzoin", "Musk"]
+    },
+    "origin": {
+      "country": "Madagascar",
+      "city": "Antananarivo",
+      "house": "Sweet Whispers Parfums"
+    }
+  },
+  {
+    "id": 18,
+    "name": "Iris Palace",
+    "brand": "Florentine Art",
+    "description": "Powdery iris inspired by the grand palaces of Florence, noble and refined.",
+    "price": 720000,
+    "category": "Floral",
+    "gender": "Unisex",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQie_sj-YNo7mpYxGrXhOVhOvGMWFTZ6v95A&s",
+    "tags": ["Iris", "Powdery", "Elegant", "Refined"],
+    "details": {
+      "volume": "75ml",
+      "concentration": "Extrait de Parfum",
+      "longevity": "12+ hours"
+    },
+    "notes": {
+      "top": ["Bergamot", "Violet Leaf"],
+      "middle": ["Iris Pallida", "Orris Butter", "Violet"],
+      "base": ["Cedarwood", "Musk", "Ambrette"]
+    },
+    "origin": {
+      "country": "Italy",
+      "city": "Florence",
+      "house": "Florentine Art Fragrances"
+    }
+  },
+  {
+    "id": 19,
+    "name": "Coffee & Smoke",
+    "brand": "Urban Underground",
+    "description": "An edgy urban fragrance combining roasted coffee with smoked woods.",
+    "price": 465000,
+    "category": "Aromatic",
+    "gender": "Men",
+    "image": "https://madeforhmns.com/cdn/shop/files/CATALOG_RESIZE6.png?v=1724061915",
+    "tags": ["Coffee", "Smoky", "Urban", "Bold"],
+    "details": {
+      "volume": "50ml",
+      "concentration": "Eau de Parfum",
+      "longevity": "9-11 hours"
+    },
+    "notes": {
+      "top": ["Coffee", "Black Tea", "Bergamot"],
+      "middle": ["Smoked Wood", "Leather", "Cacao"],
+      "base": ["Oud", "Vetiver", "Iso E Super"]
+    },
+    "origin": {
+      "country": "USA",
+      "city": "New York",
+      "house": "Urban Underground Lab"
+    }
+  },
+  {
+    "id": 20,
+    "name": "Solar Neroli",
+    "brand": "Mediterranean Sun",
+    "description": "Sun-kissed neroli blossoms at midday, bright, joyful and uplifting.",
+    "price": 430000,
+    "category": "Citrus",
+    "gender": "Unisex",
+    "image": "https://cdn.shopify.com/s/files/1/0249/6341/6160/files/9_c9bf634c-4ece-4a14-8ce7-0c6711401620.jpg?v=1773847910",
+    "tags": ["Neroli", "Citrus", "Bright", "Summer"],
+    "details": {
+      "volume": "100ml",
+      "concentration": "Eau de Toilette",
+      "longevity": "6-8 hours"
+    },
+    "notes": {
+      "top": ["Neroli", "Lemon", "Orange Blossom"],
+      "middle": ["Petitgrain", "Jasmine Sambac"],
+      "base": ["White Musk", "Ambergris", "Vetiver"]
+    },
+    "origin": {
+      "country": "Tunisia",
+      "city": "Nabeul",
+      "house": "Mediterranean Sun Parfums"
+    }
+  }
+]

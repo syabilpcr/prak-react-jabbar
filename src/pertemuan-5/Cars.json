@@ -1,0 +1,61 @@
+[
+  {
+    "id": 1,
+    "name": "Rolls-Royce Ghost",
+    "brand": "Rolls-Royce",
+    "category": "Luxury",
+    "price": 1500,
+    "image": "https://images.unsplash.com/photo-1631214503851-a320d2ec9237?auto=format&fit=crop&q=80&w=400",
+    "status": "Available",
+    "specifications": {
+      "engine": "6.75L V12",
+      "transmission": "Automatic",
+      "fuel": "Petrol"
+    },
+    "owner": {
+      "name": "Budi Luxury",
+      "contact": "0812-3456-7890",
+      "location": "Jakarta"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Tesla Model S Plaid",
+    "brand": "Tesla",
+    "category": "Electric",
+    "price": 800,
+    "image": "https://images.unsplash.com/photo-1617788131775-ceb2127bb06a?auto=format&fit=crop&q=80&w=400",
+    "status": "Available",
+    "specifications": {
+      "engine": "Tri-Motor Electric",
+      "transmission": "Single-speed",
+      "fuel": "Electric"
+    },
+    "owner": {
+      "name": "Andi Tech",
+      "contact": "0811-2222-3333",
+      "location": "Tangerang"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Porsche 911 GT3",
+    "brand": "Porsche",
+    "category": "Sport",
+    "price": 1200,
+    "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=400",
+    "status": "Booked",
+    "specifications": {
+      "engine": "4.0L Flat-6",
+      "transmission": "PDK",
+      "fuel": "Petrol"
+    },
+    "owner": {
+      "name": "Siska Sport",
+      "contact": "0855-6667-7788",
+      "location": "Surabaya"
+    }
+  }
+]
+
+
