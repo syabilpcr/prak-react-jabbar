@@ -1,52 +1,51 @@
-import { FaBell, FaSearch } from "react-icons/fa";
-import { FcAreaChart } from "react-icons/fc";
-import { SlSettings } from "react-icons/sl";
+import { useState } from "react";
+import SearchModal from "../components/SearchModal";
+import NotificationDropdown from "../components/NotificationDropdown";
 
-export default function Header() {
+const Header = () => {
+  const [searchOpen, setSearchOpen] = useState(false);
+
   return (
-    <div className="flex items-center justify-between p-4">
+    <>
+      <header className="bg-white shadow-sm px-6 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-gray-700">Dashboard</h1>
 
-      {/* Search */}
-      <div className="relative w-full max-w-lg">
-        <input
-          type="text"
-          placeholder="Search Here..."
-          className="w-full max-w-lg rounded-md border border-gray-100 bg-white p-2 pr-10 outline-none"
-        />
+        <div className="flex items-center gap-3">
+          {/* Search Button — Improvisasi 1 */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 transition px-3 py-2 rounded-xl text-sm text-gray-500"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            Cari...
+          </button>
 
-        <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-300" />
-      </div>
+          {/* Notification — Improvisasi 3 */}
+          <NotificationDropdown />
 
-      {/* Right */}
-      <div className="flex items-center space-x-4">
-
-        <div className="relative cursor-pointer rounded-2xl bg-blue-100 p-3 text-blue-500">
-          <FaBell />
-          <span className="absolute right-0 top-0 translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-200 px-2 py-1 text-xs">
-            50
-          </span>
+          {/* Avatar */}
+          <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold">
+            A
+          </div>
         </div>
+      </header>
 
-        <div className="cursor-pointer rounded-2xl bg-blue-100 p-3">
-          <FcAreaChart />
-        </div>
-
-        <div className="cursor-pointer rounded-2xl bg-red-100 p-3 text-red-500">
-          <SlSettings />
-        </div>
-
-        <div className="flex items-center space-x-4 border-l border-gray-300 pl-4">
-          <span>
-            Hello, <b>Fikri Muhaffizh</b>
-          </span>
-
-          <img
-            src="https://avatar.iran.liara.run/public/28"
-            className="h-10 w-10 rounded-full"
-          />
-        </div>
-
-      </div>
-    </div>
+      {/* Search Modal */}
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
   );
-}
+};
+
+export default Header;

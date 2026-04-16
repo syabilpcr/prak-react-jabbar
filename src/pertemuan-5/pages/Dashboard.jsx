@@ -1,69 +1,17 @@
 import PageHeader from "../components/PageHeader";
+import StatsWidget from "../components/StatsWidget"; // Improvisasi 2
 
-import {
-  FaShoppingCart,
-  FaTruck,
-  FaBan,
-  FaDollarSign,
-} from "react-icons/fa";
-
-export default function Dashboard() {
+const Dashboard = () => {
   return (
-    <div>
+    <div className="p-6">
+      <PageHeader title="Dashboard" subtitle="Selamat datang kembali!" />
 
-      <PageHeader />
+      {/* Improvisasi 2: Stats Widget dengan animasi counter */}
+      <StatsWidget />
 
-      <div className="grid gap-4 p-5 sm:grid-cols-2 md:grid-cols-4">
-
-        {/* Orders */}
-        <div className="flex items-center space-x-5 rounded-lg bg-white p-4 shadow-md">
-          <div className="rounded-full bg-hijau p-4 text-3xl text-white">
-            <FaShoppingCart />
-          </div>
-
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold">75</span>
-            <span className="text-gray-400">Total Orders</span>
-          </div>
-        </div>
-
-        {/* Delivered */}
-        <div className="flex items-center space-x-5 rounded-lg bg-white p-4 shadow-md">
-          <div className="rounded-full bg-biru p-4 text-3xl text-white">
-            <FaTruck />
-          </div>
-
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold">175</span>
-            <span className="text-gray-400">Delivered</span>
-          </div>
-        </div>
-
-        {/* Cancel */}
-        <div className="flex items-center space-x-5 rounded-lg bg-white p-4 shadow-md">
-          <div className="rounded-full bg-merah p-4 text-3xl text-white">
-            <FaBan />
-          </div>
-
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold">40</span>
-            <span className="text-gray-400">Canceled</span>
-          </div>
-        </div>
-
-        {/* Revenue */}
-        <div className="flex items-center space-x-5 rounded-lg bg-white p-4 shadow-md">
-          <div className="rounded-full bg-kuning p-4 text-3xl text-white">
-            <FaDollarSign />
-          </div>
-
-          <div className="flex flex-col">
-            <span className="text-2xl font-bold">Rp.128</span>
-            <span className="text-gray-400">Revenue</span>
-          </div>
-        </div>
-
-      </div>
+      {/* Konten lainnya tetap di bawah */}
     </div>
   );
-}
+};
+
+export default Dashboard;
