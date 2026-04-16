@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Barlow";
+  src: url("/fonts/Barlow-Regular.ttf");
+}
+
+/* 🔥 INI YANG BENAR UNTUK BOLD */
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Bold.ttf");
+  font-weight: bold;
+}
+
+body {
+  font-family: "Barlow", sans-serif;
+}
