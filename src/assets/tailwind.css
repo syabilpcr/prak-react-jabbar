@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Barlow";
+  src: url("/fonts/Barlow-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("/fonts/Poppins-Bold.ttf");
+  font-weight: bold;
+}
+
+body {
+  font-family: "Barlow", sans-serif;
+  background-color: #EEEEEE;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #D84040;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #8E1616;
+  border-radius: 10px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom color utilities */
+.bg-primary { background-color: #8E1616; }
+.bg-primary-dark { background-color: #1D1616; }
+.bg-secondary { background-color: #D84040; }
+.bg-light { background-color: #EEEEEE; }
+.text-primary { color: #8E1616; }
+.text-primary-dark { color: #1D1616; }
+.text-secondary { color: #D84040; }
+.border-primary { border-color: #8E1616; }
+.border-secondary { border-color: #D84040; }
+.hover\:bg-primary-dark:hover { background-color: #1D1616; }
+.hover\:bg-secondary-light:hover { background-color: #D84040; }
