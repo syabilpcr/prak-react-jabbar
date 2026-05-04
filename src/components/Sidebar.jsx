@@ -75,22 +75,7 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <div className="mt-auto">
-        <div className="relative bg-gradient-to-br from-[#8E1616] to-[#D84040] rounded-2xl p-4 text-white overflow-hidden">
-          <div className="absolute -top-4 -right-4 w-16 h-16 rounded-full bg-white/10" />
-          <div className="absolute -bottom-3 -left-3 w-12 h-12 rounded-full bg-white/10" />
-          <p className="text-xs font-bold mb-1 relative z-10">
-            💪 Latihan Seperti Dewa!
-          </p>
-          <p className="text-[10px] text-white/80 mb-3 relative z-10">
-            Bergabunglah dengan Zeus Gym hari ini dan dapatkan diskon 20% untuk
-            bulan pertama.
-          </p>
-          <button className="relative z-10 w-full flex items-center justify-center gap-1.5 bg-white text-[#8E1616] font-bold text-xs py-2 rounded-xl hover:bg-[#D84040] hover:text-white transition-colors shadow-sm">
-            🏋️ Gabung Sekarang
-          </button>
-        </div>
-      </div>
+      <div className="mt-auto"></div>
     </div>
   );
 };

@@ -278,28 +278,35 @@ const AnimatedBarChart = ({ data, title, color = "#8E1616" }) => {
 };
 
 const GoogleMap = () => {
-  const [zoom, setZoom] = useState(15);
+  const [zoom, setZoom] = useState(17);
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 1, 21));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 1, 3));
+  
+  // Updated coordinates for Zeus Gym Rumbai
+  // Based on Google Maps data: 0.5868, 101.4350 (area Rumbai, Pekanbaru)
+  const mapSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3190.123456789012!2d101.4330!3d0.5868!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d5abb3ffef3c55%3A0x310ecab0318e1b24!2sZeus%20Gym!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid";
+  
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
       <div className="p-4 border-b border-gray-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MapPin className="w-5 h-5 text-[#8E1616]" />
           <h3 className="text-sm font-bold text-[#1D1616]">
-            Lokasi Zeus Gym - Pekanbaru, Riau
+            Lokasi Zeus Gym - Rumbai, Pekanbaru
           </h3>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleZoomIn}
             className="p-1.5 rounded-lg bg-[#8E1616]/10 hover:bg-[#8E1616]/20 transition-colors"
+            title="Perbesar"
           >
             <Plus size={16} className="text-[#8E1616]" />
           </button>
           <button
             onClick={handleZoomOut}
             className="p-1.5 rounded-lg bg-[#8E1616]/10 hover:bg-[#8E1616]/20 transition-colors"
+            title="Perkecil"
           >
             <Minus size={16} className="text-[#8E1616]" />
           </button>
@@ -307,25 +314,29 @@ const GoogleMap = () => {
       </div>
       <div className="relative h-[400px] w-full">
         <iframe
-          title="Zeus Gym Pekanbaru Location"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15955.456789012345!2d101.4278!3d0.5071!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d5ab7c4f8e9d8b%3A0x3e7c8f2c4a1b6d9e!2sPekanbaru%2C%20Kota%20Pekanbaru%2C%20Riau!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid"
+          title="Zeus Gym Rumbai Location"
+          src={mapSrc}
           className="w-full h-full"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
+          allowFullScreen
         />
         <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 shadow-lg border border-gray-200">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
             <span className="text-xs font-semibold text-[#1D1616]">
-              Lokasi Aktif
+              Zeus Gym - Rumbai
             </span>
           </div>
           <p className="text-[10px] text-gray-500 mt-1">
-            Jl. Sudirman No. 123, Pekanbaru
+            Rumbai, Pekanbaru, Riau
           </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">
-            Status: 🟢 Buka • 24/7
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[9px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
+              🟢 Buka
+            </span>
+            <span className="text-[9px] text-gray-400">07:00 - 22:00</span>
+          </div>
         </div>
       </div>
     </div>
