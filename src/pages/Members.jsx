@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import QRCodeModal from "../components/QRCodeModal";
 import {
@@ -18,74 +18,15 @@ import {
   CalendarRange,
   CalendarClock,
   AlertCircle,
+  Loader,
 } from "lucide-react";
 
-const initialMembers = [
-  {
-    id: "ZEUS-001",
-    name: "Alex Johnson",
-    email: "alex@email.com",
-    phone: "081234567890",
-    package: "yearly",
-    packageLabel: "1 Tahun",
-    status: "Aktif",
-    joinDate: "2024-01-15",
-    expiryDate: "2025-01-15",
-    price: 1200000,
-  },
-  {
-    id: "ZEUS-002",
-    name: "Sarah Williams",
-    email: "sarah@email.com",
-    phone: "081234567891",
-    package: "monthly",
-    packageLabel: "1 Bulan",
-    status: "Aktif",
-    joinDate: "2024-02-20",
-    expiryDate: "2025-02-20",
-    price: 350000,
-  },
-  {
-    id: "ZEUS-003",
-    name: "Mike Chen",
-    email: "mike@email.com",
-    phone: "081234567892",
-    package: "quarterly",
-    packageLabel: "3 Bulan",
-    status: "Aktif",
-    joinDate: "2024-03-10",
-    expiryDate: "2024-06-10",
-    price: 850000,
-  },
-  {
-    id: "ZEUS-004",
-    name: "Jessica Lee",
-    email: "jessica@email.com",
-    phone: "081234567893",
-    package: "daily",
-    packageLabel: "Harian",
-    status: "Aktif",
-    joinDate: "2024-12-04",
-    expiryDate: "2024-12-05",
-    price: 50000,
-  },
-  {
-    id: "ZEUS-005",
-    name: "David Kim",
-    email: "david@email.com",
-    phone: "081234567894",
-    package: "monthly",
-    packageLabel: "1 Bulan",
-    status: "Tidak Aktif",
-    joinDate: "2024-05-12",
-    expiryDate: "2024-06-12",
-    price: 350000,
-  },
-];
+// Import data dari file JSON yang sudah ada
+import membersData from "../data/membersData.js";
 
 const packageConfig = {
   daily: {
-    className: "bg-blue-100 text-blue-700 border border-blue-200",
+    className: "bg-[#8E1616]/10 text-[#8E1616] border border-[#8E1616]/20",
     icon: Clock,
     label: "Harian",
     duration: 1,
@@ -93,7 +34,7 @@ const packageConfig = {
     price: 50000,
   },
   monthly: {
-    className: "bg-purple-100 text-purple-700 border border-purple-200",
+    className: "bg-[#D84040]/10 text-[#D84040] border border-[#D84040]/20",
     icon: CalendarDays,
     label: "1 Bulan",
     duration: 30,
@@ -101,7 +42,7 @@ const packageConfig = {
     price: 350000,
   },
   quarterly: {
-    className: "bg-orange-100 text-orange-700 border border-orange-200",
+    className: "bg-[#1D1616]/10 text-[#1D1616] border border-[#1D1616]/20",
     icon: CalendarRange,
     label: "3 Bulan",
     duration: 90,
@@ -189,7 +130,8 @@ const getDaysRemainingColor = (days) => {
 };
 
 const Members = () => {
-  const [members, setMembers] = useState(initialMembers);
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
@@ -204,6 +146,17 @@ const Members = () => {
     phone: "",
     package: "monthly",
   });
+
+  // Load data dari JSON saat komponen mount
+  useEffect(() => {
+    // Ambil data dari file membersData.js
+    // Asumsikan membersData berisi array atau object dengan properti members
+    const data = Array.isArray(membersData)
+      ? membersData
+      : membersData.members || [];
+    setMembers(data);
+    setLoading(false);
+  }, []);
 
   // Hitung tanggal kadaluarsa berdasarkan paket dari tanggal join
   const calculateExpiryDate = (packageType, startDate = null) => {
@@ -376,12 +329,27 @@ const Members = () => {
     yearly: currentMembers.filter((m) => m.package === "yearly").length,
   };
 
+  // Tampilkan loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader
+            size={40}
+            className="text-[#8E1616] animate-spin mx-auto mb-4"
+          />
+          <p className="text-gray-500">Memuat data anggota...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader title="Anggota" breadcrumb={["Manajemen", "Anggota"]}>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-[#8E1616] hover:bg-[#8E1616]/80 text-white font-semibold px-4 py-2 rounded-xl transition-all text-xs shadow-md shadow-[#8E1616]/30"
+          className="flex items-center gap-2 bg-[#8E1616] hover:bg-[#D84040] text-white font-semibold px-4 py-2 rounded-xl transition-all text-xs shadow-md shadow-[#8E1616]/30"
         >
           <Plus size={14} /> Pendaftaran Digital
         </button>
@@ -389,79 +357,112 @@ const Members = () => {
 
       {/* Summary Cards - Total & Status */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <p className="text-xs text-gray-400">Total Anggota</p>
-          <p className="text-2xl font-bold text-[#1D1616]">
-            {currentMembers.length}
-          </p>
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 font-medium">Total Anggota</p>
+              <p className="text-2xl font-bold text-[#1D1616] mt-1">
+                {currentMembers.length}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-[#1D1616]/10 rounded-xl flex items-center justify-center">
+              <UserCheck size={20} className="text-[#1D1616]" />
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <p className="text-xs text-gray-400">Anggota Aktif</p>
-          <p className="text-2xl font-bold text-green-600">
-            {currentMembers.filter((m) => m.status === "Aktif").length}
-          </p>
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 font-medium">Anggota Aktif</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
+                {currentMembers.filter((m) => m.status === "Aktif").length}
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+              <UserCheck size={20} className="text-green-600" />
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <p className="text-xs text-gray-400">Akan Kadaluarsa</p>
-          <p className="text-2xl font-bold text-yellow-600">
-            {
-              currentMembers.filter((m) => m.status === "Akan Kadaluarsa")
-                .length
-            }
-          </p>
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 font-medium">
+                Akan Kadaluarsa
+              </p>
+              <p className="text-2xl font-bold text-yellow-600 mt-1">
+                {
+                  currentMembers.filter((m) => m.status === "Akan Kadaluarsa")
+                    .length
+                }
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <AlertCircle size={20} className="text-yellow-600" />
+            </div>
+          </div>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
-          <p className="text-xs text-gray-400">Tidak Aktif</p>
-          <p className="text-2xl font-bold text-red-600">
-            {currentMembers.filter((m) => m.status === "Tidak Aktif").length}
-          </p>
+        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-gray-400 font-medium">Tidak Aktif</p>
+              <p className="text-2xl font-bold text-red-600 mt-1">
+                {
+                  currentMembers.filter((m) => m.status === "Tidak Aktif")
+                    .length
+                }
+              </p>
+            </div>
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+              <UserCheck size={20} className="text-red-600" />
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Package Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+        <div className="bg-gradient-to-r from-[#8E1616]/5 to-[#8E1616]/10 rounded-xl p-4 border border-[#8E1616]/20 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-2">
-            <Clock size={16} className="text-blue-600" />
-            <span className="text-xs font-semibold text-blue-700">Harian</span>
+            <Clock size={16} className="text-[#8E1616]" />
+            <span className="text-xs font-semibold text-[#8E1616]">Harian</span>
           </div>
-          <p className="text-xl font-bold text-blue-800 mt-1">
+          <p className="text-xl font-bold text-[#8E1616] mt-2">
             {statsByPackage.daily}
           </p>
-          <p className="text-[10px] text-blue-600">anggota</p>
+          <p className="text-[10px] text-gray-500">anggota</p>
         </div>
-        <div className="bg-purple-50 rounded-xl p-3 border border-purple-200">
+        <div className="bg-gradient-to-r from-[#D84040]/5 to-[#D84040]/10 rounded-xl p-4 border border-[#D84040]/20 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-2">
-            <CalendarDays size={16} className="text-purple-600" />
-            <span className="text-xs font-semibold text-purple-700">
+            <CalendarDays size={16} className="text-[#D84040]" />
+            <span className="text-xs font-semibold text-[#D84040]">
               1 Bulan
             </span>
           </div>
-          <p className="text-xl font-bold text-purple-800 mt-1">
+          <p className="text-xl font-bold text-[#D84040] mt-2">
             {statsByPackage.monthly}
           </p>
-          <p className="text-[10px] text-purple-600">anggota</p>
+          <p className="text-[10px] text-gray-500">anggota</p>
         </div>
-        <div className="bg-orange-50 rounded-xl p-3 border border-orange-200">
+        <div className="bg-gradient-to-r from-[#1D1616]/5 to-[#1D1616]/10 rounded-xl p-4 border border-[#1D1616]/20 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-2">
-            <CalendarRange size={16} className="text-orange-600" />
-            <span className="text-xs font-semibold text-orange-700">
+            <CalendarRange size={16} className="text-[#1D1616]" />
+            <span className="text-xs font-semibold text-[#1D1616]">
               3 Bulan
             </span>
           </div>
-          <p className="text-xl font-bold text-orange-800 mt-1">
+          <p className="text-xl font-bold text-[#1D1616] mt-2">
             {statsByPackage.quarterly}
           </p>
-          <p className="text-[10px] text-orange-600">anggota</p>
+          <p className="text-[10px] text-gray-500">anggota</p>
         </div>
-        <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+        <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 border border-green-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center gap-2">
             <CalendarClock size={16} className="text-green-600" />
             <span className="text-xs font-semibold text-green-700">
               1 Tahun
             </span>
           </div>
-          <p className="text-xl font-bold text-green-800 mt-1">
+          <p className="text-xl font-bold text-green-800 mt-2">
             {statsByPackage.yearly}
           </p>
           <p className="text-[10px] text-green-600">anggota</p>
@@ -519,7 +520,7 @@ const Members = () => {
 
           {/* Filter Options */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-100 animate-fade-in">
+            <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="flex flex-wrap gap-4">
                 <div className="flex flex-wrap gap-2 items-center">
                   <span className="text-xs text-gray-500 font-medium">
@@ -563,19 +564,19 @@ const Members = () => {
                   </button>
                   <button
                     onClick={() => setPackageFilter("daily")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${packageFilter === "daily" ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100"}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${packageFilter === "daily" ? "bg-[#8E1616] text-white" : "bg-[#8E1616]/10 text-[#8E1616] hover:bg-[#8E1616]/20"}`}
                   >
                     Harian
                   </button>
                   <button
                     onClick={() => setPackageFilter("monthly")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${packageFilter === "monthly" ? "bg-purple-600 text-white" : "bg-purple-50 text-purple-600 hover:bg-purple-100"}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${packageFilter === "monthly" ? "bg-[#D84040] text-white" : "bg-[#D84040]/10 text-[#D84040] hover:bg-[#D84040]/20"}`}
                   >
                     1 Bulan
                   </button>
                   <button
                     onClick={() => setPackageFilter("quarterly")}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${packageFilter === "quarterly" ? "bg-orange-600 text-white" : "bg-orange-50 text-orange-600 hover:bg-orange-100"}`}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${packageFilter === "quarterly" ? "bg-[#1D1616] text-white" : "bg-[#1D1616]/10 text-[#1D1616] hover:bg-[#1D1616]/20"}`}
                   >
                     3 Bulan
                   </button>
@@ -680,7 +681,7 @@ const Members = () => {
                   return (
                     <tr
                       key={member.id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-gray-50 transition-colors group"
                     >
                       <td className="px-6 py-3.5 font-mono text-xs text-gray-500 font-semibold">
                         {member.id}
@@ -705,8 +706,7 @@ const Members = () => {
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${pkg.className}`}
                         >
-                          <PackageIcon size={10} />
-                          {member.packageLabel}
+                          <PackageIcon size={10} /> {member.packageLabel}
                         </span>
                       </td>
                       <td className="px-6 py-3.5">
@@ -791,7 +791,7 @@ const Members = () => {
 
       {/* Modal Pendaftaran Digital */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md mx-4 border border-gray-200">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -824,7 +824,6 @@ const Members = () => {
                   className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616] transition-all"
                 />
               </div>
-
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
                   Alamat Email
@@ -838,7 +837,6 @@ const Members = () => {
                   className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616] transition-all"
                 />
               </div>
-
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
                   Nomor Telepon
@@ -852,7 +850,6 @@ const Members = () => {
                   className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616] transition-all"
                 />
               </div>
-
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
                   Pilih Paket Keanggotaan
@@ -886,7 +883,7 @@ const Members = () => {
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex-1 bg-[#8E1616] hover:bg-[#8E1616]/80 text-white font-semibold py-2.5 rounded-xl transition-all text-sm shadow-md shadow-[#8E1616]/30"
+                className="flex-1 bg-[#8E1616] hover:bg-[#D84040] text-white font-semibold py-2.5 rounded-xl transition-all text-sm shadow-md shadow-[#8E1616]/30"
               >
                 Daftarkan Anggota
               </button>
