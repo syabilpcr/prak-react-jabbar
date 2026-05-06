@@ -418,13 +418,13 @@ const Dashboard = () => {
           onClick={() => setSelectedChart("members")}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${selectedChart === "members" ? "bg-[#8E1616] text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"}`}
         >
-          📈 Pertumbuhan Anggota
+          Pertumbuhan Anggota
         </button>
         <button
           onClick={() => setSelectedChart("revenue")}
           className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${selectedChart === "revenue" ? "bg-[#8E1616] text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"}`}
         >
-          💰 Pendapatan Bulanan
+          Pendapatan Bulanan
         </button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -432,7 +432,7 @@ const Dashboard = () => {
           {selectedChart === "members" ? (
             <AnimatedLineChart
               data={monthlyData}
-              title="Pertumbuhan Anggota (2024)"
+              title="Pertumbuhan Anggota (2026)"
               color="#8E1616"
             />
           ) : (
@@ -505,21 +505,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="bg-gradient-to-r from-[#8E1616] to-[#D84040] rounded-2xl p-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h3 className="text-xl font-bold text-white">
-              📱 Pendaftaran Digital Sekarang Dibuka!
-            </h3>
-            <p className="text-white/80 mt-1">
-              Daftar online dan dapatkan kode QR instan. Lewati antrian!
-            </p>
-          </div>
-          <button className="bg-white text-[#8E1616] font-bold px-6 py-3 rounded-xl hover:bg-gray-100 transition-colors shadow-lg">
-            Daftar Sekarang →
-          </button>
         </div>
       </div>
     </div>

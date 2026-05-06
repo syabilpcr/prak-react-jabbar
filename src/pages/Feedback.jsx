@@ -35,7 +35,7 @@ const initialFeedbacks = [
     rating: 3,
     comment: "Bagus tapi parkir terbatas.",
     date: "2024-12-07",
-    status: "Menunggu",
+    status: "Dipublikasikan",
     replies: 0,
   },
   {
@@ -53,7 +53,7 @@ const initialFeedbacks = [
     rating: 2,
     comment: "Peralatan perlu perawatan.",
     date: "2024-12-05",
-    status: "Menunggu",
+    status: "Dipublikasikan",
     replies: 0,
   },
 ];
@@ -83,8 +83,7 @@ const Feedback = () => {
     .filter(
       (f) =>
         filter === "all" ||
-        f.rating === parseInt(filter) ||
-        f.status.toLowerCase() === filter,
+        f.rating === parseInt(filter)
     )
     .filter(
       (f) =>
@@ -131,17 +130,13 @@ const Feedback = () => {
       <div className="bg-white rounded-2xl p-4 mb-6 border border-gray-200 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex gap-2">
-            {["all", "5", "4", "3", "2", "1", "menunggu"].map((f) => (
+            {["all", "5", "4", "3", "2", "1"].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filter === f ? "bg-[#8E1616] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
               >
-                {f === "all"
-                  ? "Semua"
-                  : f === "menunggu"
-                    ? "Menunggu"
-                    : `⭐ ${f}`}
+                {f === "all" ? "Semua" : `⭐ ${f}`}
               </button>
             ))}
           </div>
@@ -192,7 +187,7 @@ const Feedback = () => {
               <div className="text-right">
                 <p className="text-[10px] text-gray-500">{feedback.date}</p>
                 <span
-                  className={`inline-block px-2 py-0.5 rounded text-[9px] font-semibold mt-1 ${feedback.status === "Dipublikasikan" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                  className={`inline-block px-2 py-0.5 rounded text-[9px] font-semibold mt-1 bg-green-100 text-green-700`}
                 >
                   {feedback.status}
                 </span>

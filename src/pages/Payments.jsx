@@ -8,6 +8,9 @@ import {
   QrCode,
   Wallet,
   Smartphone,
+  Calendar,
+  CalendarDays,
+  Clock,
 } from "lucide-react";
 
 const initialPayments = [
@@ -18,6 +21,7 @@ const initialPayments = [
     method: "QRIS",
     status: "Selesai",
     date: "2024-12-01",
+    subscriptionType: "Bulanan",
   },
   {
     id: "PAY-002",
@@ -26,6 +30,7 @@ const initialPayments = [
     method: "Transfer Bank",
     status: "Selesai",
     date: "2024-12-02",
+    subscriptionType: "Tahunan",
   },
   {
     id: "PAY-003",
@@ -34,6 +39,7 @@ const initialPayments = [
     method: "Dompet Digital",
     status: "Menunggu",
     date: "2024-12-03",
+    subscriptionType: "Bulanan",
   },
   {
     id: "PAY-004",
@@ -42,14 +48,16 @@ const initialPayments = [
     method: "QRIS",
     status: "Selesai",
     date: "2024-12-04",
+    subscriptionType: "Tahunan",
   },
   {
     id: "PAY-005",
     memberName: "David Kim",
-    amount: 500000,
+    amount: 25000,
     method: "Kartu Kredit",
     status: "Gagal",
     date: "2024-12-05",
+    subscriptionType: "Harian",
   },
 ];
 
@@ -82,6 +90,27 @@ const statusConfig = {
   Gagal: "bg-red-100 text-red-700 border border-red-200",
 };
 
+const subscriptionConfig = {
+  Harian: {
+    className: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+    icon: Clock,
+    label: "Harian",
+    priceRange: "Rp 25.000 - 50.000",
+  },
+  Bulanan: {
+    className: "bg-indigo-100 text-indigo-700 border border-indigo-200",
+    icon: Calendar,
+    label: "Bulanan",
+    priceRange: "Rp 500.000 - 1.000.000",
+  },
+  Tahunan: {
+    className: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+    icon: CalendarDays,
+    label: "Tahunan",
+    priceRange: "Rp 1.200.000 - 2.500.000",
+  },
+};
+
 const Payments = () => {
   const [payments, setPayments] = useState(initialPayments);
   const [showModal, setShowModal] = useState(false);
@@ -90,10 +119,36 @@ const Payments = () => {
     memberName: "",
     amount: "",
     method: "QRIS",
+    subscriptionType: "Bulanan",
   });
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubscriptionChange = (e) => {
+    const subType = e.target.value;
+    let suggestedAmount = "";
+    
+    switch(subType) {
+      case "Harian":
+        suggestedAmount = "25000";
+        break;
+      case "Bulanan":
+        suggestedAmount = "850000";
+        break;
+      case "Tahunan":
+        suggestedAmount = "1200000";
+        break;
+      default:
+        suggestedAmount = "";
+    }
+    
+    setForm({ 
+      ...form, 
+      subscriptionType: subType,
+      amount: suggestedAmount 
+    });
+  };
 
   const handleSubmit = () => {
     if (!form.memberName || !form.amount) return;
@@ -105,7 +160,12 @@ const Payments = () => {
       date: new Date().toISOString().split("T")[0],
     };
     setPayments([newPayment, ...payments]);
-    setForm({ memberName: "", amount: "", method: "QRIS" });
+    setForm({ 
+      memberName: "", 
+      amount: "", 
+      method: "QRIS",
+      subscriptionType: "Bulanan" 
+    });
     setShowModal(false);
   };
 
@@ -122,6 +182,13 @@ const Payments = () => {
     .filter((p) => p.status === "Menunggu")
     .reduce((sum, p) => sum + p.amount, 0);
 
+  // Statistik berdasarkan tipe langganan
+  const subscriptionStats = {
+    Harian: payments.filter(p => p.subscriptionType === "Harian" && p.status === "Selesai").length,
+    Bulanan: payments.filter(p => p.subscriptionType === "Bulanan" && p.status === "Selesai").length,
+    Tahunan: payments.filter(p => p.subscriptionType === "Tahunan" && p.status === "Selesai").length,
+  };
+
   return (
     <div>
       <PageHeader title="Pembayaran" breadcrumb={["Manajemen", "Pembayaran"]}>
@@ -134,24 +201,64 @@ const Payments = () => {
       </PageHeader>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm md:col-span-2">
           <p className="text-xs text-gray-400">Total Pendapatan</p>
           <p className="text-2xl font-bold text-green-600">
             Rp {totalRevenue.toLocaleString("id-ID")}
           </p>
         </div>
-        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm md:col-span-2">
           <p className="text-xs text-gray-400">Pembayaran Tertunda</p>
           <p className="text-2xl font-bold text-yellow-600">
             Rp {pendingAmount.toLocaleString("id-ID")}
           </p>
         </div>
+        <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+          <p className="text-xs text-gray-400">Total Transaksi</p>
+          <p className="text-2xl font-bold text-[#8E1616]">
+            {payments.length}
+          </p>
+        </div>
+      </div>
+
+      {/* Subscription Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-xl p-4 border border-cyan-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-cyan-700 font-semibold">Langganan Harian</p>
+              <p className="text-2xl font-bold text-cyan-800">{subscriptionStats.Harian}</p>
+              <p className="text-xs text-cyan-600 mt-1">Member aktif</p>
+            </div>
+            <Clock size={32} className="text-cyan-600 opacity-50" />
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-indigo-700 font-semibold">Langganan Bulanan</p>
+              <p className="text-2xl font-bold text-indigo-800">{subscriptionStats.Bulanan}</p>
+              <p className="text-xs text-indigo-600 mt-1">Member aktif</p>
+            </div>
+            <Calendar size={32} className="text-indigo-600 opacity-50" />
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl p-4 border border-emerald-200 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-emerald-700 font-semibold">Langganan Tahunan</p>
+              <p className="text-2xl font-bold text-emerald-800">{subscriptionStats.Tahunan}</p>
+              <p className="text-xs text-emerald-600 mt-1">Member aktif</p>
+            </div>
+            <CalendarDays size={32} className="text-emerald-600 opacity-50" />
+          </div>
+        </div>
       </div>
 
       {/* Payments Table */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-wrap gap-4">
           <div>
             <p className="text-sm font-bold text-[#1D1616]">
               Transaksi Pembayaran
@@ -183,6 +290,9 @@ const Payments = () => {
                   Anggota
                 </th>
                 <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                  Tipe Langganan
+                </th>
+                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                   Jumlah
                 </th>
                 <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
@@ -202,6 +312,8 @@ const Payments = () => {
                   methodConfig[payment.method]?.icon || CreditCard;
                 const methodStyle =
                   methodConfig[payment.method] || methodConfig.QRIS;
+                const SubIcon = subscriptionConfig[payment.subscriptionType]?.icon || Calendar;
+                const subStyle = subscriptionConfig[payment.subscriptionType] || subscriptionConfig.Bulanan;
                 return (
                   <tr
                     key={payment.id}
@@ -212,6 +324,14 @@ const Payments = () => {
                     </td>
                     <td className="px-6 py-3.5 font-semibold text-[#1D1616] text-sm">
                       {payment.memberName}
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${subStyle.className}`}
+                      >
+                        <SubIcon size={10} />
+                        {subStyle.label}
+                      </span>
                     </td>
                     <td className="px-6 py-3.5 text-sm font-semibold text-[#8E1616]">
                       Rp {payment.amount.toLocaleString("id-ID")}
@@ -252,7 +372,7 @@ const Payments = () => {
                   Proses Pembayaran
                 </h3>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  Berbagai metode pembayaran tersedia
+                  Pilih tipe langganan dan metode pembayaran
                 </p>
               </div>
               <button
@@ -276,6 +396,27 @@ const Payments = () => {
                   placeholder="Masukkan nama anggota"
                   className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
+                  Tipe Langganan
+                </label>
+                <select
+                  name="subscriptionType"
+                  value={form.subscriptionType}
+                  onChange={handleSubscriptionChange}
+                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                >
+                  <option value="Harian">Harian (Rp 25.000 - 50.000)</option>
+                  <option value="Bulanan">Bulanan (Rp 500.000 - 1.000.000)</option>
+                  <option value="Tahunan">Tahunan (Rp 1.200.000 - 2.500.000)</option>
+                </select>
+                {form.subscriptionType && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    *Kisaran harga: {subscriptionConfig[form.subscriptionType]?.priceRange}
+                  </p>
+                )}
               </div>
 
               <div>

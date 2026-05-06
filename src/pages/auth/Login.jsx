@@ -15,11 +15,26 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     setTimeout(() => {
-      if (form.email && form.password) {
+      // Ambil data user dari localStorage
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const user = users.find(
+        (u) => u.email === form.email && u.password === form.password
+      );
+
+      if (user) {
+        // Simpan session user
+        localStorage.setItem("currentUser", JSON.stringify({
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+        }));
         navigate("/");
       } else {
-        setError("Silakan masukkan email dan password");
+        setError("Email atau kata sandi salah");
       }
       setLoading(false);
     }, 500);
@@ -28,19 +43,15 @@ export default function Login() {
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200 max-w-5xl mx-auto">
       <div className="flex flex-col md:flex-row">
-        {/* Left Side - Image with simple title */}
+        {/* Left Side - Image */}
         <div className="w-full md:w-1/2 relative min-h-[400px] md:min-h-[600px]">
           <img
             src="https://i1-e.pinimg.com/1200x/b7/42/97/b74297bf782830d55728bbd3722971ed.jpg"
             alt="Zeus Gym"
             className="w-full h-full object-cover absolute inset-0"
           />
-          {/* Simple gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#1D1616]/60 to-[#1D1616]/20 flex flex-col justify-between items-center text-white p-8">
-            <div className="relative z-10 text-center mt-8">
-          
-            </div>
-            
+            <div className="relative z-10 text-center mt-8"></div>
             <div className="relative z-10 text-center mb-12">
               <h2 className="text-3xl font-bold mb-2 drop-shadow-lg tracking-wide">
                 ZEUS GYM

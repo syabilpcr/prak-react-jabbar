@@ -22,13 +22,13 @@ const ProfilePage = () => {
 
   // State untuk form data
   const [formData, setFormData] = useState({
-    fullName: "Admin Zeus",
-    username: "@zeusadmin",
-    email: "admin@zeusgym.com",
-    phone: "+62 812 3456 7890",
+    fullName: "Admin Syabil",
+    username: "syabil_zeus@admin",
+    email: "syabil@zeusgym.com",
+    phone: "+62 822 8362 8922",
     position: "Pemilik Gym / Administrator",
-    address: "Pusat Zeus Gym, Jakarta",
-    joinDate: "12 Jan 2024",
+    address: "Pusat Zeus Gym, Pekanbaru",
+    joinDate: "7 Mei 2026",
   });
 
   const [editForm, setEditForm] = useState({ ...formData });
@@ -306,7 +306,7 @@ const ProfilePage = () => {
             </h2>
             <p className="text-gray-500 text-sm">{formData.position}</p>
             <div className="mt-4 px-4 py-2 rounded-xl bg-[#8E1616]/10 text-[#8E1616] font-medium text-sm">
-              🏆 Akses Premium
+              Akses Premium
             </div>
           </div>
 
@@ -379,7 +379,6 @@ const ProfilePage = () => {
             <div>
               <label className="text-sm text-gray-500">Posisi</label>
               <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50 flex items-center gap-2">
-                <Briefcase size={16} className="text-[#8E1616]" />{" "}
                 {formData.position.split(" / ")[0]}
               </div>
             </div>
@@ -393,7 +392,7 @@ const ProfilePage = () => {
 
           <div className="mt-8">
             <h3 className="text-lg font-bold text-[#1D1616] mb-4 flex items-center gap-2">
-              <Dumbbell size={18} className="text-[#8E1616]" /> Statistik Gym
+         Statistik Gym
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-[#8E1616]/5 rounded-2xl p-5 border border-[#8E1616]/10">

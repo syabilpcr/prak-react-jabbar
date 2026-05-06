@@ -21,7 +21,7 @@ const initialPromotions = [
     code: "WELCOME20",
     discount: "20%",
     type: "percentage",
-    validUntil: "2024-12-31",
+    validUntil: "2026-2-2",
     status: "Aktif",
     sent: 45,
   },
@@ -31,7 +31,7 @@ const initialPromotions = [
     code: "REFER50",
     discount: "Rp 50rb",
     type: "fixed",
-    validUntil: "2024-12-25",
+    validUntil: "2026-3-3",
     status: "Aktif",
     sent: 28,
   },
@@ -218,13 +218,13 @@ const Promotions = () => {
               </div>
               <button
                 onClick={handleReferralProgram}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
                   referralActive
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-white text-[#8E1616] hover:bg-gray-100"
-                } shadow-lg`}
+                    ? "bg-[#D84040] hover:bg-[#8E1616] text-white"
+                    : "bg-white border-2 border-[#8E1616] text-[#8E1616] hover:bg-[#8E1616] hover:text-white"
+                } shadow-lg shadow-[#8E1616]/30`}
               >
-                {referralActive ? "📋 Kelola Program" : "🚀 Aktifkan"}
+                {referralActive ? " Kelola Program" : " Aktifkan"}
               </button>
             </div>
           </div>
@@ -431,9 +431,22 @@ const Promotions = () => {
                 <div className="flex gap-3">
                   <button
                     onClick={handleShareWhatsApp}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition-all"
+                    className="flex-1 bg-[#8E1616] hover:bg-[#D84040] text-white py-2 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-md shadow-[#8E1616]/30"
                   >
-                    <span className="text-lg">💚</span> WhatsApp
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                    </svg>
+                    WhatsApp
                   </button>
                   <button
                     onClick={handleRegenerateCode}

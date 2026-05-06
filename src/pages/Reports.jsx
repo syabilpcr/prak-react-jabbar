@@ -416,9 +416,9 @@ const Reports = () => {
   };
 
   const periodOptions = [
-    { value: "daily", label: "📅 Harian" },
-    { value: "monthly", label: "📊 Bulanan" },
-    { value: "yearly", label: "📈 Tahunan" },
+    { value: "daily", label: "Harian" },
+    { value: "monthly", label: "Bulanan" },
+    { value: "yearly", label: "Tahunan" },
   ];
 
   return (
@@ -442,9 +442,9 @@ const Reports = () => {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-2">
             {[
-              { id: "revenue", label: "💰 Pendapatan", icon: Wallet },
-              { id: "membership", label: "👥 Keanggotaan", icon: Users },
-              { id: "attendance", label: "📋 Absensi", icon: TrendingUp },
+              { id: "revenue", label: "Pendapatan", icon: Wallet },
+              { id: "membership", label: "Keanggotaan", icon: Users },
+              { id: "attendance", label: "Absensi", icon: TrendingUp },
             ].map((type) => {
               const Icon = type.icon;
               return (
