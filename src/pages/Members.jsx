@@ -110,15 +110,32 @@ const formatDate = (dateString) => {
 };
 
 // Fungsi untuk menghitung sisa hari
-const getDaysRemaining = (expiryDate) => {
+// Fungsi menghitung sisa hari berdasarkan tanggal join & expiry
+const getDaysRemaining = (joinDate, expiryDate) => {
+  if (!joinDate || !expiryDate) return 0;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const start = new Date(joinDate);
+  start.setHours(0, 0, 0, 0);
+
   const expiry = new Date(expiryDate);
   expiry.setHours(0, 0, 0, 0);
 
-  const diffTime = expiry - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays;
+  // Jika membership belum dimulai
+  if (today < start) {
+    return 0;
+  }
+
+  // Total masa aktif
+  const totalDuration = Math.ceil((expiry - start) / (1000 * 60 * 60 * 24));
+
+  // Hari yang sudah berjalan
+  const usedDays = Math.ceil((today - start) / (1000 * 60 * 60 * 24));
+
+  // Sisa hari
+  return totalDuration - usedDays;
 };
 
 // Fungsi untuk mendapatkan warna berdasarkan sisa hari
@@ -675,7 +692,10 @@ const Members = () => {
                   const pkg =
                     packageConfig[member.package] || packageConfig.monthly;
                   const PackageIcon = pkg.icon;
-                  const daysRemaining = getDaysRemaining(member.expiryDate);
+                  const daysRemaining = getDaysRemaining(
+                    member.joinDate,
+                    member.expiryDate,
+                  );
                   const daysColor = getDaysRemainingColor(daysRemaining);
 
                   return (
