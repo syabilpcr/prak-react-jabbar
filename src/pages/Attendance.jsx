@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import QRCodeModal from "../components/QRCodeModal";
 import {
-  Search,
   CheckCircle,
   XCircle,
   Clock,
@@ -10,6 +9,14 @@ import {
   Scan,
   Loader,
 } from "lucide-react";
+
+// ── Components Pertemuan 10 ───────────────────────────────────
+import SearchBar from "../components/SearchBar";
+import Badge from "../components/Badge";
+import Table from "../components/Table";
+import Avatar from "../components/Avatar";
+import StatCard from "../components/StatCard";
+import EmptyState from "../components/EmptyState";
 
 // Import data dari file JSON
 import attendanceData from "../data/attendanceData.js";
@@ -44,8 +51,8 @@ const Attendance = () => {
   // Load data dari JSON saat komponen mount
   useEffect(() => {
     // Ambil data dari file attendanceData.js
-    const data = Array.isArray(attendanceData) 
-      ? attendanceData 
+    const data = Array.isArray(attendanceData)
+      ? attendanceData
       : attendanceData.attendance || attendanceData.data || [];
     setAttendance(data);
     setLoading(false);
@@ -57,19 +64,19 @@ const Attendance = () => {
       // Simulasi scan QR - ambil data dari member pertama yang aktif
       const today = new Date().toISOString().split("T")[0];
       const existingMember = attendance.find(
-        (a) => a.memberId === "ZEUS-001" && a.date === today
+        (a) => a.memberId === "ZEUS-001" && a.date === today,
       );
-      
+
       const fakeScan = { memberId: "ZEUS-001", memberName: "Alex Johnson" };
       setScannedMember(fakeScan);
       setScanning(false);
-      
+
       const existing = attendance.find(
         (a) =>
           a.memberId === fakeScan.memberId &&
           a.date === new Date().toISOString().split("T")[0],
       );
-      
+
       if (existing && existing.status === "Aktif") {
         const updated = attendance.map((a) =>
           a.id === existing.id
@@ -114,7 +121,7 @@ const Attendance = () => {
       a.memberName?.toLowerCase().includes(search.toLowerCase()) ||
       a.memberId?.toLowerCase().includes(search.toLowerCase()),
   );
-  
+
   const activeCount = attendance.filter((a) => a.status === "Aktif").length;
   const completedCount = attendance.filter(
     (a) => a.status === "Selesai",
@@ -125,7 +132,10 @@ const Attendance = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader size={40} className="text-[#8E1616] animate-spin mx-auto mb-4" />
+          <Loader
+            size={40}
+            className="text-[#8E1616] animate-spin mx-auto mb-4"
+          />
           <p className="text-gray-500">Memuat data absensi...</p>
         </div>
       </div>
@@ -174,23 +184,31 @@ const Attendance = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-400 font-medium">Sedang Aktif</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
-              <p className="text-[10px] text-gray-500 mt-1">Member sedang berolahraga</p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
+                {activeCount}
+              </p>
+              <p className="text-[10px] text-gray-500 mt-1">
+                Member sedang berolahraga
+              </p>
             </div>
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
               <Clock size={20} className="text-green-600" />
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400 font-medium">Check-in Hari Ini</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Check-in Hari Ini
+              </p>
               <p className="text-2xl font-bold text-blue-600 mt-1">
                 {completedCount + activeCount}
               </p>
-              <p className="text-[10px] text-gray-500 mt-1">Total member hadir</p>
+              <p className="text-[10px] text-gray-500 mt-1">
+                Total member hadir
+              </p>
             </div>
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
               <CheckCircle size={20} className="text-blue-600" />
@@ -202,7 +220,9 @@ const Attendance = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs text-gray-400 font-medium">Selesai</p>
-              <p className="text-2xl font-bold text-[#1D1616] mt-1">{completedCount}</p>
+              <p className="text-2xl font-bold text-[#1D1616] mt-1">
+                {completedCount}
+              </p>
               <p className="text-[10px] text-gray-500 mt-1">Telah checkout</p>
             </div>
             <div className="w-10 h-10 bg-[#8E1616]/10 rounded-xl flex items-center justify-center">
@@ -214,13 +234,21 @@ const Attendance = () => {
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400 font-medium">Tingkat Kehadiran</p>
-              <p className="text-2xl font-bold text-[#D84040] mt-1">
-                {attendance.length > 0 
-                  ? Math.round(((completedCount + activeCount) / attendance.length) * 100)
-                  : 0}%
+              <p className="text-xs text-gray-400 font-medium">
+                Tingkat Kehadiran
               </p>
-              <p className="text-[10px] text-gray-500 mt-1">Dari total member</p>
+              <p className="text-2xl font-bold text-[#D84040] mt-1">
+                {attendance.length > 0
+                  ? Math.round(
+                      ((completedCount + activeCount) / attendance.length) *
+                        100,
+                    )
+                  : 0}
+                %
+              </p>
+              <p className="text-[10px] text-gray-500 mt-1">
+                Dari total member
+              </p>
             </div>
             <div className="w-10 h-10 bg-[#D84040]/10 rounded-xl flex items-center justify-center">
               <Clock size={20} className="text-[#D84040]" />
@@ -236,50 +264,36 @@ const Attendance = () => {
             <p className="text-sm font-bold text-[#1D1616]">Absensi Hari Ini</p>
             <p className="text-xs text-gray-400">{filtered.length} catatan</p>
           </div>
-          <div className="relative">
-            <Search
-              size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari absensi..."
-              className="pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616] w-44"
-            />
-          </div>
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari absensi..."
+            className="w-44"
+          />
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  ID Anggota
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Nama Anggota
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Check In
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Check Out
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Status
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.length > 0 ? (
-                filtered.map((record) => {
+          <Table
+            headers={[
+              "ID Anggota",
+              "Nama Anggota",
+              "Check In",
+              "Check Out",
+              "Status",
+              "Aksi",
+            ]}
+          >
+            {filtered.length > 0
+              ? filtered.map((record) => {
                   const StatusIcon = statusConfig[record.status]?.icon || Clock;
                   const statusStyle =
                     statusConfig[record.status] || statusConfig.Absen;
+                  const statusType =
+                    record.status === "Aktif"
+                      ? "success"
+                      : record.status === "Selesai"
+                        ? "info"
+                        : "danger";
                   return (
                     <tr
                       key={record.id}
@@ -290,9 +304,7 @@ const Attendance = () => {
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-xl bg-[#8E1616]/20 flex items-center justify-center text-[#8E1616] text-xs font-bold shadow-sm">
-                            {record.memberName?.charAt(0) || "?"}
-                          </div>
+                          <Avatar name={record.memberName || "?"} size="sm" />
                           <span className="font-semibold text-[#1D1616] text-sm">
                             {record.memberName}
                           </span>
@@ -300,31 +312,28 @@ const Attendance = () => {
                       </td>
                       <td className="px-6 py-3.5">
                         {record.checkIn !== "-" ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-green-50 text-green-700">
-                            <Clock size={10} />
+                          <Badge type="success">
+                            <Clock size={10} className="mr-1" />
                             {record.checkIn}
-                          </span>
+                          </Badge>
                         ) : (
                           <span className="text-xs text-gray-400">-</span>
                         )}
                       </td>
                       <td className="px-6 py-3.5">
                         {record.checkOut !== "-" ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-blue-50 text-blue-700">
-                            <CheckCircle size={10} />
+                          <Badge type="info">
+                            <CheckCircle size={10} className="mr-1" />
                             {record.checkOut}
-                          </span>
+                          </Badge>
                         ) : (
                           <span className="text-xs text-gray-400">-</span>
                         )}
                       </td>
                       <td className="px-6 py-3.5">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${statusStyle.className}`}
-                        >
-                          <StatusIcon size={10} />
+                        <Badge type={statusType} dot>
                           {statusStyle.label}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="px-6 py-3.5">
                         <button
@@ -339,27 +348,19 @@ const Attendance = () => {
                         >
                           <QrCode size={14} className="text-[#8E1616]" />
                         </button>
-                       </td>
-                     </tr>
+                      </td>
+                    </tr>
                   );
                 })
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <Search size={40} className="text-gray-300" />
-                      <p className="text-gray-500 font-medium">
-                        Tidak ada data absensi ditemukan
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Coba dengan kata kunci lain atau refresh halaman
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              : null}
+          </Table>
+          {filtered.length === 0 && (
+            <EmptyState
+              icon="🔍"
+              title="Tidak ada data absensi ditemukan"
+              message="Coba dengan kata kunci lain atau refresh halaman"
+            />
+          )}
         </div>
       </div>
 

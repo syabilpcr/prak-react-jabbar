@@ -3,72 +3,65 @@
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  Calendar,
-  Dumbbell,
-  CreditCard,
-  Activity,
-  Clock,
-  Award,
-  QrCode,
-  RefreshCw,
-} from "lucide-react";
+import { ArrowLeft, Mail, Calendar, Clock, Phone } from "lucide-react";
 import membersData from "../data/membersData";
 import PageHeader from "../components/PageHeader";
 
-// ── Konfigurasi warna ─────────────────────────────────────────
+// ── Konfigurasi warna badge tipis & elegan sesuai screenshot referensi ──
 const planConfig = {
-  Gold:   { bg: "bg-amber-50",  text: "text-amber-700",  border: "border-amber-200",  badge: "from-amber-400 to-amber-300",  shadow: "shadow-amber-100"  },
-  Silver: { bg: "bg-slate-100", text: "text-slate-600",  border: "border-slate-200",  badge: "from-slate-400 to-slate-300",  shadow: "shadow-slate-100"  },
-  Bronze: { bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200", badge: "from-orange-400 to-orange-300", shadow: "shadow-orange-100" },
+  Gold: {
+    bg: "bg-[#FFFDF0]",
+    text: "text-[#B37D14]",
+    border: "border-[#FBEBB5]",
+  },
+  Silver: {
+    bg: "bg-[#F4F7FA]",
+    text: "text-[#4A5568]",
+    border: "border-[#E2E8F0]",
+  },
+  Bronze: {
+    bg: "bg-[#FFF6F0]",
+    text: "text-[#C25E1A]",
+    border: "border-[#FAD7C4]",
+  },
 };
 
 const statusConfig = {
-  Active:   { bg: "bg-green-50",  text: "text-green-700",  dot: "bg-green-400",  border: "border-green-100"  },
-  Expired:  { bg: "bg-red-50",    text: "text-red-700",    dot: "bg-red-400",    border: "border-red-100"    },
-  Expiring: { bg: "bg-amber-50",  text: "text-amber-700",  dot: "bg-amber-400",  border: "border-amber-100"  },
+  Active: {
+    bg: "bg-[#E6FBD9]",
+    text: "text-[#1FA349]",
+    dot: "bg-[#00C853]",
+    border: "border-[#C1F4A6]",
+  },
+  Expired: {
+    bg: "bg-[#FCE8E6]",
+    text: "text-[#C53030]",
+    dot: "bg-[#E53E3E]",
+    border: "border-[#FEB8B8]",
+  },
+  Expiring: {
+    bg: "bg-[#FFF3CD]",
+    text: "text-[#856404]",
+    dot: "bg-[#FFC107]",
+    border: "border-[#FFEEBA]",
+  },
 };
 
-// ── QR Code visual sederhana ──────────────────────────────────
-const QRVisual = ({ code }) => {
-  const seed  = code.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const cells = Array.from({ length: 49 }, (_, i) => ((seed * (i + 3) * 7) % 17) > 7);
-  return (
-    <div className="w-28 h-28 border-2 border-green-400 rounded-2xl flex flex-col items-center justify-center bg-white p-2.5 shadow-sm">
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 1.5 }}>
-        {cells.map((on, i) => (
-          <div
-            key={i}
-            style={{
-              width: 9,
-              height: 9,
-              borderRadius: 1,
-              background: on ? "#22c55e" : "transparent",
-            }}
-          />
-        ))}
-      </div>
-      <div className="text-[7px] text-gray-400 mt-1.5 tracking-widest font-semibold">ZEUS GYM</div>
-    </div>
-  );
+// ── Background avatar inisial ──
+const getAvatarStyle = (char) => {
+  const code = char ? char.toUpperCase().charCodeAt(0) : 65;
+  if (code % 3 === 0) return "bg-[#280B0B] text-[#FFD6D6]";
+  if (code % 3 === 1) return "bg-[#6B00D7] text-[#F3E8FF]";
+  return "bg-[#691200] text-[#FFEBE5]";
 };
 
-// ─────────────────────────────────────────────────────────────
 export default function MemberDetail() {
-  // ── Pertemuan 9 Step 3: ambil :id dari URL ────────────────
-  const { id }          = useParams();
-  const navigate        = useNavigate();
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [member, setMember] = useState(null);
-  const [error, setError]   = useState(null);
+  const [error, setError] = useState(null);
 
-  // ── Cari data member berdasarkan id dari local data ────────
-  // (Ekuivalen dengan axios.get ke API, tapi data dari local JSON)
   useEffect(() => {
-    // Simulasi async (sesuai pola useEffect di Pertemuan 9)
     const found = membersData.find((m) => m.id === parseInt(id));
     if (!found) {
       setError(`Member dengan ID ${id} tidak ditemukan.`);
@@ -77,243 +70,200 @@ export default function MemberDetail() {
     }
   }, [id]);
 
-  // ── Guard: Error ──────────────────────────────────────────
   if (error)
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-          <div className="text-4xl mb-3">⚠️</div>
-          <p className="text-red-600 font-semibold text-sm">{error}</p>
+      <div className="p-6 w-full">
+        <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-6 text-center max-w-xl mx-auto">
+          <p className="text-rose-700 text-sm font-medium">{error}</p>
           <button
             onClick={() => navigate("/members")}
-            className="mt-4 flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-semibold mx-auto hover:bg-red-600 transition-colors"
+            className="mt-4 flex items-center gap-2 bg-gray-900 text-white px-4 py-1.5 rounded-xl text-xs font-semibold mx-auto hover:bg-gray-800 transition-all"
           >
-            <ArrowLeft size={14} />
-            Kembali ke Members
+            <ArrowLeft size={14} /> Kembali ke Members
           </button>
         </div>
       </div>
     );
 
-  // ── Guard: Loading ────────────────────────────────────────
   if (!member)
     return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400 text-sm">Memuat data member...</p>
-        </div>
+      <div className="p-6 flex items-center justify-center min-h-[40vh] w-full">
+        <div className="w-6 h-6 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
-  // ── Konfigurasi warna berdasarkan plan & status ───────────
-  const pc = planConfig[member.plan]     || planConfig.Bronze;
+  const pc = planConfig[member.plan] || planConfig.Bronze;
   const sc = statusConfig[member.status] || statusConfig.Active;
-
-  // ── Hitung persentase kunjungan (maks 100 kunjungan) ──────
+  const avatarClass = getAvatarStyle(member.name?.charAt(0));
   const visitPct = Math.min((member.visits / 100) * 100, 100);
 
-  // ─────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    // PERBAIKAN: Menggunakan w-full agar mengisi seluruh ruang container layout utama dasbor
+    <div className="space-y-6 w-full pb-8">
       {/* ── Page Header ── */}
       <PageHeader
-        title="Member Detail"
-        breadcrumb={["Management", "Members", member.name]}
+        title="Detail Anggota"
+        breadcrumb={["Manajemen", "Members", member.name]}
       >
         <button
           onClick={() => navigate("/members")}
-          className="flex items-center gap-2 border border-gray-200 text-gray-600 font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors text-xs"
+          className="flex items-center gap-1.5 bg-white border border-gray-200 text-gray-600 font-medium px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-all text-xs shadow-sm"
         >
-          <ArrowLeft size={14} />
+          <ArrowLeft size={13} />
           Kembali
         </button>
       </PageHeader>
 
-      {/* ── Grid utama ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      {/* ── UTAMA: KARTU INDIVIDU (Memenuhi Lebar Layout Dasbor) ── */}
+      <div className="bg-white border border-[#EBEBEB] rounded-[28px] p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] space-y-6 relative overflow-hidden w-full">
+        {/* Row 1: Avatar Profil, Nama, & Status Badge */}
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div
+              className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center text-[15px] font-bold tracking-wider shrink-0 ${avatarClass}`}
+            >
+              {member.name
+                ? member.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase()
+                : "MB"}
+            </div>
 
-        {/* ── Kartu Identitas Member (kiri) ── */}
-        <div
-          className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
-          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
-        >
-          {/* Banner warna plan */}
-          <div className={`h-24 bg-gradient-to-br ${pc.badge} relative overflow-hidden`}>
-            <div className="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-white/10" />
-            <div className="absolute -bottom-2 -left-2 w-14 h-14 rounded-full bg-white/10" />
-            {/* Badge plan */}
-            <span className="absolute top-3 right-3 text-[10px] font-black text-white/80 tracking-widest uppercase">
-              {member.plan} MEMBER
-            </span>
+            <div className="space-y-0.5">
+              <h2 className="text-[17px] font-bold text-[#111111] tracking-tight">
+                {member.name}
+              </h2>
+              <p className="text-[11px] text-[#A0A0A0] font-semibold font-mono tracking-wide">
+                {member.code}
+              </p>
+            </div>
           </div>
 
-          <div className="px-6 pb-6">
-            {/* Avatar */}
-            <div className={`w-16 h-16 rounded-2xl ${pc.bg} ${pc.text} border-4 border-white flex items-center justify-center text-2xl font-black -mt-8 shadow-lg ${pc.shadow}`}>
-              {member.name.charAt(0)}
-            </div>
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${sc.bg} ${sc.text} ${sc.border}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+            {member.status}
+          </span>
+        </div>
 
-            <h2 className="mt-3 text-xl font-black text-gray-800">{member.name}</h2>
-            <p className="text-xs text-gray-400 mt-0.5 font-mono">{member.code}</p>
-
-            {/* Status badge */}
-            <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold border mt-3 ${sc.bg} ${sc.text} ${sc.border}`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-              {member.status}
+        {/* Row 2: Informasi Detail Kontak */}
+        <div className="space-y-2 text-[#7F7F7F] text-xs font-medium pt-1">
+          <div className="flex items-center gap-2">
+            <Mail size={13} className="text-[#A3A3A3]" />
+            <span>{member.email}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] leading-none">🏋️</span>
+            {/* PERBAIKAN: Menghindari teks Coach ganda jika data dari database sudah mengandung kata Coach */}
+            <span>
+              {member.trainer
+                ? member.trainer.toLowerCase().includes("coach")
+                  ? member.trainer
+                  : `Coach ${member.trainer}`
+                : "Tanpa Coach"}
             </span>
+          </div>
+        </div>
 
-            <div className="mt-5 space-y-3">
-              {[
-                { Icon: Mail,     label: "Email",   value: member.email   },
-                { Icon: Phone,    label: "Telepon", value: member.phone   },
-                { Icon: Calendar, label: "Bergabung", value: member.joined },
-                { Icon: Clock,    label: "Berlaku s/d", value: member.expiry },
-                { Icon: Dumbbell, label: "Trainer",  value: member.trainer },
-              ].map(({ Icon, label, value }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <Icon size={13} className="text-green-500" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide">{label}</p>
-                    <p className="text-xs text-gray-700 font-medium">{value}</p>
-                  </div>
-                </div>
-              ))}
+        {/* Pembatas Garis Tipis Halus */}
+        <div className="h-[1px] bg-[#F5F5F5] w-full" />
+
+        {/* Row 3: Jenis Paket & Harga Nominal Finansial */}
+        <div className="flex items-end justify-between gap-4 pt-1">
+          <span
+            className={`px-[14px] py-1.5 rounded-xl text-[11px] font-bold border tracking-wide min-w-[65px] text-center ${pc.bg} ${pc.text} ${pc.border}`}
+          >
+            {member.plan}
+          </span>
+
+          <div className="text-right space-y-0.5">
+            <p className="text-[16px] font-extrabold text-[#111111] tracking-tight">
+              Rp {member.price?.toLocaleString("id-ID")}
+            </p>
+            <p className="text-[11px] text-[#A0A0A0] font-medium">
+              {member.visits}x kunjungan
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── KARTU SEKUNDER: DETAIL WAKTU & METRIK AKTIVITAS PROGRESS ── */}
+      <div className="bg-white border border-[#EBEBEB] rounded-[24px] p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        {/* Sektor Logistik Masa Aktif */}
+        <div className="space-y-4">
+          <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            Logistik Masa Aktif
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
+                <Calendar size={13} className="text-gray-400" />
+              </div>
+              <div className="text-xs">
+                <p className="text-gray-400 text-[9px] uppercase font-bold tracking-wide">
+                  Mulai Terdaftar
+                </p>
+                <p className="font-semibold text-gray-700 mt-0.5">
+                  {member.joined}
+                </p>
+              </div>
             </div>
-
-            {/* QR Code */}
-            <div className="mt-5 pt-5 border-t border-gray-50 flex flex-col items-center gap-2">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Member QR Code</p>
-              <QRVisual code={member.code} />
-              <p className="text-[9px] text-gray-300 tracking-widest">{member.code}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
+                <Clock size={13} className="text-gray-400" />
+              </div>
+              <div className="text-xs">
+                <p className="text-gray-400 text-[9px] uppercase font-bold tracking-wide">
+                  Habis Tempo
+                </p>
+                <p className="font-semibold text-gray-700 mt-0.5">
+                  {member.expiry}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
+                <Phone size={13} className="text-gray-400" />
+              </div>
+              <div className="text-xs">
+                <p className="text-gray-400 text-[9px] uppercase font-bold tracking-wide">
+                  Kontak Telepon
+                </p>
+                <p className="font-semibold text-gray-700 mt-0.5">
+                  {member.phone}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ── Kolom kanan (statistik + info) ── */}
-        <div className="xl:col-span-2 space-y-5">
-
-          {/* ── Statistik 3 kartu ── */}
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              {
-                icon: Activity,
-                label: "Total Kunjungan",
-                value: `${member.visits}x`,
-                sub: "Sejak bergabung",
-                color: "text-green-500",
-                bg: "bg-green-50",
-                border: "border-green-100",
-              },
-              {
-                icon: CreditCard,
-                label: "Biaya/Bulan",
-                value: `Rp ${member.price.toLocaleString("id-ID")}`,
-                sub: `Plan ${member.plan}`,
-                color: "text-amber-500",
-                bg: "bg-amber-50",
-                border: "border-amber-100",
-              },
-              {
-                icon: Award,
-                label: "Trainer",
-                value: member.trainer,
-                sub: "Personal trainer",
-                color: "text-blue-500",
-                bg: "bg-blue-50",
-                border: "border-blue-100",
-              },
-            ].map(({ icon: Icon, label, value, sub, color, bg, border }) => (
-              <div
-                key={label}
-                className={`bg-white rounded-2xl border ${border} p-4 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
-                style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-              >
-                <div className={`${bg} w-9 h-9 rounded-xl flex items-center justify-center mb-3`}>
-                  <Icon size={16} className={color} />
-                </div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-                <p className="text-base font-black text-gray-800 leading-tight">{value}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{sub}</p>
-              </div>
-            ))}
+        {/* Sektor Progress Bar Kuota Kunjungan */}
+        <div className="flex flex-col justify-between border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
+          <div className="space-y-1">
+            <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+              Metrik Aktivitas
+            </h3>
+            <p className="text-xs text-gray-500 font-medium">
+              Akumulasi aktivitas check-in kedatangan di gerbang gym.
+            </p>
           </div>
 
-          {/* ── Info lengkap member ── */}
-          <div
-            className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-          >
-            <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-bold text-gray-700">Informasi Lengkap</p>
-                <p className="text-xs text-gray-400">Data detail member {member.name}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">
-                  ID: {member.id}
-                </span>
-              </div>
+          <div className="space-y-2 mt-6 md:mt-0">
+            <div className="flex justify-between items-end text-xs font-bold">
+              <span className="text-gray-800">{member.visits} / 100 Sesi</span>
+              <span className="text-gray-400">{visitPct.toFixed(0)}%</span>
             </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  { label: "Nama Lengkap",  value: member.name     },
-                  { label: "Kode Member",   value: member.code     },
-                  { label: "Email",         value: member.email    },
-                  { label: "Telepon",       value: member.phone    },
-                  { label: "Plan",          value: member.plan     },
-                  { label: "Trainer",       value: member.trainer  },
-                  { label: "Harga/Bulan",   value: `Rp ${member.price.toLocaleString("id-ID")}` },
-                  { label: "Total Kunjungan", value: `${member.visits} kali` },
-                  { label: "Tanggal Bergabung", value: member.joined  },
-                  { label: "Berlaku Sampai",    value: member.expiry  },
-                  { label: "Status",        value: member.status   },
-                ].map(({ label, value }) => (
-                  <div key={label}>
-                    <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wide mb-1">
-                      {label}
-                    </p>
-                    <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2.5 text-sm text-gray-700 font-medium">
-                      {value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ── Progress kunjungan ── */}
-          <div
-            className="bg-white rounded-2xl border border-gray-100 p-6"
-            style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-bold text-gray-700">Aktivitas Kunjungan</p>
-                <p className="text-xs text-gray-400">{member.visits} dari 100 kunjungan target</p>
-              </div>
-              <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg border border-green-100">
-                {visitPct.toFixed(0)}%
-              </span>
-            </div>
-            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-700"
+                className="h-full bg-gray-800 rounded-full transition-all duration-500"
                 style={{ width: `${visitPct}%` }}
               />
             </div>
-            <div className="flex justify-between mt-2 text-[10px] text-gray-400">
-              <span>0 kunjungan</span>
-              <span>100 kunjungan</span>
-            </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -21,35 +21,32 @@ const menuGroups = [
   {
     label: "Menu",
     items: [
-      { label: "Beranda",     icon: LayoutDashboard, path: "/"           },
-      { label: "Anggota",     icon: Users,           path: "/members", badge: 30 },
-      { label: "Pembayaran",  icon: CreditCard,      path: "/payments"   },
-      { label: "Absensi",     icon: QrCode,          path: "/attendance" },
-      { label: "Laporan",     icon: FileText,        path: "/reports"    },
+      { label: "Beranda", icon: LayoutDashboard, path: "/" },
+      { label: "Anggota", icon: Users, path: "/members", badge: 30 },
+      { label: "Pembayaran", icon: CreditCard, path: "/payments" },
+      { label: "Absensi", icon: QrCode, path: "/attendance" },
+      { label: "Laporan", icon: FileText, path: "/reports" },
     ],
   },
   {
     label: "Tools",
     items: [
-      { label: "Promosi",      icon: Megaphone,     path: "/promotions" },
-      { label: "Umpan Balik",  icon: MessageSquare, path: "/feedback"   },
-      { label: "Toko",         icon: Store,         path: "/store"      },
-      { label: "Integrasi",    icon: Plug,          path: "/integration"},
+      { label: "Promosi", icon: Megaphone, path: "/promotions" },
+      { label: "Umpan Balik", icon: MessageSquare, path: "/feedback" },
     ],
   },
   {
     label: "Support",
     items: [
-      { label: "Pengaturan", icon: Settings,    path: "/settings" },
-      { label: "Bantuan",    icon: HelpCircle,  path: "/help"     },
-      { label: "Profil",     icon: User,        path: "/profile"  },
+      { label: "Profil", icon: User, path: "/profile" },
+      { label: "Components", icon: Plug, path: "/components" },
     ],
   },
 ];
 
 const Sidebar = () => {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // ── NavItem ───────────────────────────────────────────────
   const NavItem = ({ item }) => {
@@ -70,9 +67,10 @@ const Sidebar = () => {
       <button
         onClick={() => navigate(item.path)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group
-          ${isActive
-            ? "bg-[#8C1007] text-[#FFF0C4] shadow-md"
-            : "text-[#FFF0C4]/60 hover:bg-white/8 hover:text-[#FFF0C4]"
+          ${
+            isActive
+              ? "bg-[#8C1007] text-[#FFF0C4] shadow-md"
+              : "text-[#FFF0C4]/60 hover:bg-white/8 hover:text-[#FFF0C4]"
           }`}
       >
         {/* Icon box */}
@@ -90,9 +88,10 @@ const Sidebar = () => {
         {item.badge && (
           <span
             className={`text-[10px] font-bold px-2 py-0.5 rounded-full
-              ${isActive
-                ? "bg-white/25 text-[#FFF0C4]"
-                : "bg-[#8C1007]/80 text-[#FFF0C4]"
+              ${
+                isActive
+                  ? "bg-white/25 text-[#FFF0C4]"
+                  : "bg-[#8C1007]/80 text-[#FFF0C4]"
               }`}
           >
             {item.badge}
@@ -105,7 +104,6 @@ const Sidebar = () => {
   // ─────────────────────────────────────────────────────────
   return (
     <div className="w-[220px] min-h-screen bg-[#3E0703] flex flex-col fixed left-0 top-0 bottom-0 z-20 border-r border-[#FFF0C4]/10">
-
       {/* ── Logo ── */}
       <div className="px-4 py-5 border-b border-[#FFF0C4]/10">
         <div className="flex items-center gap-3">
@@ -151,7 +149,6 @@ const Sidebar = () => {
           Keluar
         </button>
       </div>
-
     </div>
   );
 };

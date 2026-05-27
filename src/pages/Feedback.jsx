@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import PageHeader from "../components/PageHeader";
 import FeedbackModal from "../components/FeedbackModal";
 import {
-  Search,
   Star,
   ThumbsUp,
   MessageCircle,
@@ -10,6 +9,14 @@ import {
   Reply,
   Loader,
 } from "lucide-react";
+
+// ── Components Pertemuan 10 ───────────────────────────────────
+import SearchBar from "../components/SearchBar";
+import Badge from "../components/Badge";
+import Avatar from "../components/Avatar";
+import Card from "../components/Card";
+import EmptyState from "../components/EmptyState";
+import Button from "../components/Button";
 
 // Import data dari file JSON
 import feedbackData from "../data/feedbackData.js";
@@ -24,8 +31,8 @@ const Feedback = () => {
   // Load data dari JSON saat komponen mount
   useEffect(() => {
     // Ambil data dari file feedbackData.js
-    const data = Array.isArray(feedbackData) 
-      ? feedbackData 
+    const data = Array.isArray(feedbackData)
+      ? feedbackData
       : feedbackData.feedbacks || feedbackData.data || [];
     setFeedbacks(data);
     setLoading(false);
@@ -50,32 +57,30 @@ const Feedback = () => {
     setFeedbacks(feedbacks.filter((f) => f.id !== id));
 
   const filtered = feedbacks
-    .filter(
-      (f) =>
-        filter === "all" ||
-        f.rating === parseInt(filter)
-    )
+    .filter((f) => filter === "all" || f.rating === parseInt(filter))
     .filter(
       (f) =>
         f.memberName?.toLowerCase().includes(search.toLowerCase()) ||
         f.comment?.toLowerCase().includes(search.toLowerCase()),
     );
 
-  const avgRating = feedbacks.length > 0 
-    ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1)
-    : 0;
+  const avgRating =
+    feedbacks.length > 0
+      ? (
+          feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length
+        ).toFixed(1)
+      : 0;
   const totalFeedbacks = feedbacks.length;
-  const satisfactionRate = feedbacks.length > 0 
-    ? ((avgRating / 5) * 100).toFixed(0)
-    : 0;
+  const satisfactionRate =
+    feedbacks.length > 0 ? ((avgRating / 5) * 100).toFixed(0) : 0;
 
   // Hitung distribusi rating
   const ratingDistribution = {
-    5: feedbacks.filter(f => f.rating === 5).length,
-    4: feedbacks.filter(f => f.rating === 4).length,
-    3: feedbacks.filter(f => f.rating === 3).length,
-    2: feedbacks.filter(f => f.rating === 2).length,
-    1: feedbacks.filter(f => f.rating === 1).length,
+    5: feedbacks.filter((f) => f.rating === 5).length,
+    4: feedbacks.filter((f) => f.rating === 4).length,
+    3: feedbacks.filter((f) => f.rating === 3).length,
+    2: feedbacks.filter((f) => f.rating === 2).length,
+    1: feedbacks.filter((f) => f.rating === 1).length,
   };
 
   // Tampilkan loading state
@@ -83,7 +88,10 @@ const Feedback = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader size={40} className="text-[#8E1616] animate-spin mx-auto mb-4" />
+          <Loader
+            size={40}
+            className="text-[#8E1616] animate-spin mx-auto mb-4"
+          />
           <p className="text-gray-500">Memuat data umpan balik...</p>
         </div>
       </div>
@@ -109,7 +117,9 @@ const Feedback = () => {
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400 font-medium">Rata-rata Rating</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Rata-rata Rating
+              </p>
               <div className="flex items-center gap-1 mt-1">
                 <Star size={20} className="fill-[#D84040] text-[#D84040]" />
                 <p className="text-2xl font-bold text-[#1D1616]">{avgRating}</p>
@@ -125,8 +135,12 @@ const Feedback = () => {
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400 font-medium">Total Umpan Balik</p>
-              <p className="text-2xl font-bold text-[#1D1616] mt-1">{totalFeedbacks}</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Total Umpan Balik
+              </p>
+              <p className="text-2xl font-bold text-[#1D1616] mt-1">
+                {totalFeedbacks}
+              </p>
               <p className="text-[10px] text-gray-500 mt-1">Semua ulasan</p>
             </div>
             <div className="w-10 h-10 bg-[#8E1616]/10 rounded-xl flex items-center justify-center">
@@ -138,8 +152,12 @@ const Feedback = () => {
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400 font-medium">Tingkat Kepuasan</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">{satisfactionRate}%</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Tingkat Kepuasan
+              </p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
+                {satisfactionRate}%
+              </p>
               <p className="text-[10px] text-gray-500 mt-1">Member puas</p>
             </div>
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
@@ -151,12 +169,16 @@ const Feedback = () => {
         <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-400 font-medium">Rating Tertinggi</p>
+              <p className="text-xs text-gray-400 font-medium">
+                Rating Tertinggi
+              </p>
               <div className="flex items-center gap-1 mt-1">
                 <Star size={20} className="fill-[#D84040] text-[#D84040]" />
                 <p className="text-2xl font-bold text-[#1D1616]">5</p>
               </div>
-              <p className="text-[10px] text-gray-500 mt-1">{ratingDistribution[5]} ulasan</p>
+              <p className="text-[10px] text-gray-500 mt-1">
+                {ratingDistribution[5]} ulasan
+              </p>
             </div>
             <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
               <Star size={20} className="text-yellow-600" />
@@ -167,19 +189,24 @@ const Feedback = () => {
 
       {/* Rating Distribution Bar */}
       <div className="bg-white rounded-2xl p-5 mb-6 border border-gray-200 shadow-sm">
-        <h3 className="text-sm font-bold text-[#1D1616] mb-4">Distribusi Rating</h3>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-4">
+          Distribusi Rating
+        </h3>
         <div className="space-y-2">
           {[5, 4, 3, 2, 1].map((rate) => {
             const count = ratingDistribution[rate];
-            const percentage = totalFeedbacks > 0 ? (count / totalFeedbacks) * 100 : 0;
+            const percentage =
+              totalFeedbacks > 0 ? (count / totalFeedbacks) * 100 : 0;
             return (
               <div key={rate} className="flex items-center gap-3">
                 <div className="w-12 flex items-center gap-1">
-                  <span className="text-xs font-semibold text-gray-600">{rate}</span>
+                  <span className="text-xs font-semibold text-gray-600">
+                    {rate}
+                  </span>
                   <Star size={10} className="fill-[#D84040] text-[#D84040]" />
                 </div>
                 <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-[#8E1616] to-[#D84040] rounded-full transition-all duration-500"
                     style={{ width: `${percentage}%` }}
                   />
@@ -202,8 +229,8 @@ const Feedback = () => {
                 key={f}
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  filter === f 
-                    ? "bg-[#8E1616] text-white shadow-md" 
+                  filter === f
+                    ? "bg-[#8E1616] text-white shadow-md"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
               >
@@ -211,18 +238,12 @@ const Feedback = () => {
               </button>
             ))}
           </div>
-          <div className="relative">
-            <Search
-              size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari umpan balik..."
-              className="pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616] w-44"
-            />
-          </div>
+          <SearchBar
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari umpan balik..."
+            className="w-44"
+          />
         </div>
       </div>
 
@@ -236,9 +257,7 @@ const Feedback = () => {
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8E1616]/20 to-[#D84040]/20 flex items-center justify-center text-[#8E1616] font-bold shadow-sm">
-                    {feedback.memberName?.charAt(0) || "A"}
-                  </div>
+                  <Avatar name={feedback.memberName || "A"} size="md" />
                   <div>
                     <p className="font-semibold text-[#1D1616]">
                       {feedback.memberName}
@@ -288,13 +307,11 @@ const Feedback = () => {
             </div>
           ))
         ) : (
-          <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
-            <MessageCircle size={40} className="mx-auto text-gray-400 mb-3" />
-            <p className="text-gray-500 font-medium">Tidak ada umpan balik ditemukan</p>
-            <p className="text-xs text-gray-400 mt-1">
-              Coba dengan kata kunci lain atau hapus filter
-            </p>
-          </div>
+          <EmptyState
+            icon="💬"
+            title="Tidak ada umpan balik ditemukan"
+            message="Coba dengan kata kunci lain atau hapus filter"
+          />
         )}
       </div>
 

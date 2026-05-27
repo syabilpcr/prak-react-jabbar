@@ -10,6 +10,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+// ── Components Pertemuan 10 ───────────────────────────────────
+// CATATAN: Import StatCard dari luar dihapus untuk menghindari konflik export/undefined
+import Card from "../components/Card";
+import ProgressBar from "../components/ProgressBar";
+import SectionHeader from "../components/SectionHeader";
+import Button from "../components/Button";
+
 // Data mentah untuk semua periode
 const rawRevenueData = {
   daily: [
@@ -288,7 +295,8 @@ const AnimatedReportChart = ({
   );
 };
 
-// Komponen untuk menampilkan statistik berdasarkan periode
+// ── KOMPONEN STATCARD LOKAL ───────────────────────────────────
+// Kita deklarasikan langsung di sini agar terhindar dari error 'undefined' akibat salah eksport file luar.
 const StatCard = ({
   title,
   value,

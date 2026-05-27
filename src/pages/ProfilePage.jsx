@@ -14,6 +14,14 @@ import {
   Save,
 } from "lucide-react";
 
+// ── Components Pertemuan 10 ───────────────────────────────────
+import Avatar from "../components/Avatar";
+import Card from "../components/Card";
+import InputField from "../components/InputField";
+import Button from "../components/Button";
+import Alert from "../components/Alert";
+import SectionHeader from "../components/SectionHeader";
+
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
@@ -392,7 +400,7 @@ const ProfilePage = () => {
 
           <div className="mt-8">
             <h3 className="text-lg font-bold text-[#1D1616] mb-4 flex items-center gap-2">
-         Statistik Gym
+              Statistik Gym
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-[#8E1616]/5 rounded-2xl p-5 border border-[#8E1616]/10">

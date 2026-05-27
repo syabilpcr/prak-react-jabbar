@@ -3,7 +3,6 @@ import PageHeader from "../components/PageHeader";
 import {
   Plus,
   X,
-  Search,
   Send,
   Trophy,
   Link as LinkIcon,
@@ -12,7 +11,18 @@ import {
   Users,
   Gift,
   Share2,
+  Search,
 } from "lucide-react";
+
+// ── Components Pertemuan 10 ───────────────────────────────────
+import SearchBar from "../components/SearchBar";
+import Badge from "../components/Badge";
+import Card from "../components/Card";
+import Modal from "../components/Modal";
+import Button from "../components/Button";
+import InputField from "../components/InputField";
+import SelectField from "../components/SelectField";
+import EmptyState from "../components/EmptyState";
 
 const initialPromotions = [
   {
