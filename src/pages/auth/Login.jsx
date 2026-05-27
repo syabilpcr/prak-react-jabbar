@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, LogIn, Dumbbell } from "lucide-react";
+import Alert from "../../components/Alert";
+import Button from "../../components/Button";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -78,15 +80,14 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="bg-red-50 mb-5 p-4 text-sm text-red-600 rounded-xl flex items-center gap-2 border border-red-200">
-              <span>⚠️</span> {error}
+            <div className="mb-5">
+              <Alert type="danger" message={error} />
             </div>
           )}
 
           {loading && (
-            <div className="bg-gray-100 mb-5 p-4 text-sm text-gray-600 rounded-xl flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-[#8E1616] border-t-transparent rounded-full animate-spin"></div>
-              Memproses...
+            <div className="mb-5">
+              <Alert type="info" message="Memproses..." />
             </div>
           )}
 

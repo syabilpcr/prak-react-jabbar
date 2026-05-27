@@ -1,8 +1,6 @@
 import { useState } from "react";
-import PageHeader from "../components/PageHeader";
 import {
   Plus,
-  X,
   Send,
   Trophy,
   Link as LinkIcon,
@@ -11,93 +9,46 @@ import {
   Users,
   Gift,
   Share2,
-  Search,
 } from "lucide-react";
 
-// ── Components Pertemuan 10 ───────────────────────────────────
+// ── Components ────────────────────────────────────────────────
 import SearchBar from "../components/SearchBar";
 import Badge from "../components/Badge";
-import Card from "../components/Card";
+import Table from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import InputField from "../components/InputField";
 import SelectField from "../components/SelectField";
 import EmptyState from "../components/EmptyState";
+import StatCard from "../components/StatCard";
 
-const initialPromotions = [
-  {
-    id: "PROMO-001",
-    title: "Diskon Anggota Baru",
-    code: "WELCOME20",
-    discount: "20%",
-    type: "percentage",
-    validUntil: "2026-2-2",
-    status: "Aktif",
-    sent: 45,
-  },
-  {
-    id: "PROMO-002",
-    title: "Bonus Referral",
-    code: "REFER50",
-    discount: "Rp 50rb",
-    type: "fixed",
-    validUntil: "2026-3-3",
-    status: "Aktif",
-    sent: 28,
-  },
-  {
-    id: "PROMO-003",
-    title: "Spesial Anggota Gold",
-    code: "GOLD15",
-    discount: "15%",
-    type: "percentage",
-    validUntil: "2024-12-20",
-    status: "Kadaluarsa",
-    sent: 120,
-  },
-];
+// ── Data ──────────────────────────────────────────────────────
+import promotionsData from "../data/promotionsData";
 
 const Promotions = () => {
-  const [promotions, setPromotions] = useState(initialPromotions);
+  const [promotions, setPromotions] = useState(promotionsData);
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
+  const [filterPromoStatus, setFilterPromoStatus] = useState("all");
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [referralActive, setReferralActive] = useState(false);
   const [referralCode, setReferralCode] = useState(
     "ZEUSREF" + Math.floor(Math.random() * 10000),
   );
   const [referralLink, setReferralLink] = useState(
-    `https://zeusgym.com/ref/${referralCode}`,
+    `https://zeusgym.com/ref/${"ZEUSREF" + Math.floor(Math.random() * 10000)}`,
   );
   const [copied, setCopied] = useState(false);
-  const [referralStats, setReferralStats] = useState({
+  const [referralStats] = useState({
     totalReferrals: 0,
     activeReferrals: 0,
     rewardsEarned: 0,
     pendingRewards: 0,
   });
-  const [referralHistory, setReferralHistory] = useState([
-    {
-      id: 1,
-      friendName: "Budi Santoso",
-      date: "2024-12-01",
-      status: "Aktif",
-      reward: "Rp 25.000",
-    },
-    {
-      id: 2,
-      friendName: "Siti Rahayu",
-      date: "2024-12-03",
-      status: "Aktif",
-      reward: "Rp 25.000",
-    },
-    {
-      id: 3,
-      friendName: "Agus Wijaya",
-      date: "2024-12-05",
-      status: "Pending",
-      reward: "Rp 25.000",
-    },
+  const [referralHistory] = useState([
+    { id: 1, friendName: "Budi Santoso", date: "2024-12-01", status: "Aktif", reward: "Rp 25.000" },
+    { id: 2, friendName: "Siti Rahayu", date: "2024-12-03", status: "Aktif", reward: "Rp 25.000" },
+    { id: 3, friendName: "Agus Wijaya", date: "2024-12-05", status: "Pending", reward: "Rp 25.000" },
   ]);
 
   const [form, setForm] = useState({
@@ -130,19 +81,8 @@ const Promotions = () => {
   };
 
   const handleSendPromo = (promo) => {
-    alert(
-      `✅ Promosi "${promo.title}" berhasil dikirim ke semua anggota!\n\n📧 ${promo.sent + 1} anggota akan menerima notifikasi.`,
-    );
-    setPromotions(
-      promotions.map((p) =>
-        p.id === promo.id ? { ...p, sent: p.sent + 1 } : p,
-      ),
-    );
-  };
-
-  const handleReferralProgram = () => {
-    setReferralActive(true);
-    setShowReferralModal(true);
+    alert(`✅ Promosi "${promo.title}" berhasil dikirim ke semua anggota!\n\n📧 ${promo.sent + 1} anggota akan menerima notifikasi.`);
+    setPromotions(promotions.map((p) => (p.id === promo.id ? { ...p, sent: p.sent + 1 } : p)));
   };
 
   const handleCopyLink = () => {
@@ -164,37 +104,73 @@ const Promotions = () => {
   };
 
   const handleDeactivateReferral = () => {
-    if (
-      window.confirm("Apakah Anda yakin ingin menonaktifkan program referral?")
-    ) {
+    if (window.confirm("Apakah Anda yakin ingin menonaktifkan program referral?")) {
       setReferralActive(false);
       setShowReferralModal(false);
       alert("Program referral telah dinonaktifkan.");
     }
   };
 
-  const filtered = promotions.filter(
-    (p) =>
-      p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = promotions.filter((p) => {
+    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) ||
+      p.code.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterPromoStatus === "all" || p.status === filterPromoStatus;
+    return matchSearch && matchStatus;
+  });
 
   return (
-    <div>
-      <PageHeader
-        title="Promosi & Otomatisasi"
-        breadcrumb={["Pemasaran", "Promosi"]}
-      >
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-[#8E1616] hover:bg-[#8E1616]/80 text-white font-semibold px-4 py-2 rounded-xl transition-all text-xs shadow-md shadow-[#8E1616]/30"
-        >
-          <Plus size={14} /> Buat Promosi
-        </button>
-      </PageHeader>
+    <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen">
+      {/* ── Page Title ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-black text-[#1D1616]">Promosi & Otomatisasi</h1>
+          <p className="text-[12px] text-[#9e7a6e] mt-0.5">
+            Kelola kampanye promosi dan program referral
+          </p>
+        </div>
+        <Button type="primary" icon={Plus} onClick={() => setShowModal(true)}>
+          Buat Promosi
+        </Button>
+      </div>
+
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          icon={Gift}
+          label="Total Promosi"
+          value={promotions.length}
+          change="+5.0%"
+          trend="up"
+          sub="dari bulan lalu"
+        />
+        <StatCard
+          icon={Send}
+          label="Total Terkirim"
+          value={promotions.reduce((s, p) => s + p.sent, 0)}
+          change="+12.3%"
+          trend="up"
+          sub="dari bulan lalu"
+        />
+        <StatCard
+          icon={Users}
+          label="Referral Aktif"
+          value={referralStats.totalReferrals}
+          change="+8.1%"
+          trend="up"
+          sub="dari bulan lalu"
+        />
+        <StatCard
+          icon={Trophy}
+          label="Promosi Aktif"
+          value={promotions.filter((p) => p.status === "Aktif").length}
+          change="+3.2%"
+          trend="up"
+          sub="dari bulan lalu"
+        />
+      </div>
 
       {/* Referral Program Card */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-gradient-to-r from-[#8E1616] to-[#D84040] rounded-2xl p-5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
           <div className="relative z-10">
@@ -204,440 +180,260 @@ const Promotions = () => {
                   <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
                     <Users size={16} className="text-white" />
                   </div>
-                  <p className="text-xs text-white/80 font-semibold">
-                    Program Referral
-                  </p>
+                  <p className="text-xs text-white/80 font-semibold">Program Referral</p>
                 </div>
-                <p className="text-xl font-bold text-white">
-                  Ajak Teman, Dapat Diskon!
-                </p>
+                <p className="text-xl font-bold text-white">Ajak Teman, Dapat Diskon!</p>
                 <p className="text-xs text-white/80 mt-1 max-w-[200px]">
                   Dapatkan diskon 20% untuk setiap teman yang bergabung!
                 </p>
                 {referralActive && (
                   <div className="mt-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                    <span className="text-[10px] text-white/90">
-                      Program Aktif
-                    </span>
-                    <span className="text-[10px] text-white/70">
-                      | {referralStats.totalReferrals} referral
-                    </span>
+                    <span className="text-[10px] text-white/90">Program Aktif</span>
                   </div>
                 )}
               </div>
-              <button
-                onClick={handleReferralProgram}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                  referralActive
-                    ? "bg-[#D84040] hover:bg-[#8E1616] text-white"
-                    : "bg-white border-2 border-[#8E1616] text-[#8E1616] hover:bg-[#8E1616] hover:text-white"
-                } shadow-lg shadow-[#8E1616]/30`}
+              <Button
+                type={referralActive ? "danger" : "secondary"}
+                onClick={() => { setReferralActive(true); setShowReferralModal(true); }}
               >
-                {referralActive ? " Kelola Program" : " Aktifkan"}
-              </button>
+                {referralActive ? "Kelola" : "Aktifkan"}
+              </Button>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#8E1616]/10 flex items-center justify-center">
-              <Trophy size={24} className="text-[#8E1616]" />
+            <div className="w-12 h-12 rounded-xl bg-[#8C1007]/10 flex items-center justify-center">
+              <Trophy size={24} className="text-[#8C1007]" />
             </div>
             <div>
-              <p className="text-xs text-gray-400">Pemasaran Digital</p>
-              <p className="text-sm font-bold text-[#1D1616]">
-                Kampanye SMS & Email
-              </p>
-              <p className="text-xs text-gray-400">
-                Terkirim otomatis ke anggota kadaluarsa
-              </p>
+              <p className="text-xs text-[#9e7a6e]">Pemasaran Digital</p>
+              <p className="text-sm font-bold text-[#1D1616]">Kampanye SMS & Email</p>
+              <p className="text-xs text-[#9e7a6e]">Terkirim otomatis ke anggota kadaluarsa</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Promotions Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-[#1D1616]">Promosi Aktif</p>
-            <p className="text-xs text-gray-400">{filtered.length} kampanye</p>
-          </div>
-          <div className="relative">
-            <Search
-              size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            />
-            <input
+      {/* ── Tabel Promosi ── */}
+      <div
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      >
+        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-[#1D1616]">Promosi Aktif</p>
+              <p className="text-xs text-[#9e7a6e]">{filtered.length} kampanye</p>
+            </div>
+            <SearchBar
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari promosi..."
-              className="pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616] w-44"
+              className="w-52"
             />
           </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
+            <select
+              value={filterPromoStatus}
+              onChange={(e) => setFilterPromoStatus(e.target.value)}
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
+              <option value="all">Semua Status</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Kadaluarsa">Kadaluarsa</option>
+            </select>
+            {filterPromoStatus !== "all" && (
+              <button
+                onClick={() => setFilterPromoStatus("all")}
+                className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold hover:bg-red-100 transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Judul
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Kode
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Diskon
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Berlaku Hingga
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Terkirim
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Status
-                </th>
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.map((promo) => (
-                <tr
-                  key={promo.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-3.5 font-semibold text-[#1D1616] text-sm">
-                    {promo.title}
-                  </td>
-                  <td className="px-6 py-3.5 font-mono text-xs text-[#8E1616]">
-                    {promo.code}
-                  </td>
-                  <td className="px-6 py-3.5 text-sm font-bold text-[#8E1616]">
-                    {promo.discount}
-                  </td>
-                  <td className="px-6 py-3.5 text-xs text-gray-500">
-                    {promo.validUntil}
-                  </td>
-                  <td className="px-6 py-3.5 text-xs text-gray-500">
-                    {promo.sent} anggota
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold ${promo.status === "Aktif" ? "bg-green-100 text-green-700 border border-green-200" : "bg-red-100 text-red-700 border border-red-200"}`}
-                    >
-                      {promo.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <button
-                      onClick={() => handleSendPromo(promo)}
-                      disabled={promo.status !== "Aktif"}
-                      className={`p-1.5 rounded-lg transition-colors ${promo.status === "Aktif" ? "bg-gray-100 hover:bg-[#8E1616]/20 text-[#8E1616]" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`}
-                    >
-                      <Send size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Table headers={["Judul", "Kode", "Diskon", "Berlaku Hingga", "Terkirim", "Status", "Aksi"]}>
+            {filtered.length === 0
+              ? null
+              : filtered.map((promo) => (
+                  <tr key={promo.id} className="hover:bg-[#faf6f4] transition-colors">
+                    <td className="px-6 py-3.5 font-semibold text-[#1D1616] text-sm">
+                      {promo.title}
+                    </td>
+                    <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007]">
+                      {promo.code}
+                    </td>
+                    <td className="px-6 py-3.5 text-sm font-bold text-[#8C1007]">
+                      {promo.discount}
+                    </td>
+                    <td className="px-6 py-3.5 text-xs text-[#9e7a6e]">
+                      {promo.validUntil}
+                    </td>
+                    <td className="px-6 py-3.5 text-xs text-[#9e7a6e]">
+                      {promo.sent} anggota
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <Badge type={promo.status === "Aktif" ? "success" : "danger"} dot>
+                        {promo.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <Button
+                        type="ghost"
+                        size="sm"
+                        icon={Send}
+                        onClick={() => handleSendPromo(promo)}
+                        disabled={promo.status !== "Aktif"}
+                      >
+                        Kirim
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+          </Table>
         </div>
+
+        {filtered.length === 0 && (
+          <EmptyState
+            icon="🔍"
+            title="Promosi tidak ditemukan"
+            message="Coba ubah kata kunci pencarian Anda."
+          />
+        )}
       </div>
 
-      {/* Referral Program Modal */}
-      {showReferralModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 border border-gray-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#8E1616]/5 to-[#D84040]/5">
-              <div>
-                <h3 className="text-xl font-bold text-[#1D1616] flex items-center gap-2">
-                  <Users size={24} className="text-[#8E1616]" />
-                  Program Referral - Ajak Teman
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Dapatkan diskon 20% untuk setiap teman yang bergabung!
-                </p>
+      {/* ── Modal Referral ── */}
+      <Modal
+        open={showReferralModal}
+        onClose={() => setShowReferralModal(false)}
+        title="Program Referral - Ajak Teman"
+        subtitle="Dapatkan diskon 20% untuk setiap teman yang bergabung!"
+        footer={
+          <div className="flex gap-3">
+            {referralActive && (
+              <Button type="danger" fullWidth onClick={handleDeactivateReferral}>
+                Nonaktifkan Program
+              </Button>
+            )}
+            <Button type="primary" fullWidth onClick={() => setShowReferralModal(false)}>
+              Tutup
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-5">
+          {/* Referral Link */}
+          <div className="bg-[#f8f3ee] rounded-xl p-4 border border-[#e8dfd6]">
+            <label className="block text-xs font-bold text-[#9e7a6e] mb-2 uppercase tracking-wide">
+              Link Referral Anda
+            </label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center bg-white border border-[#e8dfd6] rounded-xl px-3 py-2">
+                <LinkIcon size={16} className="text-[#9e7a6e] mr-2" />
+                <input
+                  type="text"
+                  value={referralLink}
+                  readOnly
+                  className="flex-1 bg-transparent text-sm text-[#1D1616] outline-none"
+                />
               </div>
-              <button
-                onClick={() => setShowReferralModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-
-            <div className="p-6">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 text-center border border-green-200">
-                  <Users size={20} className="text-green-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-green-700">
-                    {referralStats.totalReferrals}
-                  </p>
-                  <p className="text-[10px] text-green-600">Total Referral</p>
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 text-center border border-blue-200">
-                  <Gift size={20} className="text-blue-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-blue-700">
-                    {referralStats.activeReferrals}
-                  </p>
-                  <p className="text-[10px] text-blue-600">Aktif</p>
-                </div>
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-3 text-center border border-yellow-200">
-                  <Trophy size={20} className="text-yellow-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-yellow-700">
-                    Rp {(referralStats.rewardsEarned / 1000).toFixed(0)}rb
-                  </p>
-                  <p className="text-[10px] text-yellow-600">Reward Didapat</p>
-                </div>
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 text-center border border-purple-200">
-                  <Share2 size={20} className="text-purple-600 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-purple-700">
-                    Rp {(referralStats.pendingRewards / 1000).toFixed(0)}rb
-                  </p>
-                  <p className="text-[10px] text-purple-600">Pending</p>
-                </div>
-              </div>
-
-              {/* Referral Link Section */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-6">
-                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                  Link Referral Anda
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center bg-white border border-gray-200 rounded-xl px-3 py-2">
-                    <LinkIcon size={16} className="text-gray-400 mr-2" />
-                    <input
-                      type="text"
-                      value={referralLink}
-                      readOnly
-                      className="flex-1 bg-transparent text-sm text-[#1D1616] outline-none"
-                    />
-                  </div>
-                  <button
-                    onClick={handleCopyLink}
-                    className="px-4 py-2 bg-[#8E1616] hover:bg-[#8E1616]/80 text-white rounded-xl transition-all flex items-center gap-2 text-sm"
-                  >
-                    {copied ? <Check size={16} /> : <Copy size={16} />}
-                    {copied ? "Tersalin!" : "Salin"}
-                  </button>
-                </div>
-                <p className="text-[10px] text-gray-400 mt-2">
-                  Bagikan link ini ke teman Anda. Setiap pendaftaran baru akan
-                  memberikan diskon untuk Anda berdua!
-                </p>
-              </div>
-
-              {/* Share Buttons */}
-              <div className="mb-6">
-                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
-                  Bagikan ke Media Sosial
-                </label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleShareWhatsApp}
-                    className="flex-1 bg-[#8E1616] hover:bg-[#D84040] text-white py-2 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 shadow-md shadow-[#8E1616]/30"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                    </svg>
-                    WhatsApp
-                  </button>
-                  <button
-                    onClick={handleRegenerateCode}
-                    className="px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl transition-all"
-                    title="Buat kode baru"
-                  >
-                    🔄
-                  </button>
-                </div>
-              </div>
-
-              {/* Referral History */}
-              <div className="mb-6">
-                <h4 className="text-sm font-bold text-[#1D1616] mb-3 flex items-center gap-2">
-                  <Users size={14} className="text-[#8E1616]" />
-                  Riwayat Referral
-                </h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-2 text-xs text-gray-500 font-medium">
-                          Teman
-                        </th>
-                        <th className="text-left py-2 text-xs text-gray-500 font-medium">
-                          Tanggal
-                        </th>
-                        <th className="text-left py-2 text-xs text-gray-500 font-medium">
-                          Status
-                        </th>
-                        <th className="text-right py-2 text-xs text-gray-500 font-medium">
-                          Reward
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {referralHistory.map((item) => (
-                        <tr key={item.id} className="border-b border-gray-100">
-                          <td className="py-2 text-sm text-[#1D1616]">
-                            {item.friendName}
-                          </td>
-                          <td className="py-2 text-xs text-gray-500">
-                            {item.date}
-                          </td>
-                          <td className="py-2">
-                            <span
-                              className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${
-                                item.status === "Aktif"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-yellow-100 text-yellow-700"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </td>
-                          <td className="py-2 text-right text-sm font-semibold text-green-600">
-                            {item.reward}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                {referralActive && (
-                  <button
-                    onClick={handleDeactivateReferral}
-                    className="flex-1 border border-red-300 text-red-600 font-semibold py-2.5 rounded-xl hover:bg-red-50 transition-colors"
-                  >
-                    Nonaktifkan Program
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowReferralModal(false)}
-                  className="flex-1 bg-[#8E1616] hover:bg-[#8E1616]/80 text-white font-semibold py-2.5 rounded-xl transition-all"
-                >
-                  Tutup
-                </button>
-              </div>
+              <Button type="primary" size="sm" icon={copied ? Check : Copy} onClick={handleCopyLink}>
+                {copied ? "Tersalin!" : "Salin"}
+              </Button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Create Promotion Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl p-7 w-full max-w-md mx-4 border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-base font-bold text-[#1D1616]">
-                  Buat Promosi
-                </h3>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Kirim otomatis ke anggota target
-                </p>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-              >
-                <X size={16} className="text-gray-500" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
-                  Judul Promosi
-                </label>
-                <input
-                  name="title"
-                  type="text"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="Contoh: Spesial Musim Panas"
-                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
-                  Kode Promo
-                </label>
-                <input
-                  name="code"
-                  type="text"
-                  value={form.code}
-                  onChange={handleChange}
-                  placeholder="Contoh: SUMMER20"
-                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
-                  Tipe Diskon
-                </label>
-                <select
-                  name="discountType"
-                  value={form.discountType}
-                  onChange={handleChange}
-                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
-                >
-                  <option>persentase</option>
-                  <option>nominal</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide">
-                  Nilai Diskon
-                </label>
-                <input
-                  name="discount"
-                  type="text"
-                  value={form.discount}
-                  onChange={handleChange}
-                  placeholder={
-                    form.discountType === "persentase" ? "20" : "50000"
-                  }
-                  className="w-full border border-gray-200 bg-gray-50 rounded-xl px-4 py-2.5 text-sm text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowModal(false)}
-                className="flex-1 border border-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors text-sm"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="flex-1 bg-[#8E1616] hover:bg-[#8E1616]/80 text-white font-semibold py-2.5 rounded-xl transition-all text-sm"
-              >
-                Buat & Publikasikan
-              </button>
-            </div>
+          {/* Share Buttons */}
+          <div className="flex gap-3">
+            <Button type="primary" fullWidth onClick={handleShareWhatsApp}>
+              WhatsApp
+            </Button>
+            <Button type="secondary" onClick={handleRegenerateCode}>
+              🔄
+            </Button>
+          </div>
+
+          {/* Referral History */}
+          <div>
+            <p className="text-sm font-bold text-[#1D1616] mb-3">Riwayat Referral</p>
+            <Table headers={["Teman", "Tanggal", "Status", "Reward"]}>
+              {referralHistory.map((item) => (
+                <tr key={item.id} className="hover:bg-[#faf6f4] transition-colors">
+                  <td className="px-6 py-2.5 text-sm text-[#1D1616]">{item.friendName}</td>
+                  <td className="px-6 py-2.5 text-xs text-[#9e7a6e]">{item.date}</td>
+                  <td className="px-6 py-2.5">
+                    <Badge type={item.status === "Aktif" ? "success" : "warning"} dot>
+                      {item.status}
+                    </Badge>
+                  </td>
+                  <td className="px-6 py-2.5 text-sm font-semibold text-green-600">{item.reward}</td>
+                </tr>
+              ))}
+            </Table>
           </div>
         </div>
-      )}
+      </Modal>
+
+      {/* ── Modal Buat Promosi ── */}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title="Buat Promosi"
+        subtitle="Kirim otomatis ke anggota target"
+        footer={
+          <div className="flex gap-3">
+            <Button type="secondary" fullWidth onClick={() => setShowModal(false)}>
+              Batal
+            </Button>
+            <Button type="primary" fullWidth onClick={handleSubmit}>
+              Buat & Publikasikan
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <InputField
+            label="Judul Promosi"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Contoh: Spesial Musim Panas"
+            required
+          />
+          <InputField
+            label="Kode Promo"
+            name="code"
+            value={form.code}
+            onChange={handleChange}
+            placeholder="Contoh: SUMMER20"
+            required
+          />
+          <SelectField
+            label="Tipe Diskon"
+            name="discountType"
+            value={form.discountType}
+            onChange={handleChange}
+            options={[
+              { value: "percentage", label: "Persentase" },
+              { value: "fixed", label: "Nominal" },
+            ]}
+          />
+          <InputField
+            label="Nilai Diskon"
+            name="discount"
+            value={form.discount}
+            onChange={handleChange}
+            placeholder={form.discountType === "percentage" ? "20" : "50000"}
+            required
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

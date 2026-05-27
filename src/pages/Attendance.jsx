@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import PageHeader from "../components/PageHeader";
 import QRCodeModal from "../components/QRCodeModal";
 import {
   CheckCircle,
@@ -10,7 +9,7 @@ import {
   Loader,
 } from "lucide-react";
 
-// ── Components Pertemuan 10 ───────────────────────────────────
+// ── Components ────────────────────────────────────────────────
 import SearchBar from "../components/SearchBar";
 import Badge from "../components/Badge";
 import Table from "../components/Table";
@@ -43,6 +42,7 @@ const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [scanning, setScanning] = useState(false);
   const [scannedMember, setScannedMember] = useState(null);
   const [showQRModal, setShowQRModal] = useState(false);
@@ -116,11 +116,12 @@ const Attendance = () => {
     setShowQRModal(true);
   };
 
-  const filtered = attendance.filter(
-    (a) =>
-      a.memberName?.toLowerCase().includes(search.toLowerCase()) ||
-      a.memberId?.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = attendance.filter((a) => {
+    const matchSearch = a.memberName?.toLowerCase().includes(search.toLowerCase()) ||
+      a.memberId?.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterStatus === "all" || a.status === filterStatus;
+    return matchSearch && matchStatus;
+  });
 
   const activeCount = attendance.filter((a) => a.status === "Aktif").length;
   const completedCount = attendance.filter(
@@ -143,34 +144,41 @@ const Attendance = () => {
   }
 
   return (
-    <div>
-      <PageHeader title="Absensi" breadcrumb={["Manajemen", "Absensi"]}>
+    <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen">
+      {/* ── Page Title ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-black text-[#1D1616]">Absensi</h1>
+          <p className="text-[12px] text-[#9e7a6e] mt-0.5">
+            Kelola data kehadiran anggota Zeus Gym
+          </p>
+        </div>
         <button
           onClick={handleScanQR}
           disabled={scanning}
-          className="flex items-center gap-2 bg-[#8E1616] hover:bg-[#D84040] text-white font-semibold px-4 py-2 rounded-xl transition-all text-xs shadow-md shadow-[#8E1616]/30"
+          className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 bg-[#8C1007] hover:bg-[#a01a0a] text-white shadow-md shadow-[#8C1007]/30 px-4 py-2.5 text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Scan size={14} />
+          <Scan size={15} />
           {scanning ? "Memindai..." : "Pindai QR Code"}
         </button>
-      </PageHeader>
+      </div>
 
       {/* Scanned Member Notification */}
       {scannedMember && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-2xl p-4 animate-fade-in">
+        <div className="bg-green-50 border border-green-200 rounded-2xl p-4">
           <div className="flex items-center gap-3">
             <CheckCircle size={20} className="text-green-600" />
             <div>
               <p className="text-sm font-semibold text-[#1D1616]">
                 Terpindai: {scannedMember.memberName}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-[#9e7a6e]">
                 ID Anggota: {scannedMember.memberId}
               </p>
             </div>
             <button
               onClick={() => setScannedMember(null)}
-              className="ml-auto text-xs text-gray-400 hover:text-gray-600"
+              className="ml-auto text-xs text-[#9e7a6e] hover:text-[#1D1616]"
             >
               Bersihkan
             </button>
@@ -178,98 +186,80 @@ const Attendance = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 font-medium">Sedang Aktif</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
-                {activeCount}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-1">
-                Member sedang berolahraga
-              </p>
-            </div>
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-              <Clock size={20} className="text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 font-medium">
-                Check-in Hari Ini
-              </p>
-              <p className="text-2xl font-bold text-blue-600 mt-1">
-                {completedCount + activeCount}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-1">
-                Total member hadir
-              </p>
-            </div>
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <CheckCircle size={20} className="text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 font-medium">Selesai</p>
-              <p className="text-2xl font-bold text-[#1D1616] mt-1">
-                {completedCount}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-1">Telah checkout</p>
-            </div>
-            <div className="w-10 h-10 bg-[#8E1616]/10 rounded-xl flex items-center justify-center">
-              <CheckCircle size={20} className="text-[#8E1616]" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400 font-medium">
-                Tingkat Kehadiran
-              </p>
-              <p className="text-2xl font-bold text-[#D84040] mt-1">
-                {attendance.length > 0
-                  ? Math.round(
-                      ((completedCount + activeCount) / attendance.length) *
-                        100,
-                    )
-                  : 0}
-                %
-              </p>
-              <p className="text-[10px] text-gray-500 mt-1">
-                Dari total member
-              </p>
-            </div>
-            <div className="w-10 h-10 bg-[#D84040]/10 rounded-xl flex items-center justify-center">
-              <Clock size={20} className="text-[#D84040]" />
-            </div>
-          </div>
-        </div>
+      {/* ── Stat Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          icon={Clock}
+          label="Sedang Aktif"
+          value={activeCount}
+          change="+5.3%"
+          trend="up"
+          sub="member berolahraga"
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Check-in Hari Ini"
+          value={completedCount + activeCount}
+          change="+12.5%"
+          trend="up"
+          sub="total hadir"
+        />
+        <StatCard
+          icon={CheckCircle}
+          label="Selesai"
+          value={completedCount}
+          change="+8.2%"
+          trend="up"
+          sub="telah checkout"
+        />
+        <StatCard
+          icon={Clock}
+          label="Tingkat Kehadiran"
+          value={`${attendance.length > 0 ? Math.round(((completedCount + activeCount) / attendance.length) * 100) : 0}%`}
+          change="+3.1%"
+          trend="up"
+          sub="dari total member"
+        />
       </div>
 
       {/* Attendance Table */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <p className="text-sm font-bold text-[#1D1616]">Absensi Hari Ini</p>
-            <p className="text-xs text-gray-400">{filtered.length} catatan</p>
+      <div
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      >
+        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-[#1D1616]">Absensi Hari Ini</p>
+              <p className="text-xs text-[#9e7a6e]">{filtered.length} dari {attendance.length} catatan</p>
+            </div>
+            <SearchBar
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari absensi..."
+              className="w-52"
+            />
           </div>
-          <SearchBar
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari absensi..."
-            className="w-44"
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
+              <option value="all">Semua Status</option>
+              <option value="Aktif">Aktif</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+            {filterStatus !== "all" && (
+              <button
+                onClick={() => setFilterStatus("all")}
+                className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold hover:bg-red-100 transition-colors"
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -297,7 +287,7 @@ const Attendance = () => {
                   return (
                     <tr
                       key={record.id}
-                      className="hover:bg-gray-50 transition-colors group"
+                      className="hover:bg-[#faf6f4] transition-colors group"
                     >
                       <td className="px-6 py-3.5 font-mono text-xs text-gray-500 font-semibold">
                         {record.memberId}

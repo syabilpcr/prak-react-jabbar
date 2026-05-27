@@ -11,6 +11,8 @@ import {
   ArrowLeft,
   CheckCircle,
 } from "lucide-react";
+import Alert from "../../components/Alert";
+import Button from "../../components/Button";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -158,8 +160,8 @@ export default function Register() {
               </div>
 
               {error && (
-                <div className="bg-red-50 mb-4 p-3 text-sm text-red-600 rounded-xl flex items-center gap-2 border border-red-200">
-                  <span>⚠️</span> {error}
+                <div className="mb-4">
+                  <Alert type="danger" message={error} />
                 </div>
               )}
 
@@ -495,8 +497,8 @@ function OTPVerification({ phoneNumber, userData, onSuccess, onBack }) {
       </div>
 
       {error && (
-        <div className="bg-red-50 mb-4 p-3 text-sm text-red-600 rounded-xl flex items-center gap-2 border border-red-200">
-          <span>⚠️</span> {error}
+        <div className="mb-4">
+          <Alert type="danger" message={error} />
         </div>
       )}
 

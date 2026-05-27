@@ -1,26 +1,24 @@
 import { useState, useRef } from "react";
-import PageHeader from "../components/PageHeader";
 import {
   Mail,
   Phone,
   MapPin,
   Calendar,
-  Briefcase,
   Edit,
   Camera,
-  Dumbbell,
-  Upload,
   X,
   Save,
 } from "lucide-react";
 
-// ── Components Pertemuan 10 ───────────────────────────────────
+// ── Components ────────────────────────────────────────────────
 import Avatar from "../components/Avatar";
 import Card from "../components/Card";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import Alert from "../components/Alert";
 import SectionHeader from "../components/SectionHeader";
+import StatCard from "../components/StatCard";
+import Modal from "../components/Modal";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -268,19 +266,23 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Profil" breadcrumb={["Beranda", "Profil"]}>
-        <button
-          onClick={handleEditClick}
-          className="bg-[#8E1616] hover:bg-[#D84040] text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-all duration-300 text-sm flex items-center gap-2"
-        >
-          <Edit size={16} /> Edit Profil
-        </button>
-      </PageHeader>
+    <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen">
+      {/* ── Page Title ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-black text-[#1D1616]">Profil</h1>
+          <p className="text-[12px] text-[#9e7a6e] mt-0.5">
+            Kelola informasi profil administrator
+          </p>
+        </div>
+        <Button type="primary" icon={Edit} onClick={handleEditClick}>
+          Edit Profil
+        </Button>
+      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         {/* Left Card - Profile Info */}
-        <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
           <div className="flex flex-col items-center text-center">
             <div className="relative group">
               <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#8E1616] to-[#D84040] flex items-center justify-center text-4xl font-bold text-white border-4 border-[#8E1616]/30 overflow-hidden">
@@ -341,7 +343,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Right Card - Personal Information */}
-        <div className="xl:col-span-2 bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
+        <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-bold text-[#1D1616]">

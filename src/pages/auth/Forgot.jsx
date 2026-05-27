@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, ArrowLeft, Send, Dumbbell } from "lucide-react";
+import Alert from "../../components/Alert";
+import Button from "../../components/Button";
 
 export default function Forgot() {
   const [email, setEmail] = useState("");
@@ -63,8 +65,8 @@ export default function Forgot() {
           </div>
 
           {error && (
-            <div className="bg-red-50 mb-5 p-4 text-sm text-red-600 rounded-xl flex items-center gap-2 border border-red-200">
-              <span>⚠️</span> {error}
+            <div className="mb-5">
+              <Alert type="danger" message={error} />
             </div>
           )}
 

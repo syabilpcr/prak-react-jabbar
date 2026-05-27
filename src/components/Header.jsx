@@ -1,160 +1,173 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Bell,
   Search,
-  MessageSquare,
   ChevronDown,
-  X,
-  Clock,
-  Calendar,
-  Sparkles,
+  User,
+  LogOut,
+  Settings,
 } from "lucide-react";
 
-const Header = ({ onSearch }) => {
-  const [time, setTime] = useState(new Date());
+const Header = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const notifRef = useRef(null);
+  const profileRef = useRef(null);
 
   useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(t);
+    const handleClick = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotifications(false);
+      if (profileRef.current && !profileRef.current.contains(e.target)) setShowProfile(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    if (onSearch) {
-      onSearch(value);
-    }
+  const notifications = [
+    { id: 1, title: "Member baru terdaftar", time: "2 menit lalu", unread: true },
+    { id: 2, title: "Pembayaran diterima dari Maya", time: "15 menit lalu", unread: true },
+    { id: 3, title: "5 member akan expired minggu ini", time: "1 jam lalu", unread: true },
+    { id: 4, title: "Feedback baru ⭐5 dari Sari", time: "3 jam lalu", unread: false },
+  ];
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === "/") return "Beranda";
+    if (path.includes("members")) return "Anggota";
+    if (path.includes("payments")) return "Pembayaran";
+    if (path.includes("attendance")) return "Absensi";
+    if (path.includes("reports")) return "Laporan";
+    if (path.includes("promotions")) return "Promosi";
+    if (path.includes("feedback")) return "Umpan Balik";
+    if (path.includes("profile")) return "Profil";
+    if (path.includes("components")) return "Components";
+    return "Zeus Gym";
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      alert(`Mencari untuk: "${searchQuery}"`);
+  const handleSearch = (e) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      navigate(`/members?search=${encodeURIComponent(searchQuery)}`);
     }
-  };
-
-  const clearSearch = () => {
-    setSearchQuery("");
-    if (onSearch) onSearch("");
   };
 
   return (
-    <div className="h-16 bg-white/95 backdrop-blur-md border-b border-gray-100 px-8 flex items-center justify-between sticky top-0 z-50 shadow-sm transition-all duration-300">
-      {/* ── SISI KIRI: WAKTU & STATS RINGKAS ─────────────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 bg-gradient-to-r from-gray-50 to-gray-100/50 border border-gray-200/60 rounded-xl px-3.5 py-1.5 shadow-inner">
-          <Calendar size={14} className="text-[#8C1007]" />
-          <span className="text-xs font-bold text-gray-700 tracking-wide">
-            {time.toLocaleDateString("id-ID", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </span>
-          <div className="w-[1px] h-3 bg-gray-300 mx-1" />
-          <Clock size={13} className="text-gray-400" />
-          <span className="text-xs font-medium text-gray-500 font-mono">
-            {time.toLocaleTimeString("id-ID", {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-            })}
-          </span>
-        </div>
+    <header className="h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between sticky top-0 z-40">
+      {/* Page title */}
+      <div>
+        <h2 className="text-lg font-bold text-gray-800">{getPageTitle()}</h2>
       </div>
 
-      {/* ── SISI KANAN: PENCARIAN & KONTROL KOMPLEKS ─────────────────────────── */}
-      <div className="flex items-center gap-6">
-        {/* Kolom Pencarian Premium (Card Style) */}
-        <div className="flex items-center gap-2.5 bg-[#FDFBF9] border border-[#EBE3DB] rounded-xl px-3.5 py-1.5 w-80 shadow-sm focus-within:border-[#8C1007] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#8C1007]/5 focus-within:shadow-md transition-all duration-300 group">
-          <Search
-            size={14}
-            className="text-[#A38479] group-focus-within:text-[#8C1007] transition-colors shrink-0"
-          />
+      {/* Search */}
+      <div className="flex-1 max-w-sm mx-8">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Cari anggota, laporan, atau transaksi..."
-            className="bg-transparent text-xs font-medium text-gray-800 placeholder-[#CBB3A9] focus:outline-none w-full"
-          />
-
-          {searchQuery ? (
-            <button
-              onClick={clearSearch}
-              className="text-[#A38479] hover:text-[#8C1007] p-0.5 rounded-full hover:bg-gray-100 transition-all"
-            >
-              <X size={12} />
-            </button>
-          ) : (
-            <kbd className="hidden sm:inline-block bg-white border border-[#EBE3DB] text-[9px] px-1.5 py-0.5 rounded-md text-gray-400 font-sans shadow-sm select-none">
-              Ctrl+K
-            </kbd>
-          )}
-        </div>
-
-        {/* Pembatas Vertikal */}
-        <div className="h-6 w-[1px] bg-gray-200 hidden md:block" />
-
-        {/* Menu Aksi/Ikon Pintas */}
-        <div className="flex items-center gap-2.5">
-          {/* Tombol Pesan */}
-          <button className="w-9 h-9 rounded-xl bg-[#FDFBF9] border border-[#EBE3DB] flex items-center justify-center text-[#7A3A3A] hover:text-[#8C1007] hover:bg-[#8C1007]/5 hover:border-[#8C1007]/20 shadow-sm transition-all duration-200 relative group">
-            <MessageSquare
-              size={15}
-              className="group-hover:scale-105 transition-transform"
-            />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#8C1007] rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-
-          {/* Tombol Notifikasi Ber-badge Kompleks */}
-          <button className="relative w-9 h-9 rounded-xl bg-[#FDFBF9] border border-[#EBE3DB] flex items-center justify-center text-[#7A3A3A] hover:text-[#8C1007] hover:bg-[#8C1007]/5 hover:border-[#8C1007]/20 shadow-sm transition-all duration-200 group">
-            <Bell
-              size={15}
-              className="group-hover:scale-105 transition-transform"
-            />
-            <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-[#8C1007] text-[#FFF0C4] text-[8px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-sm shadow-[#8C1007]/20">
-              13
-            </span>
-          </button>
-        </div>
-
-        {/* Pembatas Vertikal */}
-        <div className="h-6 w-[1px] bg-gray-200" />
-
-        {/* Card Profil Admin Premium */}
-        <div className="flex items-center gap-3 bg-[#FDFBF9]/40 hover:bg-[#FDFBF9] p-1.5 pr-3.5 rounded-xl border border-[#EBE3DB]/60 hover:border-[#EBE3DB] cursor-pointer group shadow-sm hover:shadow-md transition-all duration-300">
-          {/* Avatar Container dengan Status Online Indicator */}
-          <div className="relative">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#8C1007] to-[#B3190F] flex items-center justify-center text-[#FFF0C4] text-xs font-black shadow-md shadow-[#8C1007]/20 transform group-hover:scale-102 transition-transform">
-              SY
-            </div>
-            {/* Status Online Badge */}
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white shadow-sm shadow-emerald-500/50" />
-          </div>
-
-          {/* Label Informasi Pengguna */}
-          <div className="hidden md:block select-none">
-            <div className="flex items-center gap-1">
-              <p className="text-xs font-extrabold text-gray-800 tracking-tight leading-none group-hover:text-[#8C1007] transition-colors">
-                Syabil Admin
-              </p>
-             
-            </div>
-            <p className="text-[9px] text-[#A38479] font-bold uppercase tracking-wider mt-0.5">
-              Super Administrator
-            </p>
-          </div>
-
-          <ChevronDown
-            size={13}
-            className="text-[#A38479] group-hover:text-[#8C1007] transition-colors duration-200 ml-1"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+            placeholder="Cari..."
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#8C1007] transition-colors"
           />
         </div>
       </div>
-    </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-3">
+        {/* Notifications */}
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => { setShowNotifications(!showNotifications); setShowProfile(false); }}
+            className="relative w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            )}
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 top-12 w-80 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden z-50">
+              <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <p className="text-sm font-semibold text-gray-800">Notifikasi</p>
+                {unreadCount > 0 && (
+                  <span className="text-xs text-gray-500">{unreadCount} baru</span>
+                )}
+              </div>
+              <div className="max-h-72 overflow-y-auto">
+                {notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    className={`px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer ${notif.unread ? "bg-blue-50/30" : ""}`}
+                  >
+                    <p className={`text-sm ${notif.unread ? "font-semibold text-gray-800" : "text-gray-600"}`}>
+                      {notif.title}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="px-4 py-2 border-t border-gray-100">
+                <button className="w-full text-center text-xs text-[#8C1007] font-medium hover:underline py-1">
+                  Lihat semua
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Profile */}
+        <div className="relative" ref={profileRef}>
+          <button
+            onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }}
+            className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <div className="w-8 h-8 rounded-full bg-[#8C1007] flex items-center justify-center text-white text-xs font-semibold">
+              SY
+            </div>
+            <div className="hidden md:block text-left">
+              <p className="text-sm font-medium text-gray-800 leading-none">Syabil</p>
+              <p className="text-xs text-gray-500 mt-0.5">Admin</p>
+            </div>
+            <ChevronDown size={14} className="text-gray-400" />
+          </button>
+
+          {showProfile && (
+            <div className="absolute right-0 top-12 w-48 bg-white rounded-lg border border-gray-200 shadow-lg overflow-hidden z-50">
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-sm font-semibold text-gray-800">Syabil Admin</p>
+                <p className="text-xs text-gray-500 mt-0.5">syabil@zeusgym.com</p>
+              </div>
+              <div className="py-1">
+                <button
+                  onClick={() => { navigate("/profile"); setShowProfile(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <User size={14} /> Profil
+                </button>
+                <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <Settings size={14} /> Pengaturan
+                </button>
+              </div>
+              <div className="border-t border-gray-100 py-1">
+                <button
+                  onClick={() => { navigate("/login"); setShowProfile(false); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <LogOut size={14} /> Keluar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
   );
 };
 

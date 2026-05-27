@@ -1,58 +1,25 @@
 // src/pages/MemberDetail.jsx
-// Pertemuan 9 — Step 3: Halaman detail member menggunakan Dynamic Route + useParams
 
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Mail, Calendar, Clock, Phone } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import membersData from "../data/membersData";
-import PageHeader from "../components/PageHeader";
-
-// ── Konfigurasi warna badge tipis & elegan sesuai screenshot referensi ──
-const planConfig = {
-  Gold: {
-    bg: "bg-[#FFFDF0]",
-    text: "text-[#B37D14]",
-    border: "border-[#FBEBB5]",
-  },
-  Silver: {
-    bg: "bg-[#F4F7FA]",
-    text: "text-[#4A5568]",
-    border: "border-[#E2E8F0]",
-  },
-  Bronze: {
-    bg: "bg-[#FFF6F0]",
-    text: "text-[#C25E1A]",
-    border: "border-[#FAD7C4]",
-  },
-};
+import Badge from "../components/Badge";
 
 const statusConfig = {
-  Active: {
-    bg: "bg-[#E6FBD9]",
-    text: "text-[#1FA349]",
-    dot: "bg-[#00C853]",
-    border: "border-[#C1F4A6]",
-  },
-  Expired: {
-    bg: "bg-[#FCE8E6]",
-    text: "text-[#C53030]",
-    dot: "bg-[#E53E3E]",
-    border: "border-[#FEB8B8]",
-  },
-  Expiring: {
-    bg: "bg-[#FFF3CD]",
-    text: "text-[#856404]",
-    dot: "bg-[#FFC107]",
-    border: "border-[#FFEEBA]",
-  },
+  Active: { type: "success", label: "Aktif" },
+  aktif: { type: "success", label: "Aktif" },
+  Expired: { type: "danger", label: "Tidak Aktif" },
+  "tidak aktif": { type: "danger", label: "Tidak Aktif" },
+  Expiring: { type: "warning", label: "Segera Berakhir" },
 };
 
-// ── Background avatar inisial ──
-const getAvatarStyle = (char) => {
+const getAvatarGradient = (char) => {
   const code = char ? char.toUpperCase().charCodeAt(0) : 65;
-  if (code % 3 === 0) return "bg-[#280B0B] text-[#FFD6D6]";
-  if (code % 3 === 1) return "bg-[#6B00D7] text-[#F3E8FF]";
-  return "bg-[#691200] text-[#FFEBE5]";
+  if (code % 4 === 0) return "from-[#8C1007] to-[#D84040]";
+  if (code % 4 === 1) return "from-[#1D1616] to-[#3E0703]";
+  if (code % 4 === 2) return "from-[#6B00D7] to-[#9B59B6]";
+  return "from-[#0D4F4F] to-[#1A8A8A]";
 };
 
 export default function MemberDetail() {
@@ -77,7 +44,7 @@ export default function MemberDetail() {
           <p className="text-rose-700 text-sm font-medium">{error}</p>
           <button
             onClick={() => navigate("/members")}
-            className="mt-4 flex items-center gap-2 bg-gray-900 text-white px-4 py-1.5 rounded-xl text-xs font-semibold mx-auto hover:bg-gray-800 transition-all"
+            className="mt-4 flex items-center gap-2 bg-[#8C1007] text-white px-4 py-2 rounded-xl text-xs font-semibold mx-auto hover:bg-[#a01a0a] transition-all"
           >
             <ArrowLeft size={14} /> Kembali ke Members
           </button>
@@ -88,182 +55,135 @@ export default function MemberDetail() {
   if (!member)
     return (
       <div className="p-6 flex items-center justify-center min-h-[40vh] w-full">
-        <div className="w-6 h-6 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#8C1007] border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
-  const pc = planConfig[member.plan] || planConfig.Bronze;
-  const sc = statusConfig[member.status] || statusConfig.Active;
-  const avatarClass = getAvatarStyle(member.name?.charAt(0));
-  const visitPct = Math.min((member.visits / 100) * 100, 100);
+  const nama = member.nama_lengkap || member.name;
+  const statusCfg = statusConfig[member.status_member] || statusConfig[member.status] || statusConfig.Active;
+  const gradient = getAvatarGradient(nama?.charAt(0));
+
+  // Info items untuk grid
+  const personalInfo = [
+    { label: "ID Member", value: member.id_member || member.code, mono: true },
+    { label: "Nama Lengkap", value: nama },
+    { label: "Jenis Kelamin", value: member.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan" },
+    { label: "Tanggal Lahir", value: member.tgl_lahir || "-" },
+    { label: "No. Handphone", value: member.no_hp || member.phone },
+    { label: "Alamat", value: member.alamat || "-", wide: true },
+  ];
+
+  const membershipInfo = [
+    { label: "Tanggal Gabung", value: member.tgl_gabung || member.joined },
+    { label: "Tanggal Berakhir", value: member.tgl_berakhir || member.expiry },
+    { label: "Status Member", value: member.status_member || member.status, badge: true },
+    { label: "Pin Akses", value: member.pin_akses || "-", mono: true, highlight: true },
+  ];
+
+  const emergencyInfo = [
+    { label: "Catatan Medis", value: member.catatan_medis || "Tidak ada" },
+    { label: "Kontak Darurat", value: member.kontak_darurat || "-", mono: true },
+    { label: "Nama Kontak Darurat", value: member.nama_kontak_darurat || "-" },
+  ];
 
   return (
-    // PERBAIKAN: Menggunakan w-full agar mengisi seluruh ruang container layout utama dasbor
-    <div className="space-y-6 w-full pb-8">
-      {/* ── Page Header ── */}
-      <PageHeader
-        title="Detail Anggota"
-        breadcrumb={["Manajemen", "Members", member.name]}
-      >
+    <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen w-full">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-black text-[#1D1616]">Detail Anggota</h1>
+          <p className="text-[12px] text-[#9e7a6e] mt-0.5">
+            Informasi lengkap member {member.id_member || member.code}
+          </p>
+        </div>
         <button
           onClick={() => navigate("/members")}
-          className="flex items-center gap-1.5 bg-white border border-gray-200 text-gray-600 font-medium px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-all text-xs shadow-sm"
+          className="inline-flex items-center gap-2 font-semibold bg-white hover:bg-[#f8f3ee] text-[#5a3030] border border-[#e8dfd6] px-4 py-2.5 text-sm rounded-xl transition-all"
         >
-          <ArrowLeft size={13} />
+          <ArrowLeft size={15} />
           Kembali
         </button>
-      </PageHeader>
+      </div>
 
-      {/* ── UTAMA: KARTU INDIVIDU (Memenuhi Lebar Layout Dasbor) ── */}
-      <div className="bg-white border border-[#EBEBEB] rounded-[28px] p-8 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] space-y-6 relative overflow-hidden w-full">
-        {/* Row 1: Avatar Profil, Nama, & Status Badge */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div
-              className={`w-[52px] h-[52px] rounded-2xl flex items-center justify-center text-[15px] font-bold tracking-wider shrink-0 ${avatarClass}`}
-            >
-              {member.name
-                ? member.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()
-                : "MB"}
-            </div>
-
-            <div className="space-y-0.5">
-              <h2 className="text-[17px] font-bold text-[#111111] tracking-tight">
-                {member.name}
-              </h2>
-              <p className="text-[11px] text-[#A0A0A0] font-semibold font-mono tracking-wide">
-                {member.code}
-              </p>
-            </div>
-          </div>
-
-          <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border ${sc.bg} ${sc.text} ${sc.border}`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-            {member.status}
-          </span>
+      {/* ── Hero Card ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+        {/* Top accent bar */}
+        <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-50" />
         </div>
-
-        {/* Row 2: Informasi Detail Kontak */}
-        <div className="space-y-2 text-[#7F7F7F] text-xs font-medium pt-1">
-          <div className="flex items-center gap-2">
-            <Mail size={13} className="text-[#A3A3A3]" />
-            <span>{member.email}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] leading-none">🏋️</span>
-            {/* PERBAIKAN: Menghindari teks Coach ganda jika data dari database sudah mengandung kata Coach */}
-            <span>
-              {member.trainer
-                ? member.trainer.toLowerCase().includes("coach")
-                  ? member.trainer
-                  : `Coach ${member.trainer}`
-                : "Tanpa Coach"}
-            </span>
-          </div>
-        </div>
-
-        {/* Pembatas Garis Tipis Halus */}
-        <div className="h-[1px] bg-[#F5F5F5] w-full" />
-
-        {/* Row 3: Jenis Paket & Harga Nominal Finansial */}
-        <div className="flex items-end justify-between gap-4 pt-1">
-          <span
-            className={`px-[14px] py-1.5 rounded-xl text-[11px] font-bold border tracking-wide min-w-[65px] text-center ${pc.bg} ${pc.text} ${pc.border}`}
-          >
-            {member.plan}
-          </span>
-
-          <div className="text-right space-y-0.5">
-            <p className="text-[16px] font-extrabold text-[#111111] tracking-tight">
-              Rp {member.price?.toLocaleString("id-ID")}
-            </p>
-            <p className="text-[11px] text-[#A0A0A0] font-medium">
-              {member.visits}x kunjungan
-            </p>
+        
+        <div className="px-8 pb-6 -mt-10 relative">
+          <div className="flex items-end gap-5">
+            {/* Avatar */}
+            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-lg`}>
+              {nama ? nama.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "MB"}
+            </div>
+            
+            <div className="flex-1 pt-12">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-[#1D1616]">{nama}</h2>
+                  <p className="text-sm text-[#9e7a6e] font-mono mt-0.5">{member.id_member || member.code}</p>
+                </div>
+                <Badge type={statusCfg.type} dot>{statusCfg.label}</Badge>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── KARTU SEKUNDER: DETAIL WAKTU & METRIK AKTIVITAS PROGRESS ── */}
-      <div className="bg-white border border-[#EBEBEB] rounded-[24px] p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        {/* Sektor Logistik Masa Aktif */}
-        <div className="space-y-4">
-          <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-            Logistik Masa Aktif
-          </h3>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                <Calendar size={13} className="text-gray-400" />
-              </div>
-              <div className="text-xs">
-                <p className="text-gray-400 text-[9px] uppercase font-bold tracking-wide">
-                  Mulai Terdaftar
-                </p>
-                <p className="font-semibold text-gray-700 mt-0.5">
-                  {member.joined}
-                </p>
-              </div>
+      {/* ── Data Pribadi ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
+          Data Pribadi
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+          {personalInfo.map((item) => (
+            <div key={item.label} className={item.wide ? "md:col-span-2" : ""}>
+              <p className="text-[10px] text-[#9e7a6e] uppercase font-bold tracking-wider mb-1">{item.label}</p>
+              <p className={`text-sm text-[#1D1616] font-medium ${item.mono ? "font-mono" : ""}`}>
+                {item.value}
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                <Clock size={13} className="text-gray-400" />
-              </div>
-              <div className="text-xs">
-                <p className="text-gray-400 text-[9px] uppercase font-bold tracking-wide">
-                  Habis Tempo
-                </p>
-                <p className="font-semibold text-gray-700 mt-0.5">
-                  {member.expiry}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                <Phone size={13} className="text-gray-400" />
-              </div>
-              <div className="text-xs">
-                <p className="text-gray-400 text-[9px] uppercase font-bold tracking-wide">
-                  Kontak Telepon
-                </p>
-                <p className="font-semibold text-gray-700 mt-0.5">
-                  {member.phone}
-                </p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
+      </div>
 
-        {/* Sektor Progress Bar Kuota Kunjungan */}
-        <div className="flex flex-col justify-between border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-          <div className="space-y-1">
-            <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-              Metrik Aktivitas
-            </h3>
-            <p className="text-xs text-gray-500 font-medium">
-              Akumulasi aktivitas check-in kedatangan di gerbang gym.
-            </p>
-          </div>
+      {/* ── Keanggotaan ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
+          Informasi Keanggotaan
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+          {membershipInfo.map((item) => (
+            <div key={item.label}>
+              <p className="text-[10px] text-[#9e7a6e] uppercase font-bold tracking-wider mb-1">{item.label}</p>
+              {item.badge ? (
+                <Badge type={statusCfg.type} dot>{item.value}</Badge>
+              ) : (
+                <p className={`text-sm font-medium ${item.highlight ? "text-[#8C1007] text-lg font-bold font-mono" : "text-[#1D1616]"} ${item.mono && !item.highlight ? "font-mono" : ""}`}>
+                  {item.value}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="space-y-2 mt-6 md:mt-0">
-            <div className="flex justify-between items-end text-xs font-bold">
-              <span className="text-gray-800">{member.visits} / 100 Sesi</span>
-              <span className="text-gray-400">{visitPct.toFixed(0)}%</span>
+      {/* ── Medis & Darurat ── */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
+          Catatan Medis & Kontak Darurat
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">
+          {emergencyInfo.map((item) => (
+            <div key={item.label}>
+              <p className="text-[10px] text-[#9e7a6e] uppercase font-bold tracking-wider mb-1">{item.label}</p>
+              <p className={`text-sm text-[#1D1616] font-medium ${item.mono ? "font-mono" : ""}`}>
+                {item.value}
+              </p>
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gray-800 rounded-full transition-all duration-500"
-                style={{ width: `${visitPct}%` }}
-              />
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

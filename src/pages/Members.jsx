@@ -66,6 +66,9 @@ const Members = () => {
   const [members, setMembers] = useState(membersData);
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterGender, setFilterGender] = useState("all");
+  const [filterPlan, setFilterPlan] = useState("all");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -74,15 +77,18 @@ const Members = () => {
     trainer: "Coach Budi",
   });
 
-  const filtered = members.filter(
-    (m) =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.code.toLowerCase().includes(search.toLowerCase()) ||
-      m.plan.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = members.filter((m) => {
+    const nama = (m.nama_lengkap || m.name || "").toLowerCase();
+    const kode = (m.id_member || m.code || "").toLowerCase();
+    const matchSearch = nama.includes(search.toLowerCase()) || kode.includes(search.toLowerCase());
+    const matchStatus = filterStatus === "all" || (m.status_member || m.status || "").toLowerCase() === filterStatus;
+    const matchGender = filterGender === "all" || m.jenis_kelamin === filterGender;
+    const matchPlan = filterPlan === "all" || (m.plan || "").toLowerCase() === filterPlan;
+    return matchSearch && matchStatus && matchGender && matchPlan;
+  });
 
-  const totalActive = members.filter((m) => m.status === "Active").length;
-  const totalExpiring = members.filter((m) => m.status === "Expiring").length;
+  const totalActive = members.filter((m) => (m.status_member || m.status) === "aktif" || m.status === "Active").length;
+  const totalExpired = members.filter((m) => (m.status_member || m.status) === "tidak aktif" || m.status === "Expired").length;
   const totalRevenue = members.reduce((s, m) => s + m.price, 0);
 
   const handleChange = (e) =>
@@ -151,8 +157,8 @@ const Members = () => {
         />
         <StatCard
           icon={TrendingUp}
-          label="Akan Expired"
-          value={totalExpiring}
+          label="Tidak Aktif"
+          value={totalExpired}
           change="2.1%"
           trend="down"
           sub="dari bulan lalu"
@@ -173,19 +179,61 @@ const Members = () => {
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
         {/* Header tabel */}
-        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-[#1D1616]">Daftar Member</p>
-            <p className="text-xs text-[#9e7a6e]">
-              {filtered.length} total member terdaftar
-            </p>
+        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-[#1D1616]">Daftar Member</p>
+              <p className="text-xs text-[#9e7a6e]">
+                {filtered.length} dari {members.length} member
+              </p>
+            </div>
+            <SearchBar
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Cari nama / ID..."
+              className="w-52"
+            />
           </div>
-          <SearchBar
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari member..."
-            className="w-48"
-          />
+          {/* Filter Row */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
+              <option value="all">Semua Status</option>
+              <option value="aktif">Aktif</option>
+              <option value="tidak aktif">Tidak Aktif</option>
+            </select>
+            <select
+              value={filterGender}
+              onChange={(e) => setFilterGender(e.target.value)}
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
+              <option value="all">Semua Gender</option>
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+            <select
+              value={filterPlan}
+              onChange={(e) => setFilterPlan(e.target.value)}
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
+              <option value="all">Semua Plan</option>
+              <option value="gold">Gold</option>
+              <option value="silver">Silver</option>
+              <option value="bronze">Bronze</option>
+            </select>
+            {(filterStatus !== "all" || filterGender !== "all" || filterPlan !== "all") && (
+              <button
+                onClick={() => { setFilterStatus("all"); setFilterGender("all"); setFilterPlan("all"); }}
+                className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold hover:bg-red-100 transition-colors"
+              >
+                Reset Filter
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Table */}
@@ -193,20 +241,19 @@ const Members = () => {
           <Table
             headers={[
               "#",
-              "Nama Member",
-              "Kode",
-              "Plan",
-              "Trainer",
-              "Harga/Bulan",
-              "Kunjungan",
+              "ID Member",
+              "Nama Lengkap",
+              "JK",
+              "No HP",
+              "Tgl Gabung",
+              "Tgl Berakhir",
               "Status",
+              "Pin Akses",
             ]}
           >
             {filtered.length === 0
               ? null
               : filtered.map((item, idx) => {
-                  const pc = planConfig[item.plan] || planConfig.Bronze;
-                  const sc = statusConfig[item.status] || statusConfig.Active;
                   return (
                     <tr
                       key={item.id}
@@ -216,15 +263,22 @@ const Members = () => {
                         {idx + 1}
                       </td>
 
+                      <td className="px-6 py-3.5 font-mono text-xs text-[#9e7a6e] font-semibold">
+                        {item.id_member || item.code}
+                      </td>
+
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <Avatar name={item.name} size="sm" />
+                          <Avatar
+                            name={item.nama_lengkap || item.name}
+                            size="sm"
+                          />
                           <div>
                             <Link
                               to={`/members/${item.id}`}
                               className="font-semibold text-[#8C1007] hover:text-[#a01a0a] hover:underline transition-colors text-sm"
                             >
-                              {item.name}
+                              {item.nama_lengkap || item.name}
                             </Link>
                             <p className="text-[10px] text-[#9e7a6e]">
                               {item.email}
@@ -233,44 +287,42 @@ const Members = () => {
                         </div>
                       </td>
 
-                      <td className="px-6 py-3.5 font-mono text-xs text-[#9e7a6e] font-semibold">
-                        {item.code}
-                      </td>
-
-                      <td className="px-6 py-3.5">
-                        <Badge type={item.plan.toLowerCase()} dot>
-                          {item.plan}
+                      <td className="px-6 py-3.5 text-xs text-[#5a3030] text-center">
+                        <Badge
+                          type={item.jenis_kelamin === "L" ? "info" : "warning"}
+                        >
+                          {item.jenis_kelamin === "L" ? "L" : "P"}
                         </Badge>
                       </td>
 
                       <td className="px-6 py-3.5 text-xs text-[#5a3030]">
-                        {item.trainer}
+                        {item.no_hp || item.phone}
                       </td>
 
-                      <td className="px-6 py-3.5 text-sm font-semibold text-[#1D1616]">
-                        Rp {item.price.toLocaleString("id-ID")}
+                      <td className="px-6 py-3.5 text-xs text-[#5a3030]">
+                        {item.tgl_gabung || item.joined}
                       </td>
 
-                      <td className="px-6 py-3.5">
-                        <span className="text-sm font-black text-[#8C1007]">
-                          {item.visits}
-                        </span>
-                        <span className="text-[10px] text-[#9e7a6e]">x</span>
+                      <td className="px-6 py-3.5 text-xs text-[#5a3030]">
+                        {item.tgl_berakhir || item.expiry}
                       </td>
 
                       <td className="px-6 py-3.5">
                         <Badge
                           type={
+                            (item.status_member || item.status) === "aktif" ||
                             item.status === "Active"
                               ? "success"
-                              : item.status === "Expiring"
-                                ? "warning"
-                                : "danger"
+                              : "danger"
                           }
                           dot
                         >
-                          {item.status}
+                          {item.status_member || item.status}
                         </Badge>
+                      </td>
+
+                      <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007] font-bold">
+                        {item.pin_akses || "-"}
                       </td>
                     </tr>
                   );
