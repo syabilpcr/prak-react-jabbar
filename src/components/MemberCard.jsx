@@ -1,12 +1,6 @@
 import Badge from "./Badge";
 import Avatar from "./Avatar";
 
-const planMap = {
-  Gold: "gold",
-  Silver: "silver",
-  Bronze: "bronze",
-};
-
 const statusMap = {
   Active: "success",
   Expired: "danger",
@@ -16,7 +10,6 @@ const statusMap = {
 export default function MemberCard({
   name,
   code,
-  plan,
   status,
   email,
   trainer,
@@ -46,8 +39,7 @@ export default function MemberCard({
         <p>🏋️ {trainer}</p>
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-[#f5f0eb]">
-        <Badge type={planMap[plan] || "secondary"}>{plan}</Badge>
-        <div className="text-right">
+        <div className="text-left">
           <p className="text-[11px] font-bold text-[#1D1616]">
             Rp {price?.toLocaleString("id-ID")}
           </p>

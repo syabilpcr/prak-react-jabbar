@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, LogIn, Dumbbell } from "lucide-react";
-import Alert from "../../components/Alert";
 import Button from "../../components/Button";
+
+// UI Components dari folder ui
+import { Alert, AlertTitle, AlertDescription } from "../../components/ui/alert";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -80,15 +82,15 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="mb-5">
-              <Alert type="danger" message={error} />
-            </div>
+            <Alert variant="destructive" className="mb-5">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           {loading && (
-            <div className="mb-5">
-              <Alert type="info" message="Memproses..." />
-            </div>
+            <Alert variant="default" className="mb-5">
+              <AlertDescription>Memproses...</AlertDescription>
+            </Alert>
           )}
 
           <form onSubmit={handleSubmit}>

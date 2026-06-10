@@ -11,8 +11,10 @@ import {
   ArrowLeft,
   CheckCircle,
 } from "lucide-react";
-import Alert from "../../components/Alert";
 import Button from "../../components/Button";
+
+// UI Components dari folder ui
+import { Alert, AlertTitle, AlertDescription } from "../../components/ui/alert";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -160,9 +162,9 @@ export default function Register() {
               </div>
 
               {error && (
-                <div className="mb-4">
-                  <Alert type="danger" message={error} />
-                </div>
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
 
               <form onSubmit={handleSubmitRegistration}>
@@ -497,9 +499,9 @@ function OTPVerification({ phoneNumber, userData, onSuccess, onBack }) {
       </div>
 
       {error && (
-        <div className="mb-4">
-          <Alert type="danger" message={error} />
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <div className="mb-6">

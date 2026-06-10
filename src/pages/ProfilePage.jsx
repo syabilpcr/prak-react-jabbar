@@ -15,10 +15,12 @@ import Avatar from "../components/Avatar";
 import Card from "../components/Card";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
-import Alert from "../components/Alert";
 import SectionHeader from "../components/SectionHeader";
 import StatCard from "../components/StatCard";
 import Modal from "../components/Modal";
+
+// UI Components dari folder ui
+import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);

@@ -47,6 +47,8 @@ const Attendance = () => {
   const [scannedMember, setScannedMember] = useState(null);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Load data dari JSON saat komponen mount
   useEffect(() => {
@@ -122,6 +124,30 @@ const Attendance = () => {
     const matchStatus = filterStatus === "all" || a.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (e) => {
+    setFilterStatus(e.target.value);
+    setCurrentPage(1);
+  };
 
   const activeCount = attendance.filter((a) => a.status === "Aktif").length;
   const completedCount = attendance.filter(
@@ -235,7 +261,7 @@ const Attendance = () => {
             </div>
             <SearchBar
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Cari absensi..."
               className="w-52"
             />
@@ -244,7 +270,7 @@ const Attendance = () => {
             <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={handleFilterChange}
               className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
             >
               <option value="all">Semua Status</option>
@@ -273,8 +299,8 @@ const Attendance = () => {
               "Aksi",
             ]}
           >
-            {filtered.length > 0
-              ? filtered.map((record) => {
+            {currentItems.length > 0
+              ? currentItems.map((record, idx) => {
                   const StatusIcon = statusConfig[record.status]?.icon || Clock;
                   const statusStyle =
                     statusConfig[record.status] || statusConfig.Absen;
@@ -344,12 +370,67 @@ const Attendance = () => {
                 })
               : null}
           </Table>
-          {filtered.length === 0 && (
+          {currentItems.length === 0 && (
             <EmptyState
               icon="🔍"
               title="Tidak ada data absensi ditemukan"
               message="Coba dengan kata kunci lain atau refresh halaman"
             />
+          )}
+
+          {/* Pagination */}
+          {filtered.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+              <p className="text-xs text-[#9e7a6e]">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filtered.length)} of {filtered.length} results
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  ‹
+                </button>
+                
+                {[...Array(totalPages)].map((_, index) => {
+                  const pageNumber = index + 1;
+                  if (
+                    pageNumber === 1 ||
+                    pageNumber === totalPages ||
+                    (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => paginate(pageNumber)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                          currentPage === pageNumber
+                            ? "bg-[#0d6efd] text-white"
+                            : "border border-gray-200 text-[#5a3030] hover:bg-gray-50"
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  } else if (
+                    pageNumber === currentPage - 2 ||
+                    pageNumber === currentPage + 2
+                  ) {
+                    return <span key={pageNumber} className="text-xs text-gray-400">...</span>;
+                  }
+                  return null;
+                })}
+
+                <button
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

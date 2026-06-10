@@ -19,6 +19,9 @@ import GoogleMap from "../components/GoogleMap";
 import AreaUsage from "../components/AreaUsage";
 import TodayClasses from "../components/TodayClasses";
 
+// ── UI Components dari folder ui ──────────────────────────────
+import { Separator } from "../components/ui/separator";
+
 // ── Data ──────────────────────────────────────────────────────
 import { monthlyData } from "../data/dashboardData";
 
@@ -88,6 +91,13 @@ const Dashboard = () => {
         ))}
       </div>
 
+      {/* Separator dengan label (UI Component dari folder ui) */}
+      <div className="flex items-center gap-3 my-4">
+        <Separator className="flex-1 bg-gray-300" />
+        <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Grafik & Analitik</span>
+        <Separator className="flex-1 bg-gray-300" />
+      </div>
+
       <div className="flex gap-2">
         {["members", "revenue"].map((tab) => (
           <button
@@ -100,6 +110,9 @@ const Dashboard = () => {
           </button>
         ))}
       </div>
+
+      {/* Separator antara tab dan chart (UI Component dari folder ui) */}
+      <Separator className="bg-gray-300" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 space-y-5">
@@ -118,6 +131,13 @@ const Dashboard = () => {
           <GoogleMap />
         </div>
         <AreaUsage />
+      </div>
+
+      {/* Separator dengan label (UI Component dari folder ui) */}
+      <div className="flex items-center gap-3 my-4">
+        <Separator className="flex-1 bg-gray-300" />
+        <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Statistik Live</span>
+        <Separator className="flex-1 bg-gray-300" />
       </div>
 
       <LiveStats />

@@ -23,7 +23,6 @@ import SelectField from "../components/SelectField";
 import SearchBar from "../components/SearchBar";
 // 11-13: Feedback Components
 import Modal from "../components/Modal";
-import Alert from "../components/Alert";
 import EmptyState from "../components/EmptyState";
 // 14: Data Display Component
 import ProgressBar from "../components/ProgressBar";
@@ -41,26 +40,23 @@ import {
 } from "lucide-react";
 
 // ── Demo data ─────────────────────────────────────────────────
-const demoHeaders = ["No", "Nama Member", "Plan", "Status", "Harga"];
+const demoHeaders = ["No", "Nama Member", "Status", "Harga"];
 const demoMembers = [
-  { id: 1, name: "Ahmad Fauzi", plan: "Gold", status: "Active", price: 500000 },
+  { id: 1, name: "Ahmad Fauzi", status: "Active", price: 300000 },
   {
     id: 2,
     name: "Rina Sari",
-    plan: "Silver",
     status: "Expiring",
     price: 300000,
   },
   {
     id: 3,
     name: "Budi Santoso",
-    plan: "Bronze",
     status: "Expired",
-    price: 150000,
+    price: 300000,
   },
 ];
 
-const planBadgeType = { Gold: "gold", Silver: "silver", Bronze: "bronze" };
 const statusBadgeType = {
   Active: "success",
   Expiring: "warning",
@@ -87,7 +83,7 @@ const Components = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [alertShown, setAlertShown] = useState(true);
   const [inputVal, setInputVal] = useState("");
-  const [selectVal, setSelectVal] = useState("Gold");
+  const [selectVal, setSelectVal] = useState("Trainer A");
   const [searchVal, setSearchVal] = useState("");
 
   return (
@@ -147,15 +143,6 @@ const Components = () => {
           </Badge>
           <Badge type="warning" dot>
             Expiring
-          </Badge>
-          <Badge type="gold" dot>
-            Gold
-          </Badge>
-          <Badge type="silver" dot>
-            Silver
-          </Badge>
-          <Badge type="bronze" dot>
-            Bronze
           </Badge>
           <Badge type="info">Info</Badge>
           <Badge type="secondary">Secondary</Badge>
@@ -308,17 +295,15 @@ const Components = () => {
           <MemberCard
             name="Ahmad Fauzi"
             code="ZG-001"
-            plan="Gold"
             status="Active"
             email="ahmad@mail.com"
             trainer="Coach Budi"
             visits={24}
-            price={500000}
+            price={300000}
           />
           <MemberCard
             name="Rina Sari"
             code="ZG-002"
-            plan="Silver"
             status="Expiring"
             email="rina@mail.com"
             trainer="Coach Rina"
@@ -328,12 +313,11 @@ const Components = () => {
           <MemberCard
             name="Budi Santoso"
             code="ZG-003"
-            plan="Bronze"
             status="Expired"
             email="budi@mail.com"
             trainer="Coach Deni"
             visits={5}
-            price={150000}
+            price={300000}
           />
         </div>
       </Section>
@@ -462,10 +446,10 @@ const Components = () => {
               required
             />
             <SelectField
-              label="Plan"
-              value="Gold"
+              label="Trainer"
+              value="Trainer A"
               onChange={() => {}}
-              options={["Gold", "Silver", "Bronze"]}
+              options={["Trainer A", "Trainer B", "Trainer C"]}
             />
             <Alert
               type="info"

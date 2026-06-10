@@ -11,7 +11,7 @@ const QRCodeModal = ({ isOpen, onClose, member }) => {
           <div>
             <h3 className="text-lg font-bold text-[#1D1616]">Kode Akses QR</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              {member?.name || "Anggota"} • {member?.membership || "Gold"}
+              {member?.name || "Anggota"} • Member Zeus Gym
             </p>
           </div>
           <button

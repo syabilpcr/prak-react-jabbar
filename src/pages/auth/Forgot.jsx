@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, ArrowLeft, Send, Dumbbell } from "lucide-react";
-import Alert from "../../components/Alert";
 import Button from "../../components/Button";
+
+// UI Components dari folder ui
+import { Alert, AlertTitle, AlertDescription } from "../../components/ui/alert";
 
 export default function Forgot() {
   const [email, setEmail] = useState("");
@@ -65,9 +67,9 @@ export default function Forgot() {
           </div>
 
           {error && (
-            <div className="mb-5">
-              <Alert type="danger" message={error} />
-            </div>
+            <Alert variant="destructive" className="mb-5">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
           )}
 
           {sent ? (

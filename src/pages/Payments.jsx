@@ -25,10 +25,12 @@ import SearchBar from "../components/SearchBar";
 import Table from "../components/Table";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
-import InputField from "../components/InputField";
 import SelectField from "../components/SelectField";
 import EmptyState from "../components/EmptyState";
 import Avatar from "../components/Avatar";
+
+// ── UI Components dari folder ui ──────────────────────────────
+import { Input } from "../components/ui/input";
 
 const methodConfig = {
   QRIS: {
@@ -100,6 +102,8 @@ const Payments = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterMethod, setFilterMethod] = useState("all");
   const [filterSub, setFilterSub] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [form, setForm] = useState({
     memberName: "",
     amount: "",
@@ -164,6 +168,30 @@ const Payments = () => {
     const matchSub = filterSub === "all" || p.subscriptionType === filterSub;
     return matchSearch && matchStatus && matchMethod && matchSub;
   });
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+  const prevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearch(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (setter) => (e) => {
+    setter(e.target.value);
+    setCurrentPage(1);
+  };
 
   const totalRevenue = payments
     .filter((p) => p.status === "Selesai")
@@ -253,7 +281,7 @@ const Payments = () => {
             </div>
             <SearchBar
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={handleSearchChange}
               placeholder="Cari pembayaran..."
               className="w-52"
             />
@@ -262,7 +290,7 @@ const Payments = () => {
             <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={handleFilterChange(setFilterStatus)}
               className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
             >
               <option value="all">Semua Status</option>
@@ -272,7 +300,7 @@ const Payments = () => {
             </select>
             <select
               value={filterMethod}
-              onChange={(e) => setFilterMethod(e.target.value)}
+              onChange={handleFilterChange(setFilterMethod)}
               className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
             >
               <option value="all">Semua Metode</option>
@@ -283,7 +311,7 @@ const Payments = () => {
             </select>
             <select
               value={filterSub}
-              onChange={(e) => setFilterSub(e.target.value)}
+              onChange={handleFilterChange(setFilterSub)}
               className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
             >
               <option value="all">Semua Tipe</option>
@@ -293,7 +321,12 @@ const Payments = () => {
             </select>
             {(filterStatus !== "all" || filterMethod !== "all" || filterSub !== "all") && (
               <button
-                onClick={() => { setFilterStatus("all"); setFilterMethod("all"); setFilterSub("all"); }}
+                onClick={() => { 
+                  setFilterStatus("all"); 
+                  setFilterMethod("all"); 
+                  setFilterSub("all"); 
+                  setCurrentPage(1);
+                }}
                 className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold hover:bg-red-100 transition-colors"
               >
                 Reset
@@ -307,9 +340,9 @@ const Payments = () => {
           <Table
             headers={["ID", "Anggota", "Tipe Langganan", "Jumlah", "Metode", "Status", "Tanggal"]}
           >
-            {filtered.length === 0
+            {currentItems.length === 0
               ? null
-              : filtered.map((payment) => {
+              : currentItems.map((payment) => {
                   const MethodIcon = methodConfig[payment.method]?.icon || CreditCard;
                   const methodStyle = methodConfig[payment.method] || methodConfig.QRIS;
                   const SubIcon = subscriptionConfig[payment.subscriptionType]?.icon || Calendar;
@@ -364,12 +397,67 @@ const Payments = () => {
           </Table>
         </div>
 
-        {filtered.length === 0 && (
+        {currentItems.length === 0 && (
           <EmptyState
             icon="🔍"
             title="Tidak ada transaksi ditemukan"
             message="Coba dengan kata kunci lain atau tambah transaksi baru"
           />
+        )}
+
+        {/* Pagination */}
+        {filtered.length > 0 && (
+          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-xs text-[#9e7a6e]">
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filtered.length)} of {filtered.length} results
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={prevPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ‹
+              </button>
+              
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNumber = index + 1;
+                if (
+                  pageNumber === 1 ||
+                  pageNumber === totalPages ||
+                  (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                ) {
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => paginate(pageNumber)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                        currentPage === pageNumber
+                          ? "bg-[#0d6efd] text-white"
+                          : "border border-gray-200 text-[#5a3030] hover:bg-gray-50"
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                } else if (
+                  pageNumber === currentPage - 2 ||
+                  pageNumber === currentPage + 2
+                ) {
+                  return <span key={pageNumber} className="text-xs text-gray-400">...</span>;
+                }
+                return null;
+              })}
+
+              <button
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ›
+              </button>
+            </div>
+          </div>
         )}
       </div>
 
@@ -391,14 +479,20 @@ const Payments = () => {
         }
       >
         <div className="space-y-4">
-          <InputField
-            label="Nama Anggota"
-            name="memberName"
-            value={form.memberName}
-            onChange={handleChange}
-            placeholder="Masukkan nama anggota"
-            required
-          />
+          {/* Input Component dari folder ui - komponen UI Shadcn */}
+          <div>
+            <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
+              Nama Anggota <span className="text-[#8C1007] ml-1">*</span>
+            </label>
+            <Input
+              name="memberName"
+              value={form.memberName}
+              onChange={handleChange}
+              placeholder="Masukkan nama anggota"
+              required
+              className="bg-[#f8f3ee] border-[#e8dfd6]"
+            />
+          </div>
           <SelectField
             label="Tipe Langganan"
             name="subscriptionType"
@@ -410,15 +504,20 @@ const Payments = () => {
               { value: "Tahunan", label: "Tahunan (Rp 1.200.000 - 2.500.000)" },
             ]}
           />
-          <InputField
-            label="Jumlah (Rp)"
-            name="amount"
-            type="number"
-            value={form.amount}
-            onChange={handleChange}
-            placeholder="0"
-            required
-          />
+          <div>
+            <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
+              Jumlah (Rp) <span className="text-[#8C1007] ml-1">*</span>
+            </label>
+            <Input
+              name="amount"
+              type="number"
+              value={form.amount}
+              onChange={handleChange}
+              placeholder="0"
+              required
+              className="bg-[#f8f3ee] border-[#e8dfd6]"
+            />
+          </div>
           <SelectField
             label="Metode Pembayaran"
             name="method"
