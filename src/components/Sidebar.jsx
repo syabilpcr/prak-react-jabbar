@@ -14,6 +14,7 @@ import {
   Settings,
   HelpCircle,
   LogOut,
+  Layers,
 } from "lucide-react";
 
 // ── Definisi menu ─────────────────────────────────────────────
@@ -22,7 +23,7 @@ const menuGroups = [
     label: "Menu",
     items: [
       { label: "Beranda", icon: LayoutDashboard, path: "/" },
-      { label: "Anggota", icon: Users, path: "/members", badge: 30 },
+      { label: "Anggota", icon: Users, path: "/members", badge: 1000 },
       { label: "Pembayaran", icon: CreditCard, path: "/payments" },
       { label: "Absensi", icon: QrCode, path: "/attendance" },
       { label: "Laporan", icon: FileText, path: "/reports" },
@@ -40,6 +41,7 @@ const menuGroups = [
     items: [
       { label: "Profil", icon: User, path: "/profile" },
       { label: "Components", icon: Plug, path: "/components" },
+      { label: "Shadcn UI", icon: Layers, path: "/shadcn-ui" },
     ],
   },
 ];

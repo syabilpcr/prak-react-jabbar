@@ -24,6 +24,9 @@ const MemberDetail = React.lazy(() => import("./pages/MemberDetail"));
 // ── Pertemuan 10: Component Library ──────────────────────────
 const Components = React.lazy(() => import("./pages/Components"));
 
+// ── Pertemuan 11: Shadcn UI ───────────────────────────────────
+const ShadcnUI = React.lazy(() => import("./pages/ShadcnUI"));
+
 // ── Pages — Auth ──────────────────────────────────────────────
 const Login = React.lazy(() => import("./pages/auth/Login"));
 const Register = React.lazy(() => import("./pages/auth/Register"));
@@ -72,6 +75,10 @@ function App() {
               /components → halaman playground semua 15 component
             */}
             <Route path="components" element={<Components />} />
+
+            <Route path="shadcn-ui" element={<ShadcnUI />} />
+
+            
 
             <Route path="*" element={<NotFound />} />
           </Route>
