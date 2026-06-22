@@ -5,6 +5,7 @@ import Loading from "./components/Loading";
 // ── Layouts ───────────────────────────────────────────────────
 const MainLayout = React.lazy(() => import("./layouts/MainLayout"));
 const AuthLayout = React.lazy(() => import("./layouts/AuthLayout"));
+const MemberLayout = React.lazy(() => import("./layouts/MemberLayout"));
 
 // ── Pages — Main ──────────────────────────────────────────────
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
@@ -26,6 +27,15 @@ const Components = React.lazy(() => import("./pages/Components"));
 
 // ── Pertemuan 11: Shadcn UI ───────────────────────────────────
 const ShadcnUI = React.lazy(() => import("./pages/ShadcnUI"));
+
+// ── Manajemen User (CRUD) ─────────────────────────────────────
+const Users = React.lazy(() => import("./pages/Users"));
+
+// ── Halaman Member (role: member) ─────────────────────────────
+const MemberDashboard = React.lazy(() => import("./pages/member/MemberDashboard"));
+const MemberClasses = React.lazy(() => import("./pages/member/MemberClasses"));
+const MemberWorkouts = React.lazy(() => import("./pages/member/MemberWorkouts"));
+const MemberProfile = React.lazy(() => import("./pages/member/MemberProfile"));
 
 // ── Pages — Auth ──────────────────────────────────────────────
 const Login = React.lazy(() => import("./pages/auth/Login"));
@@ -78,9 +88,20 @@ function App() {
 
             <Route path="shadcn-ui" element={<ShadcnUI />} />
 
+            {/* ── Manajemen User (CRUD) ── */}
+            <Route path="users" element={<Users />} />
+
             
 
             <Route path="*" element={<NotFound />} />
+          </Route>
+
+          {/* ── MemberLayout: area khusus user dengan role "member" ── */}
+          <Route element={<MemberLayout />}>
+            <Route path="member" element={<MemberDashboard />} />
+            <Route path="member/classes" element={<MemberClasses />} />
+            <Route path="member/workouts" element={<MemberWorkouts />} />
+            <Route path="member/profile" element={<MemberProfile />} />
           </Route>
 
           {/* ── AuthLayout ── */}

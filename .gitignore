@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (Supabase API key dll — jangan di-commit)
+.env
+.env.local
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

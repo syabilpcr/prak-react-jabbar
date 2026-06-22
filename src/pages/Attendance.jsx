@@ -7,6 +7,8 @@ import {
   QrCode,
   Scan,
   Loader,
+  LogOut,
+  Trash2,
 } from "lucide-react";
 
 // ── Components ────────────────────────────────────────────────
@@ -16,9 +18,12 @@ import Table from "../components/Table";
 import Avatar from "../components/Avatar";
 import StatCard from "../components/StatCard";
 import EmptyState from "../components/EmptyState";
+import Modal from "../components/Modal";
+import SelectField from "../components/SelectField";
+import Button from "../components/Button";
 
-// Import data dari file JSON
-import attendanceData from "../data/attendanceData.js";
+// ── Data absensi & member diambil dari REST API Supabase (schema "zeusgym") ──
+import api from "../lib/api";
 
 const statusConfig = {
   Aktif: {
@@ -40,7 +45,9 @@ const statusConfig = {
 
 const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
+  const [memberMap, setMemberMap] = useState({}); // { id_member: nama_lengkap }
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [scanning, setScanning] = useState(false);
@@ -50,67 +57,187 @@ const Attendance = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  // Load data dari JSON saat komponen mount
+  // ── State modal check-in (pilih member dari dropdown) ──
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [modalError, setModalError] = useState(null);
+
+  // ── Ambil data absensi & member dari Supabase saat komponen mount ──
+  // Supabase membatasi 1000 baris per request, jadi diambil bertahap (paginasi)
+  // memakai header "Range" sampai semua baris terambil.
   useEffect(() => {
-    // Ambil data dari file attendanceData.js
-    const data = Array.isArray(attendanceData)
-      ? attendanceData
-      : attendanceData.attendance || attendanceData.data || [];
-    setAttendance(data);
-    setLoading(false);
+    const fetchAllPaginated = async (path, params = {}) => {
+      let allRows = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const res = await api.get(path, {
+          params,
+          headers: { Range: `${from}-${from + pageSize - 1}` },
+        });
+        allRows = allRows.concat(res.data);
+        if (res.data.length < pageSize) break;
+        from += pageSize;
+      }
+      return allRows;
+    };
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setFetchError(null);
+        const [memberRows, absensiRows] = await Promise.all([
+          fetchAllPaginated("/member", { select: "id_member,nama_lengkap" }),
+          fetchAllPaginated("/absensi"),
+        ]);
+
+        const lookup = {};
+        memberRows.forEach((m) => {
+          lookup[m.id_member] = m.nama_lengkap;
+        });
+        setMemberMap(lookup);
+
+        // Urutkan terbaru dulu (berdasarkan tanggal, lalu jam masuk)
+        absensiRows.sort((a, b) => {
+          const d = new Date(b.tgl_absensi) - new Date(a.tgl_absensi);
+          if (d !== 0) return d;
+          return (b.jam_masuk || "").localeCompare(a.jam_masuk || "");
+        });
+        setAttendance(absensiRows);
+      } catch (err) {
+        console.error("Gagal mengambil data absensi:", err);
+        setFetchError(
+          "Gagal memuat data absensi dari server. Periksa koneksi atau pastikan tabel 'absensi' sudah dibuat.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const handleScanQR = () => {
-    setScanning(true);
-    setTimeout(() => {
-      // Simulasi scan QR - ambil data dari member pertama yang aktif
-      const today = new Date().toISOString().split("T")[0];
-      const existingMember = attendance.find(
-        (a) => a.memberId === "ZEUS-001" && a.date === today,
+  const jamSekarang = () =>
+    new Date().toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  // ── CREATE: Check-in member terpilih ke Supabase ──────────────
+  // Alur: pilih member dari dropdown → kalau sudah ada sesi "Aktif"
+  // hari ini, tolak (harus check-out dulu). Kalau belum, buat record baru.
+  const handleCheckIn = async () => {
+    if (!selectedMemberId) {
+      setModalError("Pilih anggota terlebih dahulu.");
+      return;
+    }
+
+    const namaMember = memberMap[selectedMemberId];
+    const today = new Date().toISOString().split("T")[0];
+
+    // Cegah check-in ganda saat masih ada sesi aktif hari ini
+    const sudahAktif = attendance.find(
+      (a) =>
+        a.id_member === selectedMemberId &&
+        a.tgl_absensi === today &&
+        a.status === "Aktif",
+    );
+    if (sudahAktif) {
+      setModalError(
+        `${namaMember} masih punya sesi aktif hari ini. Lakukan check-out dulu.`,
       );
+      return;
+    }
 
-      const fakeScan = { memberId: "ZEUS-001", memberName: "Alex Johnson" };
-      setScannedMember(fakeScan);
-      setScanning(false);
+    const jam = jamSekarang();
+    const newRecord = {
+      id_absensi: `ATT-${Date.now()}`,
+      id_member: selectedMemberId,
+      tgl_absensi: today,
+      jam_masuk: jam,
+      jam_keluar: "-",
+      status: "Aktif",
+    };
 
-      const existing = attendance.find(
-        (a) =>
-          a.memberId === fakeScan.memberId &&
-          a.date === new Date().toISOString().split("T")[0],
+    try {
+      setSubmitting(true);
+      setModalError(null);
+      const res = await api.post("/absensi", newRecord, {
+        headers: { Prefer: "return=representation" },
+      });
+      const inserted = res.data[0] || newRecord;
+      setAttendance((prev) => [inserted, ...prev]);
+      setScannedMember({ memberId: selectedMemberId, memberName: namaMember });
+      setShowCheckInModal(false);
+      setSelectedMemberId("");
+    } catch (err) {
+      console.error("Gagal check-in:", err);
+      setModalError(
+        err.response?.data?.message ||
+          "Gagal menyimpan absensi. Periksa koneksi atau hak akses (GRANT/RLS).",
       );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-      if (existing && existing.status === "Aktif") {
-        const updated = attendance.map((a) =>
-          a.id === existing.id
-            ? {
-                ...a,
-                checkOut: new Date().toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }),
-                status: "Selesai",
-              }
-            : a,
-        );
-        setAttendance(updated);
-        alert(`Check-out berhasil untuk ${fakeScan.memberName}`);
-      } else if (!existing || existing.status === "Selesai") {
-        const newAttendance = {
-          id: `ATT-${String(attendance.length + 1).padStart(3, "0")}`,
-          memberId: fakeScan.memberId,
-          memberName: fakeScan.memberName,
-          checkIn: new Date().toLocaleTimeString("id-ID", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          checkOut: "-",
-          status: "Aktif",
-          date: new Date().toISOString().split("T")[0],
-        };
-        setAttendance([newAttendance, ...attendance]);
-        alert(`Check-in berhasil untuk ${fakeScan.memberName}`);
-      }
-    }, 1500);
+  // ── UPDATE: Check-out (isi jam keluar + status Selesai) ──────
+  const handleCheckout = async (record) => {
+    const jam = jamSekarang();
+    try {
+      const res = await api.patch(
+        "/absensi",
+        { jam_keluar: jam, status: "Selesai" },
+        {
+          params: { id_absensi: `eq.${record.id_absensi}` },
+          headers: { Prefer: "return=representation" },
+        },
+      );
+      const updated = res.data[0] || {
+        ...record,
+        jam_keluar: jam,
+        status: "Selesai",
+      };
+      setAttendance((prev) =>
+        prev.map((a) => (a.id_absensi === record.id_absensi ? updated : a)),
+      );
+    } catch (err) {
+      console.error("Gagal check-out:", err);
+      setFetchError(
+        err.response?.data?.message ||
+          "Gagal melakukan check-out. Periksa koneksi atau hak akses.",
+      );
+    }
+  };
+
+  // ── DELETE: Hapus record absensi ─────────────────────────────
+  const handleDelete = async (record) => {
+    const namaMember = memberMap[record.id_member] || record.id_member;
+    const ok = window.confirm(
+      `Hapus catatan absensi ${namaMember} (${record.tgl_absensi})? Tindakan ini tidak bisa dibatalkan.`,
+    );
+    if (!ok) return;
+    try {
+      await api.delete("/absensi", {
+        params: { id_absensi: `eq.${record.id_absensi}` },
+      });
+      setAttendance((prev) =>
+        prev.filter((a) => a.id_absensi !== record.id_absensi),
+      );
+    } catch (err) {
+      console.error("Gagal menghapus absensi:", err);
+      setFetchError(
+        err.response?.data?.message ||
+          "Gagal menghapus catatan absensi. Periksa koneksi atau hak akses.",
+      );
+    }
+  };
+
+  const openCheckInModal = () => {
+    setSelectedMemberId("");
+    setModalError(null);
+    setShowCheckInModal(true);
   };
 
   const handleShowQR = (member) => {
@@ -119,8 +246,11 @@ const Attendance = () => {
   };
 
   const filtered = attendance.filter((a) => {
-    const matchSearch = a.memberName?.toLowerCase().includes(search.toLowerCase()) ||
-      a.memberId?.toLowerCase().includes(search.toLowerCase());
+    const namaMember = memberMap[a.id_member] || "";
+    const q = search.toLowerCase();
+    const matchSearch =
+      namaMember.toLowerCase().includes(q) ||
+      (a.id_member || "").toLowerCase().includes(q);
     const matchStatus = filterStatus === "all" || a.status === filterStatus;
     return matchSearch && matchStatus;
   });
@@ -179,15 +309,29 @@ const Attendance = () => {
             Kelola data kehadiran anggota Zeus Gym
           </p>
         </div>
-        <button
-          onClick={handleScanQR}
-          disabled={scanning}
-          className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 bg-[#8C1007] hover:bg-[#a01a0a] text-white shadow-md shadow-[#8C1007]/30 px-4 py-2.5 text-sm rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Scan size={15} />
-          {scanning ? "Memindai..." : "Pindai QR Code"}
-        </button>
+        <Button type="primary" icon={Scan} onClick={openCheckInModal}>
+          Catat Absensi
+        </Button>
       </div>
+
+      {/* Alert error fetch / simpan */}
+      {fetchError && (
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+          <XCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-700">
+              Terjadi Kesalahan
+            </p>
+            <p className="text-xs text-red-600 mt-0.5">{fetchError}</p>
+          </div>
+          <button
+            onClick={() => setFetchError(null)}
+            className="text-xs text-red-600 hover:text-red-800"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Scanned Member Notification */}
       {scannedMember && (
@@ -300,8 +444,7 @@ const Attendance = () => {
             ]}
           >
             {currentItems.length > 0
-              ? currentItems.map((record, idx) => {
-                  const StatusIcon = statusConfig[record.status]?.icon || Clock;
+              ? currentItems.map((record) => {
                   const statusStyle =
                     statusConfig[record.status] || statusConfig.Absen;
                   const statusType =
@@ -310,37 +453,39 @@ const Attendance = () => {
                       : record.status === "Selesai"
                         ? "info"
                         : "danger";
+                  const namaMember =
+                    memberMap[record.id_member] || "Member tidak ditemukan";
                   return (
                     <tr
-                      key={record.id}
+                      key={record.id_absensi}
                       className="hover:bg-[#faf6f4] transition-colors group"
                     >
                       <td className="px-6 py-3.5 font-mono text-xs text-gray-500 font-semibold">
-                        {record.memberId}
+                        {record.id_member}
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <Avatar name={record.memberName || "?"} size="sm" />
+                          <Avatar name={namaMember} size="sm" />
                           <span className="font-semibold text-[#1D1616] text-sm">
-                            {record.memberName}
+                            {namaMember}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-3.5">
-                        {record.checkIn !== "-" ? (
+                        {record.jam_masuk && record.jam_masuk !== "-" ? (
                           <Badge type="success">
                             <Clock size={10} className="mr-1" />
-                            {record.checkIn}
+                            {record.jam_masuk}
                           </Badge>
                         ) : (
                           <span className="text-xs text-gray-400">-</span>
                         )}
                       </td>
                       <td className="px-6 py-3.5">
-                        {record.checkOut !== "-" ? (
+                        {record.jam_keluar && record.jam_keluar !== "-" ? (
                           <Badge type="info">
                             <CheckCircle size={10} className="mr-1" />
-                            {record.checkOut}
+                            {record.jam_keluar}
                           </Badge>
                         ) : (
                           <span className="text-xs text-gray-400">-</span>
@@ -352,18 +497,36 @@ const Attendance = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-3.5">
-                        <button
-                          onClick={() =>
-                            handleShowQR({
-                              id: record.memberId,
-                              name: record.memberName,
-                            })
-                          }
-                          className="p-1.5 rounded-lg bg-gray-100 hover:bg-[#8E1616]/20 transition-colors"
-                          title="Tampilkan QR Code"
-                        >
-                          <QrCode size={14} className="text-[#8E1616]" />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          {record.status === "Aktif" && (
+                            <button
+                              onClick={() => handleCheckout(record)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-semibold"
+                              title="Check-out sekarang"
+                            >
+                              <LogOut size={13} /> Check-out
+                            </button>
+                          )}
+                          <button
+                            onClick={() =>
+                              handleShowQR({
+                                id: record.id_member,
+                                name: namaMember,
+                              })
+                            }
+                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-[#8E1616]/20 transition-colors"
+                            title="Tampilkan QR Code"
+                          >
+                            <QrCode size={14} className="text-[#8E1616]" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(record)}
+                            className="p-1.5 rounded-lg bg-gray-100 hover:bg-red-100 transition-colors"
+                            title="Hapus catatan"
+                          >
+                            <Trash2 size={14} className="text-red-600" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -434,6 +597,68 @@ const Attendance = () => {
           )}
         </div>
       </div>
+
+      {/* ── Modal Catat Absensi (pilih member dari dropdown) ── */}
+      <Modal
+        open={showCheckInModal}
+        onClose={() => !submitting && setShowCheckInModal(false)}
+        title="Catat Absensi"
+        subtitle="Pilih anggota untuk check-in hari ini"
+        footer={
+          <div className="flex gap-3">
+            <Button
+              type="secondary"
+              fullWidth
+              disabled={submitting}
+              onClick={() => setShowCheckInModal(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="primary"
+              fullWidth
+              disabled={submitting}
+              onClick={handleCheckIn}
+            >
+              {submitting ? "Menyimpan..." : "Check-in"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {modalError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-600">
+              {modalError}
+            </div>
+          )}
+          <SelectField
+            label="Pilih Anggota"
+            name="id_member"
+            value={selectedMemberId}
+            onChange={(e) => setSelectedMemberId(e.target.value)}
+            options={[
+              { value: "", label: "-- Pilih anggota --" },
+              ...Object.entries(memberMap)
+                .sort((a, b) => a[1].localeCompare(b[1]))
+                .map(([id, nama]) => ({
+                  value: id,
+                  label: `${nama} (${id})`,
+                })),
+            ]}
+          />
+          {selectedMemberId && (
+            <div className="flex items-center gap-2.5 bg-[#f8f3ee] rounded-xl p-3">
+              <Avatar name={memberMap[selectedMemberId]} size="sm" />
+              <div>
+                <p className="text-sm font-semibold text-[#1D1616]">
+                  {memberMap[selectedMemberId]}
+                </p>
+                <p className="text-xs text-[#9e7a6e]">{selectedMemberId}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
 
       <QRCodeModal
         isOpen={showQRModal}

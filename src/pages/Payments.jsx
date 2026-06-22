@@ -13,10 +13,15 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
+  AlertTriangle,
+  TrendingUp,
+  Receipt,
 } from "lucide-react";
 
-// Import data dari file JSON
-import paymentsData from "../data/paymentsData.js";
+// ── Pertemuan 13: Consume API ──────────────────────────────
+// Data transaksi & member diambil dari REST API Supabase (schema "zeusgym"),
+// bukan dari file data statis lagi.
+import api from "../lib/api";
 
 // ── Components ────────────────────────────────────────────────
 import StatCard from "../components/StatCard";
@@ -31,142 +36,185 @@ import Avatar from "../components/Avatar";
 
 // ── UI Components dari folder ui ──────────────────────────────
 import { Input } from "../components/ui/input";
+import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
-const methodConfig = {
-  QRIS: {
-    className: "bg-[#8E1616]/10 text-[#8E1616] border border-[#8E1616]/20",
-    icon: QrCode,
-    label: "QRIS",
-  },
-  "Transfer Bank": {
-    className: "bg-[#D84040]/10 text-[#D84040] border border-[#D84040]/20",
-    icon: CreditCard,
-    label: "Transfer Bank",
-  },
-  "Dompet Digital": {
-    className: "bg-purple-100 text-purple-700 border border-purple-200",
-    icon: Wallet,
-    label: "Dompet Digital",
-  },
-  "Kartu Kredit": {
-    className: "bg-orange-100 text-orange-700 border border-orange-200",
-    icon: Smartphone,
-    label: "Kartu Kredit",
-  },
-};
-
-const statusConfig = {
-  Selesai: {
-    className: "bg-green-100 text-green-700 border border-green-200",
-    icon: CheckCircle,
-    label: "Selesai",
-  },
-  Menunggu: {
-    className: "bg-yellow-100 text-yellow-700 border border-yellow-200",
-    icon: AlertCircle,
-    label: "Menunggu",
-  },
-  Gagal: {
-    className: "bg-red-100 text-red-700 border border-red-200",
-    icon: XCircle,
-    label: "Gagal",
-  },
-};
-
-const subscriptionConfig = {
-  Harian: {
+// ── Pertemuan 13: Consume API ──────────────────────────────
+// Jenis transaksi yang benar-benar ada di data Supabase (kolom jenis_transaksi):
+// "Perpanjangan 1 Bulan", "Perpanjangan 3 Bulan", "Perpanjangan 6 Bulan",
+// "Perpanjangan 1 Tahun". Tidak ada konsep "metode pembayaran" atau "status"
+// di data asli, jadi konfigurasi itu dihapus dari halaman ini.
+const jenisTransaksiConfig = {
+  "Perpanjangan 1 Bulan": {
     className: "bg-[#8E1616]/10 text-[#8E1616] border border-[#8E1616]/20",
     icon: Clock,
-    label: "Harian",
-    priceRange: "Rp 25.000 - 50.000",
+    label: "1 Bulan",
+    nominal: 300000,
   },
-  Bulanan: {
+  "Perpanjangan 3 Bulan": {
     className: "bg-[#D84040]/10 text-[#D84040] border border-[#D84040]/20",
     icon: Calendar,
-    label: "Bulanan",
-    priceRange: "Rp 500.000 - 1.000.000",
+    label: "3 Bulan",
+    nominal: 800000,
   },
-  Tahunan: {
+  "Perpanjangan 6 Bulan": {
+    className: "bg-purple-100 text-purple-700 border border-purple-200",
+    icon: CalendarDays,
+    label: "6 Bulan",
+    nominal: 1500000,
+  },
+  "Perpanjangan 1 Tahun": {
     className: "bg-[#1D1616]/10 text-[#1D1616] border border-[#1D1616]/20",
     icon: CalendarDays,
-    label: "Tahunan",
-    priceRange: "Rp 1.200.000 - 2.500.000",
+    label: "1 Tahun",
+    nominal: 2500000,
   },
 };
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
+  const [memberMap, setMemberMap] = useState({}); // { id_member: nama_lengkap }
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterMethod, setFilterMethod] = useState("all");
-  const [filterSub, setFilterSub] = useState("all");
+  const [filterJenis, setFilterJenis] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [form, setForm] = useState({
-    memberName: "",
-    amount: "",
-    method: "QRIS",
-    subscriptionType: "Bulanan",
+    id_member: "",
+    jenis_transaksi: "Perpanjangan 1 Bulan",
+    nominal: "300000",
   });
 
+  // ── Pertemuan 13: Consume API ──────────────────────────────
+  // Ambil data transaksi & member dari REST API Supabase (schema "zeusgym").
+  // Karena jumlah transaksi besar (ribuan baris) dan Supabase membatasi
+  // maksimal 1000 baris per request, data diambil bertahap (paginasi)
+  // memakai header "Range" sampai semua baris benar-benar terambil.
   useEffect(() => {
-    const data = Array.isArray(paymentsData)
-      ? paymentsData
-      : paymentsData.payments || paymentsData.data || [];
-    setPayments(data);
-    setLoading(false);
+    const fetchAllPaginated = async (path, params = {}) => {
+      let allRows = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const res = await api.get(path, {
+          params,
+          headers: { Range: `${from}-${from + pageSize - 1}` },
+        });
+        allRows = allRows.concat(res.data);
+        if (res.data.length < pageSize) break;
+        from += pageSize;
+      }
+      return allRows;
+    };
+
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setFetchError(null);
+
+        const [memberRows, transaksiRows] = await Promise.all([
+          fetchAllPaginated("/member", { select: "id_member,nama_lengkap" }),
+          fetchAllPaginated("/transaksi"),
+        ]);
+
+        const lookup = {};
+        memberRows.forEach((m) => {
+          lookup[m.id_member] = m.nama_lengkap;
+        });
+        setMemberMap(lookup);
+
+        // Urutkan dari transaksi terbaru ke terlama
+        transaksiRows.sort(
+          (a, b) => new Date(b.tgl_transaksi) - new Date(a.tgl_transaksi),
+        );
+        setPayments(transaksiRows);
+      } catch (err) {
+        console.error("Gagal mengambil data transaksi:", err);
+        setFetchError(
+          "Gagal memuat data transaksi dari server. Periksa koneksi atau konfigurasi API.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubscriptionChange = (e) => {
-    const subType = e.target.value;
-    let suggestedAmount = "";
-    switch (subType) {
-      case "Harian":
-        suggestedAmount = "25000";
-        break;
-      case "Bulanan":
-        suggestedAmount = "850000";
-        break;
-      case "Tahunan":
-        suggestedAmount = "1200000";
-        break;
-      default:
-        suggestedAmount = "";
-    }
-    setForm({ ...form, subscriptionType: subType, amount: suggestedAmount });
+  const handleJenisChange = (e) => {
+    const jenis = e.target.value;
+    const suggestedNominal = jenisTransaksiConfig[jenis]?.nominal || "";
+    setForm({
+      ...form,
+      jenis_transaksi: jenis,
+      nominal: String(suggestedNominal),
+    });
   };
 
-  const handleSubmit = () => {
-    if (!form.memberName || !form.amount) return;
+  const handleSubmit = async () => {
+    if (!form.id_member || !form.nominal) {
+      alert("ID Member dan nominal wajib diisi!");
+      return;
+    }
+    if (!memberMap[form.id_member]) {
+      alert(
+        `ID Member "${form.id_member}" tidak ditemukan. Periksa kembali ID-nya.`,
+      );
+      return;
+    }
+
+    // ── Pertemuan 13: Consume API ──────────────────────────────
+    // Payload hanya berisi kolom yang memang ada di table zeusgym.transaksi
     const newPayment = {
-      id: `PAY-${String(payments.length + 1).padStart(3, "0")}`,
-      ...form,
-      amount: Number(form.amount),
-      status: "Menunggu",
-      date: new Date().toISOString().split("T")[0],
+      id_transaksi: `TRX-${Date.now()}`,
+      id_member: form.id_member,
+      tgl_transaksi: new Date().toISOString().slice(0, 19).replace("T", " "),
+      jenis_transaksi: form.jenis_transaksi,
+      nominal: Number(form.nominal),
     };
-    setPayments([newPayment, ...payments]);
-    setForm({
-      memberName: "",
-      amount: "",
-      method: "QRIS",
-      subscriptionType: "Bulanan",
-    });
-    setShowModal(false);
+
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+
+      const res = await api.post("/transaksi", newPayment, {
+        headers: { Prefer: "return=representation" },
+      });
+
+      const inserted = res.data[0] || newPayment;
+      setPayments([inserted, ...payments]);
+      setForm({
+        id_member: "",
+        jenis_transaksi: "Perpanjangan 1 Bulan",
+        nominal: "300000",
+      });
+      setShowModal(false);
+    } catch (err) {
+      console.error("Gagal menambahkan transaksi:", err);
+      setSubmitError(
+        err.response?.data?.message ||
+          "Gagal menyimpan transaksi baru ke server. Periksa koneksi atau hak akses (GRANT INSERT).",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const filtered = payments.filter((p) => {
-    const matchSearch = p.memberName?.toLowerCase().includes(search.toLowerCase()) ||
-      p.id?.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = filterStatus === "all" || p.status === filterStatus;
-    const matchMethod = filterMethod === "all" || p.method === filterMethod;
-    const matchSub = filterSub === "all" || p.subscriptionType === filterSub;
-    return matchSearch && matchStatus && matchMethod && matchSub;
+    const namaMember = memberMap[p.id_member] || "";
+    const matchSearch =
+      namaMember.toLowerCase().includes(search.toLowerCase()) ||
+      p.id_member?.toLowerCase().includes(search.toLowerCase()) ||
+      p.id_transaksi?.toLowerCase().includes(search.toLowerCase());
+    const matchJenis =
+      filterJenis === "all" || p.jenis_transaksi === filterJenis;
+    return matchSearch && matchJenis;
   });
 
   // Pagination
@@ -193,21 +241,25 @@ const Payments = () => {
     setCurrentPage(1);
   };
 
-  const totalRevenue = payments
-    .filter((p) => p.status === "Selesai")
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
-  const pendingAmount = payments
-    .filter((p) => p.status === "Menunggu")
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
-  const failedAmount = payments
-    .filter((p) => p.status === "Gagal")
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
+  const totalRevenue = payments.reduce((sum, p) => sum + (p.nominal || 0), 0);
+  const avgPerTransaksi = payments.length ? totalRevenue / payments.length : 0;
 
-  if (loading) {
+  // Jenis transaksi paling populer (berdasarkan jumlah kemunculan)
+  const jenisCount = payments.reduce((acc, p) => {
+    acc[p.jenis_transaksi] = (acc[p.jenis_transaksi] || 0) + 1;
+    return acc;
+  }, {});
+  const jenisTerpopuler =
+    Object.entries(jenisCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
+
+  if (loading && payments.length === 0 && !fetchError) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader size={40} className="text-[#8E1616] animate-spin mx-auto mb-4" />
+          <Loader
+            size={40}
+            className="text-[#8E1616] animate-spin mx-auto mb-4"
+          />
           <p className="text-gray-500">Memuat data pembayaran...</p>
         </div>
       </div>
@@ -229,6 +281,15 @@ const Payments = () => {
         </Button>
       </div>
 
+      {/* ── Pertemuan 13: Alert error fetch API ── */}
+      {fetchError && (
+        <Alert variant="destructive" className="relative">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Gagal Memuat Data</AlertTitle>
+          <AlertDescription>{fetchError}</AlertDescription>
+        </Alert>
+      )}
+
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -237,31 +298,33 @@ const Payments = () => {
           value={`Rp ${(totalRevenue / 1000000).toFixed(1)} Jt`}
           change="+18.2%"
           trend="up"
-          sub="transaksi selesai"
-        />
-        <StatCard
-          icon={AlertCircle}
-          label="Pembayaran Tertunda"
-          value={`Rp ${(pendingAmount / 1000000).toFixed(1)} Jt`}
-          change="+3.1%"
-          trend="up"
-          sub="menunggu konfirmasi"
-        />
-        <StatCard
-          icon={XCircle}
-          label="Pembayaran Gagal"
-          value={`Rp ${(failedAmount / 1000000).toFixed(1)} Jt`}
-          change="-2.5%"
-          trend="down"
-          sub="perlu tindak lanjut"
+          sub="seluruh transaksi"
         />
         <StatCard
           icon={Wallet}
           label="Total Transaksi"
-          value={payments.length}
+          value={payments.length.toLocaleString("id-ID")}
           change="+12.5%"
           trend="up"
           sub="semua transaksi"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Rata-rata / Transaksi"
+          value={`Rp ${(avgPerTransaksi / 1000).toFixed(0)} Rb`}
+          change="+5.3%"
+          trend="up"
+          sub="per transaksi"
+        />
+        <StatCard
+          icon={Receipt}
+          label="Jenis Terpopuler"
+          value={
+            jenisTransaksiConfig[jenisTerpopuler]?.label || jenisTerpopuler
+          }
+          change=""
+          trend="up"
+          sub="paling sering dipilih"
         />
       </div>
 
@@ -274,7 +337,9 @@ const Payments = () => {
         <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-[#1D1616]">Transaksi Pembayaran</p>
+              <p className="text-sm font-bold text-[#1D1616]">
+                Transaksi Pembayaran
+              </p>
               <p className="text-xs text-[#9e7a6e]">
                 {filtered.length} dari {payments.length} transaksi
               </p>
@@ -287,44 +352,24 @@ const Payments = () => {
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
+            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">
+              Filter:
+            </span>
             <select
-              value={filterStatus}
-              onChange={handleFilterChange(setFilterStatus)}
+              value={filterJenis}
+              onChange={handleFilterChange(setFilterJenis)}
               className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
             >
-              <option value="all">Semua Status</option>
-              <option value="Selesai">Selesai</option>
-              <option value="Menunggu">Menunggu</option>
-              <option value="Gagal">Gagal</option>
+              <option value="all">Semua Jenis Transaksi</option>
+              <option value="Perpanjangan 1 Bulan">Perpanjangan 1 Bulan</option>
+              <option value="Perpanjangan 3 Bulan">Perpanjangan 3 Bulan</option>
+              <option value="Perpanjangan 6 Bulan">Perpanjangan 6 Bulan</option>
+              <option value="Perpanjangan 1 Tahun">Perpanjangan 1 Tahun</option>
             </select>
-            <select
-              value={filterMethod}
-              onChange={handleFilterChange(setFilterMethod)}
-              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
-            >
-              <option value="all">Semua Metode</option>
-              <option value="QRIS">QRIS</option>
-              <option value="Transfer Bank">Transfer Bank</option>
-              <option value="Dompet Digital">Dompet Digital</option>
-              <option value="Kartu Kredit">Kartu Kredit</option>
-            </select>
-            <select
-              value={filterSub}
-              onChange={handleFilterChange(setFilterSub)}
-              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
-            >
-              <option value="all">Semua Tipe</option>
-              <option value="Harian">Harian</option>
-              <option value="Bulanan">Bulanan</option>
-              <option value="Tahunan">Tahunan</option>
-            </select>
-            {(filterStatus !== "all" || filterMethod !== "all" || filterSub !== "all") && (
+            {filterJenis !== "all" && (
               <button
-                onClick={() => { 
-                  setFilterStatus("all"); 
-                  setFilterMethod("all"); 
-                  setFilterSub("all"); 
+                onClick={() => {
+                  setFilterJenis("all");
                   setCurrentPage(1);
                 }}
                 className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold hover:bg-red-100 transition-colors"
@@ -338,58 +383,55 @@ const Payments = () => {
         {/* Table */}
         <div className="overflow-x-auto">
           <Table
-            headers={["ID", "Anggota", "Tipe Langganan", "Jumlah", "Metode", "Status", "Tanggal"]}
+            headers={[
+              "ID Transaksi",
+              "Anggota",
+              "ID Member",
+              "Jenis Transaksi",
+              "Nominal",
+              "Tanggal",
+            ]}
           >
             {currentItems.length === 0
               ? null
               : currentItems.map((payment) => {
-                  const MethodIcon = methodConfig[payment.method]?.icon || CreditCard;
-                  const methodStyle = methodConfig[payment.method] || methodConfig.QRIS;
-                  const SubIcon = subscriptionConfig[payment.subscriptionType]?.icon || Calendar;
-                  const subStyle = subscriptionConfig[payment.subscriptionType] || subscriptionConfig.Bulanan;
+                  const jenisStyle =
+                    jenisTransaksiConfig[payment.jenis_transaksi] ||
+                    jenisTransaksiConfig["Perpanjangan 1 Bulan"];
+                  const JenisIcon = jenisStyle.icon;
+                  const namaMember =
+                    memberMap[payment.id_member] || "Member tidak ditemukan";
 
                   return (
-                    <tr key={payment.id} className="hover:bg-[#faf6f4] transition-colors">
+                    <tr
+                      key={payment.id_transaksi}
+                      className="hover:bg-[#faf6f4] transition-colors"
+                    >
                       <td className="px-6 py-3.5 font-mono text-xs text-[#9e7a6e] font-semibold">
-                        {payment.id}
+                        {payment.id_transaksi}
                       </td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center gap-2.5">
-                          <Avatar name={payment.memberName || "?"} size="sm" />
+                          <Avatar name={namaMember} size="sm" />
                           <span className="font-semibold text-[#1D1616] text-sm">
-                            {payment.memberName}
+                            {namaMember}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-3.5">
-                        <Badge type={payment.subscriptionType === "Harian" ? "primary" : payment.subscriptionType === "Bulanan" ? "warning" : "secondary"} dot>
-                          {subStyle.label}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-3.5 text-sm font-semibold text-[#8C1007]">
-                        Rp {(payment.amount || 0).toLocaleString("id-ID")}
+                      <td className="px-6 py-3.5 font-mono text-xs text-[#9e7a6e]">
+                        {payment.id_member}
                       </td>
                       <td className="px-6 py-3.5">
                         <Badge type="info" dot>
-                          {methodStyle.label}
+                          <JenisIcon size={11} className="inline mr-1" />
+                          {jenisStyle.label}
                         </Badge>
                       </td>
-                      <td className="px-6 py-3.5">
-                        <Badge
-                          type={
-                            payment.status === "Selesai"
-                              ? "success"
-                              : payment.status === "Menunggu"
-                                ? "warning"
-                                : "danger"
-                          }
-                          dot
-                        >
-                          {payment.status}
-                        </Badge>
+                      <td className="px-6 py-3.5 text-sm font-semibold text-[#8C1007]">
+                        Rp {(payment.nominal || 0).toLocaleString("id-ID")}
                       </td>
                       <td className="px-6 py-3.5 text-xs text-[#9e7a6e]">
-                        {payment.date}
+                        {payment.tgl_transaksi}
                       </td>
                     </tr>
                   );
@@ -409,7 +451,9 @@ const Payments = () => {
         {filtered.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <p className="text-xs text-[#9e7a6e]">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filtered.length)} of {filtered.length} results
+              Showing {indexOfFirstItem + 1} to{" "}
+              {Math.min(indexOfLastItem, filtered.length)} of {filtered.length}{" "}
+              results
             </p>
             <div className="flex items-center gap-1">
               <button
@@ -419,13 +463,14 @@ const Payments = () => {
               >
                 ‹
               </button>
-              
+
               {[...Array(totalPages)].map((_, index) => {
                 const pageNumber = index + 1;
                 if (
                   pageNumber === 1 ||
                   pageNumber === totalPages ||
-                  (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
+                  (pageNumber >= currentPage - 1 &&
+                    pageNumber <= currentPage + 1)
                 ) {
                   return (
                     <button
@@ -444,7 +489,11 @@ const Payments = () => {
                   pageNumber === currentPage - 2 ||
                   pageNumber === currentPage + 2
                 ) {
-                  return <span key={pageNumber} className="text-xs text-gray-400">...</span>;
+                  return (
+                    <span key={pageNumber} className="text-xs text-gray-400">
+                      ...
+                    </span>
+                  );
                 }
                 return null;
               })}
@@ -464,67 +513,99 @@ const Payments = () => {
       {/* ── Modal Tambah Pembayaran ── */}
       <Modal
         open={showModal}
-        onClose={() => setShowModal(false)}
-        title="Proses Pembayaran"
-        subtitle="Pilih tipe langganan dan metode pembayaran"
+        onClose={() => !submitting && setShowModal(false)}
+        title="Catat Transaksi Baru"
+        subtitle="Masukkan ID Member dan jenis perpanjangan membership"
         footer={
           <div className="flex gap-3">
-            <Button type="secondary" fullWidth onClick={() => setShowModal(false)}>
+            <Button
+              type="secondary"
+              fullWidth
+              disabled={submitting}
+              onClick={() => setShowModal(false)}
+            >
               Batal
             </Button>
-            <Button type="primary" fullWidth onClick={handleSubmit}>
-              Proses Pembayaran
+            <Button
+              type="primary"
+              fullWidth
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? "Menyimpan..." : "Simpan Transaksi"}
             </Button>
           </div>
         }
       >
         <div className="space-y-4">
+          {/* ── Pertemuan 13: Error simpan ke API ── */}
+          {submitError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Gagal Menyimpan</AlertTitle>
+              <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          )}
+
           {/* Input Component dari folder ui - komponen UI Shadcn */}
           <div>
             <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
-              Nama Anggota <span className="text-[#8C1007] ml-1">*</span>
+              ID Member <span className="text-[#8C1007] ml-1">*</span>
             </label>
             <Input
-              name="memberName"
-              value={form.memberName}
+              name="id_member"
+              value={form.id_member}
               onChange={handleChange}
-              placeholder="Masukkan nama anggota"
+              placeholder="Contoh: M-1001"
               required
               className="bg-[#f8f3ee] border-[#e8dfd6]"
             />
+            {form.id_member && (
+              <p className="text-[11px] mt-1 text-[#9e7a6e]">
+                {memberMap[form.id_member]
+                  ? `✓ ${memberMap[form.id_member]}`
+                  : "⚠ ID Member tidak ditemukan"}
+              </p>
+            )}
           </div>
           <SelectField
-            label="Tipe Langganan"
-            name="subscriptionType"
-            value={form.subscriptionType}
-            onChange={handleSubscriptionChange}
+            label="Jenis Transaksi"
+            name="jenis_transaksi"
+            value={form.jenis_transaksi}
+            onChange={handleJenisChange}
             options={[
-              { value: "Harian", label: "Harian (Rp 25.000 - 50.000)" },
-              { value: "Bulanan", label: "Bulanan (Rp 500.000 - 1.000.000)" },
-              { value: "Tahunan", label: "Tahunan (Rp 1.200.000 - 2.500.000)" },
+              {
+                value: "Perpanjangan 1 Bulan",
+                label: "Perpanjangan 1 Bulan (Rp 300.000)",
+              },
+              {
+                value: "Perpanjangan 3 Bulan",
+                label: "Perpanjangan 3 Bulan (Rp 800.000)",
+              },
+              {
+                value: "Perpanjangan 6 Bulan",
+                label: "Perpanjangan 6 Bulan (Rp 1.500.000)",
+              },
+              {
+                value: "Perpanjangan 1 Tahun",
+                label: "Perpanjangan 1 Tahun (Rp 2.500.000)",
+              },
             ]}
           />
           <div>
             <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
-              Jumlah (Rp) <span className="text-[#8C1007] ml-1">*</span>
+              Nominal (Rp) <span className="text-[#8C1007] ml-1">*</span>
             </label>
             <Input
-              name="amount"
+              name="nominal"
               type="number"
-              value={form.amount}
+              value={form.nominal}
               onChange={handleChange}
               placeholder="0"
               required
               className="bg-[#f8f3ee] border-[#e8dfd6]"
             />
           </div>
-          <SelectField
-            label="Metode Pembayaran"
-            name="method"
-            value={form.method}
-            onChange={handleChange}
-            options={["QRIS", "Transfer Bank", "Dompet Digital", "Kartu Kredit"]}
-          />
         </div>
       </Modal>
     </div>

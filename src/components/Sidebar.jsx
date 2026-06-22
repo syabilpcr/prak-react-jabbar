@@ -8,13 +8,14 @@ import {
   Megaphone,
   MessageSquare,
   User,
+  UserCog,
   Dumbbell,
   Store,
-  Plug,
+
   Settings,
   HelpCircle,
   LogOut,
-  Layers,
+
 } from "lucide-react";
 
 // ── Definisi menu ─────────────────────────────────────────────
@@ -40,8 +41,7 @@ const menuGroups = [
     label: "Support",
     items: [
       { label: "Profil", icon: User, path: "/profile" },
-      { label: "Components", icon: Plug, path: "/components" },
-      { label: "Shadcn UI", icon: Layers, path: "/shadcn-ui" },
+      { label: "Manajemen User", icon: UserCog, path: "/users" },
     ],
   },
 ];

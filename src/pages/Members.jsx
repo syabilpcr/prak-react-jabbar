@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Users, Wallet, CalendarCheck, TrendingUp, CheckCircle2 } from "lucide-react";
-import membersData from "../data/membersData";
+import {
+  Plus,
+  Users,
+  Wallet,
+  CalendarCheck,
+  TrendingUp,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
+import api from "../lib/api";
 
 // ── Components ────────────────────────────────────────────────
 import StatCard from "../components/StatCard";
@@ -20,12 +28,19 @@ import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
 // ── Main Component ────────────────────────────────────────────
 const Members = () => {
-  const [members, setMembers] = useState(membersData);
+  // ── Pertemuan 13: Consume API ──────────────────────────────
+  // members diambil dari REST API Supabase (schema "zeusgym", table "member"),
+  // bukan dari file data statis lagi.
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterGender, setFilterGender] = useState("all");
   const [successAlert, setSuccessAlert] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [form, setForm] = useState({
@@ -42,12 +57,69 @@ const Members = () => {
     durasi_membership: "1-bulan", // default 1 bulan
   });
 
+  // ── Pertemuan 13: Consume API ──────────────────────────────
+  // Ambil data member dari REST API Supabase saat komponen pertama kali dimuat.
+  // Endpoint: GET {SUPABASE_URL}/rest/v1/member (schema "zeusgym")
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        setLoading(true);
+        setFetchError(null);
+
+        // Supabase membatasi maksimal 1000 baris per request (lihat setting
+        // "Max rows" di Data API). Karena jumlah member sudah melebihi 1000,
+        // data diambil bertahap (paginasi) memakai header "Range" sampai
+        // semua baris benar-benar terambil — bukan hanya 1000 baris pertama.
+        let allRows = [];
+        let from = 0;
+        const pageSize = 1000;
+        while (true) {
+          const pageRes = await api.get("/member", {
+            headers: { Range: `${from}-${from + pageSize - 1}` },
+          });
+          allRows = allRows.concat(pageRes.data);
+          if (pageRes.data.length < pageSize) break;
+          from += pageSize;
+        }
+
+        // Urutkan berdasarkan angka pada id_member (bukan ORDER BY di server,
+        // yang akan mengurutkan "M-999" vs "M-2001" secara teks/string —
+        // hasilnya salah karena bukan urutan angka yang sebenarnya).
+        allRows.sort((a, b) => {
+          const numA = parseInt((a.id_member || "").replace("M-", ""), 10);
+          const numB = parseInt((b.id_member || "").replace("M-", ""), 10);
+          return numA - numB;
+        });
+
+        // Tambahkan field bantu "id" (numerik) supaya tetap kompatibel
+        // dengan komponen lain yang masih mengandalkan urutan index,
+        // tanpa mengubah data asli dari Supabase.
+        const withId = allRows.map((m, idx) => ({ id: idx + 1, ...m }));
+        setMembers(withId);
+      } catch (err) {
+        console.error("Gagal mengambil data member:", err);
+        setFetchError(
+          "Gagal memuat data member dari server. Periksa koneksi atau konfigurasi API.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
   const filtered = members.filter((m) => {
     const nama = (m.nama_lengkap || m.name || "").toLowerCase();
     const kode = (m.id_member || m.code || "").toLowerCase();
-    const matchSearch = nama.includes(search.toLowerCase()) || kode.includes(search.toLowerCase());
-    const matchStatus = filterStatus === "all" || (m.status_member || m.status || "").toLowerCase() === filterStatus;
-    const matchGender = filterGender === "all" || m.jenis_kelamin === filterGender;
+    const matchSearch =
+      nama.includes(search.toLowerCase()) ||
+      kode.includes(search.toLowerCase());
+    const matchStatus =
+      filterStatus === "all" ||
+      (m.status_member || m.status || "").toLowerCase() === filterStatus;
+    const matchGender =
+      filterGender === "all" || m.jenis_kelamin === filterGender;
     return matchSearch && matchStatus && matchGender;
   });
 
@@ -76,95 +148,153 @@ const Members = () => {
     setCurrentPage(1);
   };
 
-  const totalActive = members.filter((m) => (m.status_member || m.status) === "aktif" || m.status === "Active").length;
-  const totalExpired = members.filter((m) => (m.status_member || m.status) === "tidak aktif" || m.status === "Expired").length;
-  const totalRevenue = members.reduce((s, m) => s + m.price, 0);
+  const totalActive = members.filter(
+    (m) => (m.status_member || m.status) === "aktif" || m.status === "Active",
+  ).length;
+  const totalExpired = members.filter(
+    (m) =>
+      (m.status_member || m.status) === "tidak aktif" || m.status === "Expired",
+  ).length;
+  const totalRevenue = members.reduce(
+    (s, m) => s + (m.total_nominal_transaksi ?? m.price ?? 0),
+    0,
+  );
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.nama_lengkap || !form.no_hp || !form.tgl_lahir) {
       alert("Nama lengkap, nomor HP, dan tanggal lahir wajib diisi!");
       return;
     }
-    
+
     const today = new Date().toISOString().split("T")[0];
-    
-    // Hitung tanggal berakhir dan harga berdasarkan durasi
+
+    // Hitung tanggal berakhir berdasarkan durasi
     const durasiConfig = {
-      "harian": { days: 1, price: 50000 },
-      "1-bulan": { days: 30, price: 300000 },
-      "2-bulan": { days: 60, price: 570000 },
-      "3-bulan": { days: 90, price: 810000 },
-      "4-bulan": { days: 120, price: 1080000 },
-      "5-bulan": { days: 150, price: 1325000 },
-      "6-bulan": { days: 180, price: 1560000 },
-      "7-bulan": { days: 210, price: 1785000 },
-      "8-bulan": { days: 240, price: 2000000 },
-      "9-bulan": { days: 270, price: 2205000 },
-      "10-bulan": { days: 300, price: 2400000 },
-      "11-bulan": { days: 330, price: 2585000 },
-      "12-bulan": { days: 365, price: 2760000 },
+      harian: { days: 1 },
+      "1-bulan": { days: 30 },
+      "2-bulan": { days: 60 },
+      "3-bulan": { days: 90 },
+      "4-bulan": { days: 120 },
+      "5-bulan": { days: 150 },
+      "6-bulan": { days: 180 },
+      "7-bulan": { days: 210 },
+      "8-bulan": { days: 240 },
+      "9-bulan": { days: 270 },
+      "10-bulan": { days: 300 },
+      "11-bulan": { days: 330 },
+      "12-bulan": { days: 365 },
     };
-    
-    const selectedDurasi = durasiConfig[form.durasi_membership] || durasiConfig["1-bulan"];
-    const expiry = new Date(Date.now() + selectedDurasi.days * 24 * 60 * 60 * 1000)
+
+    const selectedDurasi =
+      durasiConfig[form.durasi_membership] || durasiConfig["1-bulan"];
+    const expiry = new Date(
+      Date.now() + selectedDurasi.days * 24 * 60 * 60 * 1000,
+    )
       .toISOString()
       .split("T")[0];
-    
-    // Generate ID Member
-    const newIdNumber = String(members.length + 1).padStart(4, "0");
-    const newIdMember = `M-${newIdNumber}`;
-    
+
     // Generate PIN jika tidak diisi
-    const generatedPin = form.pin_akses || String(Math.floor(100000 + Math.random() * 900000));
-    
-    const newMember = {
-      id: members.length + 1,
-      id_member: newIdMember,
-      code: newIdMember,
+    const generatedPin =
+      form.pin_akses || String(Math.floor(100000 + Math.random() * 900000));
+
+    // ── Pertemuan 13: Consume API ──────────────────────────────
+    // Payload hanya berisi kolom yang memang ada di table zeusgym.member
+    const buildPayload = (idMember) => ({
+      id_member: idMember,
       nama_lengkap: form.nama_lengkap,
-      name: form.nama_lengkap,
       jenis_kelamin: form.jenis_kelamin,
       tgl_lahir: form.tgl_lahir,
       no_hp: form.no_hp,
-      phone: form.no_hp,
       alamat: form.alamat,
       tgl_gabung: today,
-      joined: today,
       tgl_berakhir: expiry,
-      expiry: expiry,
       status_member: form.status_member,
-      status: form.status_member === "aktif" ? "Active" : "Expired",
       pin_akses: generatedPin,
       catatan_medis: form.catatan_medis || "Tidak ada",
       kontak_darurat: form.kontak_darurat,
       nama_kontak_darurat: form.nama_kontak_darurat,
-      email: `${form.nama_lengkap.toLowerCase().replace(/\s+/g, '.')}@email.com`,
-      price: selectedDurasi.price,
-      visits: 0,
-      trainer: "Coach Budi",
-      durasi_membership: form.durasi_membership,
-    };
-    
-    setMembers([newMember, ...members]);
-    setForm({
-      nama_lengkap: "",
-      jenis_kelamin: "L",
-      tgl_lahir: "",
-      no_hp: "",
-      alamat: "",
-      status_member: "aktif",
-      pin_akses: "",
-      catatan_medis: "",
-      kontak_darurat: "",
-      nama_kontak_darurat: "",
-      durasi_membership: "1-bulan",
+      frekuensi_transaksi: 0,
+      total_nominal_transaksi: 0,
     });
-    setShowModal(false);
-    setSuccessAlert(`Member ${form.nama_lengkap} berhasil ditambahkan dengan ID ${newIdMember} (${form.durasi_membership.replace('-', ' ')}).`);
-    setTimeout(() => setSuccessAlert(null), 4000);
+
+    try {
+      setSubmitting(true);
+      setSubmitError(null);
+
+      // Ambil SEMUA id_member langsung dari Supabase (bukan dari state lokal
+      // yang bisa basi), lalu cari angka terbesar secara NUMERIK di JavaScript.
+      // Catatan: id_member adalah kolom text, jadi "ORDER BY id_member DESC"
+      // di server akan mengurutkan secara string (mis. "M-999" > "M-2001"),
+      // BUKAN secara angka — itu sebabnya perhitungan harus dilakukan di sini.
+      // Catatan: Supabase membatasi maksimal 1000 baris per request (lihat
+      // setting "Max rows" di Data API). Karena jumlah member sudah/akan
+      // melebihi 1000, kita ambil semua id_member dengan paginasi memakai
+      // header "Range" sampai tidak ada baris baru lagi.
+      let allIds = [];
+      let from = 0;
+      const pageSize = 1000;
+      while (true) {
+        const pageRes = await api.get("/member", {
+          params: { select: "id_member" },
+          headers: { Range: `${from}-${from + pageSize - 1}` },
+        });
+        allIds = allIds.concat(pageRes.data);
+        if (pageRes.data.length < pageSize) break;
+        from += pageSize;
+      }
+
+      const existingNumbers = allIds
+        .map((m) => parseInt((m.id_member || "").replace("M-", ""), 10))
+        .filter((n) => !isNaN(n));
+      const nextNumber =
+        (existingNumbers.length ? Math.max(...existingNumbers) : 1000) + 1;
+      const newIdMember = `M-${nextNumber}`;
+
+      // POST ke REST API Supabase — "Prefer: return=representation" agar
+      // baris yang baru dibuat dikembalikan oleh server (termasuk default value-nya).
+      const res = await api.post("/member", buildPayload(newIdMember), {
+        headers: { Prefer: "return=representation" },
+      });
+
+      const inserted = res.data[0] || buildPayload(newIdMember);
+      setMembers([{ id: members.length + 1, ...inserted }, ...members]);
+      setForm({
+        nama_lengkap: "",
+        jenis_kelamin: "L",
+        tgl_lahir: "",
+        no_hp: "",
+        alamat: "",
+        status_member: "aktif",
+        pin_akses: "",
+        catatan_medis: "",
+        kontak_darurat: "",
+        nama_kontak_darurat: "",
+        durasi_membership: "1-bulan",
+      });
+      setShowModal(false);
+      setSuccessAlert(
+        `Member ${form.nama_lengkap} berhasil ditambahkan dengan ID ${newIdMember} dan tersimpan ke database.`,
+      );
+      setTimeout(() => setSuccessAlert(null), 4000);
+    } catch (err) {
+      console.error("Gagal menambahkan member:", err);
+      const apiMessage = err.response?.data?.message || "";
+      if (apiMessage.includes("duplicate key")) {
+        setSubmitError(
+          "ID Member yang digenerate ternyata sudah dipakai (kemungkinan ada penambahan data lain barengan). Silakan klik 'Simpan Member' sekali lagi.",
+        );
+      } else {
+        setSubmitError(
+          apiMessage ||
+            "Gagal menyimpan member baru ke server. Periksa koneksi atau hak akses (GRANT INSERT).",
+        );
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -218,6 +348,15 @@ const Members = () => {
         />
       </div>
 
+      {/* ── Pertemuan 13: Alert error fetch API ── */}
+      {fetchError && (
+        <Alert variant="destructive" className="relative">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Gagal Memuat Data</AlertTitle>
+          <AlertDescription>{fetchError}</AlertDescription>
+        </Alert>
+      )}
+
       {/* ── Alert sukses tambah member (UI Component dari folder ui) ── */}
       {successAlert && (
         <Alert variant="success" className="relative">
@@ -256,7 +395,9 @@ const Members = () => {
           </div>
           {/* Filter Row */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">Filter:</span>
+            <span className="text-[10px] font-bold text-[#9e7a6e] uppercase tracking-wider">
+              Filter:
+            </span>
             <select
               value={filterStatus}
               onChange={handleFilterChange(setFilterStatus)}
@@ -277,9 +418,9 @@ const Members = () => {
             </select>
             {(filterStatus !== "all" || filterGender !== "all") && (
               <button
-                onClick={() => { 
-                  setFilterStatus("all"); 
-                  setFilterGender("all"); 
+                onClick={() => {
+                  setFilterStatus("all");
+                  setFilterGender("all");
                   setCurrentPage(1);
                 }}
                 className="px-3 py-1.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 font-semibold hover:bg-red-100 transition-colors"
@@ -291,168 +432,191 @@ const Members = () => {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <Table
-            headers={[
-              "#",
-              "ID Member",
-              "Nama Lengkap",
-              "JK",
-              "No HP",
-              "Tgl Gabung",
-              "Tgl Berakhir",
-              "Status",
-              "Pin Akses",
-            ]}
-          >
-            {currentItems.length === 0
-              ? null
-              : currentItems.map((item, idx) => {
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-[#faf6f4] transition-colors"
-                    >
-                      <td className="px-6 py-3.5 text-xs text-[#9e7a6e] font-medium">
-                        {indexOfFirstItem + idx + 1}
-                      </td>
-
-                      <td className="px-6 py-3.5 font-mono text-xs text-[#9e7a6e] font-semibold">
-                        {item.id_member || item.code}
-                      </td>
-
-                      <td className="px-6 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <Avatar
-                            name={item.nama_lengkap || item.name}
-                            size="sm"
-                          />
-                          <div>
-                            <Link
-                              to={`/members/${item.id}`}
-                              className="font-semibold text-[#8C1007] hover:text-[#a01a0a] hover:underline transition-colors text-sm"
-                            >
-                              {item.nama_lengkap || item.name}
-                            </Link>
-                            <p className="text-[10px] text-[#9e7a6e]">
-                              {item.email}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-3.5 text-xs text-[#5a3030] text-center">
-                        <Badge
-                          type={item.jenis_kelamin === "L" ? "info" : "warning"}
-                        >
-                          {item.jenis_kelamin === "L" ? "L" : "P"}
-                        </Badge>
-                      </td>
-
-                      <td className="px-6 py-3.5 text-xs text-[#5a3030]">
-                        {item.no_hp || item.phone}
-                      </td>
-
-                      <td className="px-6 py-3.5 text-xs text-[#5a3030]">
-                        {item.tgl_gabung || item.joined}
-                      </td>
-
-                      <td className="px-6 py-3.5 text-xs text-[#5a3030]">
-                        {item.tgl_berakhir || item.expiry}
-                      </td>
-
-                      <td className="px-6 py-3.5">
-                        <Badge
-                          type={
-                            (item.status_member || item.status) === "aktif" ||
-                            item.status === "Active"
-                              ? "success"
-                              : "danger"
-                          }
-                          dot
-                        >
-                          {item.status_member || item.status}
-                        </Badge>
-                      </td>
-
-                      <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007] font-bold">
-                        {item.pin_akses || "-"}
-                      </td>
-                    </tr>
-                  );
-                })}
-          </Table>
-        </div>
-
-        {currentItems.length === 0 && (
-          <EmptyState
-            icon="🔍"
-            title="Member tidak ditemukan"
-            message="Coba ubah kata kunci pencarian Anda."
-          />
-        )}
-
-        {/* Pagination */}
-        {filtered.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="w-8 h-8 border-3 border-[#8C1007] border-t-transparent rounded-full animate-spin" />
             <p className="text-xs text-[#9e7a6e]">
-              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filtered.length)} of {filtered.length} results
+              Memuat data member dari server...
             </p>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={prevPage}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                ‹
-              </button>
-              
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNumber = index + 1;
-                // Tampilkan halaman pertama, terakhir, current, dan 2 halaman di sekitar current
-                if (
-                  pageNumber === 1 ||
-                  pageNumber === totalPages ||
-                  (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                ) {
-                  return (
-                    <button
-                      key={pageNumber}
-                      onClick={() => paginate(pageNumber)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                        currentPage === pageNumber
-                          ? "bg-[#0d6efd] text-white"
-                          : "border border-gray-200 text-[#5a3030] hover:bg-gray-50"
-                      }`}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                } else if (
-                  pageNumber === currentPage - 2 ||
-                  pageNumber === currentPage + 2
-                ) {
-                  return <span key={pageNumber} className="text-xs text-gray-400">...</span>;
-                }
-                return null;
-              })}
-
-              <button
-                onClick={nextPage}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                ›
-              </button>
-            </div>
           </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <Table
+                headers={[
+                  "#",
+                  "ID Member",
+                  "Nama Lengkap",
+                  "JK",
+                  "No HP",
+                  "Tgl Gabung",
+                  "Tgl Berakhir",
+                  "Status",
+                  "Pin Akses",
+                ]}
+              >
+                {currentItems.length === 0
+                  ? null
+                  : currentItems.map((item, idx) => {
+                      return (
+                        <tr
+                          key={item.id}
+                          className="hover:bg-[#faf6f4] transition-colors"
+                        >
+                          <td className="px-6 py-3.5 text-xs text-[#9e7a6e] font-medium">
+                            {indexOfFirstItem + idx + 1}
+                          </td>
+
+                          <td className="px-6 py-3.5 font-mono text-xs text-[#9e7a6e] font-semibold">
+                            {item.id_member || item.code}
+                          </td>
+
+                          <td className="px-6 py-3.5">
+                            <div className="flex items-center gap-2.5">
+                              <Avatar
+                                name={item.nama_lengkap || item.name}
+                                size="sm"
+                              />
+                              <div>
+                                <Link
+                                  to={`/members/${item.id}`}
+                                  className="font-semibold text-[#8C1007] hover:text-[#a01a0a] hover:underline transition-colors text-sm"
+                                >
+                                  {item.nama_lengkap || item.name}
+                                </Link>
+                                <p className="text-[10px] text-[#9e7a6e]">
+                                  {item.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-6 py-3.5 text-xs text-[#5a3030] text-center">
+                            <Badge
+                              type={
+                                item.jenis_kelamin === "L" ? "info" : "warning"
+                              }
+                            >
+                              {item.jenis_kelamin === "L" ? "L" : "P"}
+                            </Badge>
+                          </td>
+
+                          <td className="px-6 py-3.5 text-xs text-[#5a3030]">
+                            {item.no_hp || item.phone}
+                          </td>
+
+                          <td className="px-6 py-3.5 text-xs text-[#5a3030]">
+                            {item.tgl_gabung || item.joined}
+                          </td>
+
+                          <td className="px-6 py-3.5 text-xs text-[#5a3030]">
+                            {item.tgl_berakhir || item.expiry}
+                          </td>
+
+                          <td className="px-6 py-3.5">
+                            <Badge
+                              type={
+                                (item.status_member || item.status) ===
+                                  "aktif" || item.status === "Active"
+                                  ? "success"
+                                  : "danger"
+                              }
+                              dot
+                            >
+                              {item.status_member || item.status}
+                            </Badge>
+                          </td>
+
+                          <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007] font-bold">
+                            {item.pin_akses || "-"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+              </Table>
+            </div>
+
+            {currentItems.length === 0 && (
+              <EmptyState
+                icon="🔍"
+                title="Member tidak ditemukan"
+                message="Coba ubah kata kunci pencarian Anda."
+              />
+            )}
+
+            {/* Pagination */}
+            {filtered.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                <p className="text-xs text-[#9e7a6e]">
+                  Showing {indexOfFirstItem + 1} to{" "}
+                  {Math.min(indexOfLastItem, filtered.length)} of{" "}
+                  {filtered.length} results
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={prevPage}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ‹
+                  </button>
+
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    // Tampilkan halaman pertama, terakhir, current, dan 2 halaman di sekitar current
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 1 &&
+                        pageNumber <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => paginate(pageNumber)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                            currentPage === pageNumber
+                              ? "bg-[#0d6efd] text-white"
+                              : "border border-gray-200 text-[#5a3030] hover:bg-gray-50"
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    } else if (
+                      pageNumber === currentPage - 2 ||
+                      pageNumber === currentPage + 2
+                    ) {
+                      return (
+                        <span
+                          key={pageNumber}
+                          className="text-xs text-gray-400"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+
+                  <button
+                    onClick={nextPage}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs text-[#5a3030] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
       {/* ── Modal Tambah Member ── */}
       <Modal
         open={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => !submitting && setShowModal(false)}
         title="Tambah Member Baru"
         subtitle="Isi data member dengan lengkap (13 Atribut)"
         footer={
@@ -460,20 +624,37 @@ const Members = () => {
             <Button
               type="secondary"
               fullWidth
+              disabled={submitting}
               onClick={() => setShowModal(false)}
             >
               Batal
             </Button>
-            <Button type="primary" fullWidth onClick={handleSubmit}>
-              Simpan Member
+            <Button
+              type="primary"
+              fullWidth
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? "Menyimpan..." : "Simpan Member"}
             </Button>
           </div>
         }
       >
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          {/* ── Pertemuan 13: Error simpan ke API ── */}
+          {submitError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Gagal Menyimpan</AlertTitle>
+              <AlertDescription>{submitError}</AlertDescription>
+            </Alert>
+          )}
+
           {/* Data Pribadi */}
           <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
-            <p className="text-xs font-bold text-[#8C1007] mb-2">📋 DATA PRIBADI</p>
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
+              📋 DATA PRIBADI
+            </p>
             <div className="space-y-3">
               <InputField
                 label="Nama Lengkap"
@@ -521,7 +702,9 @@ const Members = () => {
 
           {/* Keanggotaan */}
           <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
-            <p className="text-xs font-bold text-[#8C1007] mb-2">🎫 KEANGGOTAAN</p>
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
+              🎫 KEANGGOTAAN
+            </p>
             <div className="space-y-3">
               <SelectField
                 label="Durasi Membership"
@@ -541,7 +724,10 @@ const Members = () => {
                   { value: "9-bulan", label: "9 Bulan — Rp 2.205.000" },
                   { value: "10-bulan", label: "10 Bulan — Rp 2.400.000" },
                   { value: "11-bulan", label: "11 Bulan — Rp 2.585.000" },
-                  { value: "12-bulan", label: "12 Bulan / 1 Tahun — Rp 2.760.000" },
+                  {
+                    value: "12-bulan",
+                    label: "12 Bulan / 1 Tahun — Rp 2.760.000",
+                  },
                 ]}
               />
               <SelectField
@@ -567,7 +753,9 @@ const Members = () => {
 
           {/* Kontak Darurat & Medis */}
           <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
-            <p className="text-xs font-bold text-[#8C1007] mb-2">🏥 KONTAK DARURAT & MEDIS</p>
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
+              🏥 KONTAK DARURAT & MEDIS
+            </p>
             <div className="space-y-3">
               <InputField
                 label="Nama Kontak Darurat"
@@ -595,7 +783,10 @@ const Members = () => {
 
           <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-700">
-              ℹ️ <strong>Info:</strong> ID Member, tanggal gabung, dan tanggal berakhir akan dibuat otomatis berdasarkan durasi yang dipilih. PIN akan di-generate jika tidak diisi. Harga disesuaikan dengan durasi membership.
+              ℹ️ <strong>Info:</strong> ID Member, tanggal gabung, dan tanggal
+              berakhir akan dibuat otomatis berdasarkan durasi yang dipilih. PIN
+              akan di-generate jika tidak diisi. Harga disesuaikan dengan durasi
+              membership.
             </p>
           </div>
         </div>
