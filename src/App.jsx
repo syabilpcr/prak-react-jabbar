@@ -1,5 +1,5 @@
 import React, { Suspense, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Loading from "./components/Loading";
 
 // ── Layouts ───────────────────────────────────────────────────
@@ -61,8 +61,11 @@ function App() {
       {showContent && (
         <Routes>
           {/* ── MainLayout: Sidebar + Header ── */}
+          {/* Root → arahkan ke halaman login lebih dulu */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+
           <Route element={<MainLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="members" element={<Members />} />
             <Route path="payments" element={<Payments />} />
             <Route path="attendance" element={<Attendance />} />

@@ -50,7 +50,7 @@ export default function Login() {
         if (user.role === "member") {
           navigate("/member");
         } else {
-          navigate("/");
+          navigate("/dashboard");
         }
       } else {
         setError("Email atau kata sandi salah");

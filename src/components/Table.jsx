@@ -7,7 +7,7 @@ export default function Table({ headers = [], children, loading = false, emptyMe
             {headers.map((header, index) => (
               <th
                 key={index}
-                className="text-left px-6 py-3.5 text-[10px] font-bold text-[#FFF0C4]/70 uppercase tracking-widest whitespace-nowrap"
+                className="text-left px-6 py-3.5 text-[10px] font-bold text-[#F8EEDF]/70 uppercase tracking-widest whitespace-nowrap"
               >
                 {header}
               </th>

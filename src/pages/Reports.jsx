@@ -61,7 +61,7 @@ const Reports = () => {
 
   const getChartColor = () => {
     if (reportType === "revenue") return "#8E1616";
-    if (reportType === "membership") return "#D84040";
+    if (reportType === "membership") return "#000000";
     return "#8E1616";
   };
 
@@ -150,7 +150,7 @@ const Reports = () => {
 
       {/* Filter Section */}
       <div
-        className="bg-white rounded-2xl border border-gray-100 p-4"
+        className="bg-white rounded-2xl border border-[#E8C999]/50 p-4"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -167,8 +167,8 @@ const Reports = () => {
                   onClick={() => setReportType(type.id)}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
                     reportType === type.id
-                      ? "bg-[#8C1007] text-[#FFF0C4]"
-                      : "bg-[#f8f3ee] text-[#5a3030] border border-[#e8dfd6] hover:bg-[#f0e8e4]"
+                      ? "bg-[#8E1616] text-[#F8EEDF]"
+                      : "bg-[#F8EEDF] text-[#5a3030] border border-[#E8C999] hover:bg-[#f0e3cf]"
                   }`}
                 >
                   <Icon size={16} />
@@ -187,8 +187,8 @@ const Reports = () => {
                   onClick={() => setDateRange(option.value)}
                   className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                     dateRange === option.value
-                      ? "bg-[#8C1007] text-[#FFF0C4]"
-                      : "bg-[#f8f3ee] text-[#5a3030] border border-[#e8dfd6] hover:bg-[#f0e8e4]"
+                      ? "bg-[#8E1616] text-[#F8EEDF]"
+                      : "bg-[#F8EEDF] text-[#5a3030] border border-[#E8C999] hover:bg-[#f0e3cf]"
                   }`}
                 >
                   {option.label}
@@ -238,8 +238,8 @@ const Reports = () => {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-        <div className="px-6 py-4 border-b border-gray-50">
+      <div className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+        <div className="px-6 py-4 border-b border-[#E8C999]/40">
           <p className="text-sm font-bold text-[#1D1616]">Data Detail</p>
           <p className="text-xs text-[#9e7a6e] mt-0.5">
             Data lengkap per periode
@@ -248,14 +248,14 @@ const Reports = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#3E0703]">
-                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-[#FFF0C4]/70 uppercase tracking-widest">
+              <tr className="bg-[#000000]">
+                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-[#F8EEDF]/70 uppercase tracking-widest">
                   Periode
                 </th>
-                <th className="text-right px-6 py-3.5 text-[10px] font-bold text-[#FFF0C4]/70 uppercase tracking-widest">
+                <th className="text-right px-6 py-3.5 text-[10px] font-bold text-[#F8EEDF]/70 uppercase tracking-widest">
                   Nilai
                 </th>
-                <th className="text-right px-6 py-3.5 text-[10px] font-bold text-[#FFF0C4]/70 uppercase tracking-widest">
+                <th className="text-right px-6 py-3.5 text-[10px] font-bold text-[#F8EEDF]/70 uppercase tracking-widest">
                   Persentase
                 </th>
               </tr>
@@ -271,7 +271,7 @@ const Reports = () => {
                     <td className="px-6 py-3.5 font-medium text-[#1D1616]">
                       {item.label}
                     </td>
-                    <td className="px-6 py-3.5 text-right font-semibold text-[#8C1007]">
+                    <td className="px-6 py-3.5 text-right font-semibold text-[#8E1616]">
                       {reportType === "revenue"
                         ? `Rp ${item.value.toLocaleString("id-ID")}`
                         : item.value.toLocaleString("id-ID")}
@@ -280,7 +280,7 @@ const Reports = () => {
                       <div className="flex items-center justify-end gap-2">
                         <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-[#8C1007] rounded-full"
+                            className="h-full bg-[#8E1616] rounded-full"
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -293,10 +293,10 @@ const Reports = () => {
                 );
               })}
             </tbody>
-            <tfoot className="bg-[#f8f3ee] border-t border-[#e8dfd6]">
+            <tfoot className="bg-[#F8EEDF] border-t border-[#E8C999]">
               <tr>
                 <td className="px-6 py-3.5 font-bold text-[#1D1616]">Total</td>
-                <td className="px-6 py-3.5 text-right font-bold text-[#8C1007]">
+                <td className="px-6 py-3.5 text-right font-bold text-[#8E1616]">
                   {reportType === "revenue"
                     ? `Rp ${totalValue.toLocaleString("id-ID")}`
                     : totalValue.toLocaleString("id-ID")}
@@ -311,7 +311,7 @@ const Reports = () => {
       </div>
 
       {/* Real-time Summary */}
-      <div className="bg-gradient-to-r from-[#8E1616]/5 to-[#D84040]/5 rounded-2xl p-5 border border-gray-200">
+      <div className="bg-gradient-to-r from-[#8E1616]/5 to-[#E8C999]/15 rounded-2xl p-5 border border-[#E8C999]/60">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-bold text-[#1D1616] flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>

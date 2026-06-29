@@ -9,7 +9,7 @@ const LiveStats = () => {
   }, []);
   const items = liveStatsItems;
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-5">
       <div className="flex items-center justify-between mb-4">
         <span className="text-[14px] font-bold text-[#1D1616]">
           Status Real-time
@@ -37,7 +37,7 @@ const LiveStats = () => {
           </p>
         </div>
         {items.map((item, i) => (
-          <div key={i} className="border-l border-gray-100 pl-4">
+          <div key={i} className="border-l border-[#E8C999]/50 pl-4">
             <p className="text-[10px] text-gray-400 mb-1">{item.label}</p>
             <p
               className={`text-xl font-black ${item.color || "text-[#1D1616]"}`}

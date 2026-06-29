@@ -38,7 +38,7 @@ const Header = () => {
 
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === "/") return "Beranda";
+    if (path === "/dashboard") return "Beranda";
     if (path.includes("members")) return "Anggota";
     if (path.includes("payments")) return "Pembayaran";
     if (path.includes("attendance")) return "Absensi";
@@ -73,7 +73,7 @@ const Header = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearch}
             placeholder="Cari..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#8C1007] transition-colors"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#8E1616] transition-colors"
           />
         </div>
       </div>
@@ -114,7 +114,7 @@ const Header = () => {
                 ))}
               </div>
               <div className="px-4 py-2 border-t border-gray-100">
-                <button className="w-full text-center text-xs text-[#8C1007] font-medium hover:underline py-1">
+                <button className="w-full text-center text-xs text-[#8E1616] font-medium hover:underline py-1">
                   Lihat semua
                 </button>
               </div>
@@ -128,7 +128,7 @@ const Header = () => {
             onClick={() => { setShowProfile(!showProfile); setShowNotifications(false); }}
             className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            <div className="w-8 h-8 rounded-full bg-[#8C1007] flex items-center justify-center text-white text-xs font-semibold">
+            <div className="w-8 h-8 rounded-full bg-[#8E1616] flex items-center justify-center text-white text-xs font-semibold">
               SY
             </div>
             <div className="hidden md:block text-left">

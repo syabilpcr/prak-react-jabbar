@@ -19,6 +19,7 @@ import SectionHeader from "../components/SectionHeader";
 import StatCard from "../components/StatCard";
 import Modal from "../components/Modal";
 
+
 // UI Components dari folder ui
 import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
@@ -110,8 +111,8 @@ const ProfilePage = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 border border-gray-200 max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 border border-[#E8C999]/60 max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-6 border-b border-[#E8C999]/60">
             <div>
               <h3 className="text-xl font-bold text-[#1D1616]">Edit Profil</h3>
               <p className="text-sm text-gray-500 mt-1">
@@ -177,7 +178,7 @@ const ProfilePage = () => {
                   name="fullName"
                   value={editForm.fullName}
                   onChange={handleEditFormChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-[#E8C999]/60 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
               </div>
 
@@ -190,7 +191,7 @@ const ProfilePage = () => {
                   name="username"
                   value={editForm.username}
                   onChange={handleEditFormChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-[#E8C999]/60 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
               </div>
 
@@ -203,7 +204,7 @@ const ProfilePage = () => {
                   name="email"
                   value={editForm.email}
                   onChange={handleEditFormChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-[#E8C999]/60 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
               </div>
 
@@ -216,7 +217,7 @@ const ProfilePage = () => {
                   name="phone"
                   value={editForm.phone}
                   onChange={handleEditFormChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-[#E8C999]/60 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
               </div>
 
@@ -229,7 +230,7 @@ const ProfilePage = () => {
                   name="position"
                   value={editForm.position}
                   onChange={handleEditFormChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-[#E8C999]/60 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
               </div>
 
@@ -242,22 +243,22 @@ const ProfilePage = () => {
                   name="address"
                   value={editForm.address}
                   onChange={handleEditFormChange}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-[#E8C999]/60 rounded-xl text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]"
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex gap-3 p-6 border-t border-gray-200">
+          <div className="flex gap-3 p-6 border-t border-[#E8C999]/60">
             <button
               onClick={handleCancelEdit}
-              className="flex-1 border border-gray-200 text-gray-600 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex-1 border border-[#E8C999]/60 text-gray-600 font-semibold py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
             >
               Batal
             </button>
             <button
               onClick={handleSaveEdit}
-              className="flex-1 bg-[#8E1616] hover:bg-[#D84040] text-white font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"
+              className="flex-1 bg-[#8E1616] hover:bg-[#6f1111] text-white font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2"
             >
               <Save size={16} /> Simpan Perubahan
             </button>
@@ -284,10 +285,10 @@ const ProfilePage = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         {/* Left Card - Profile Info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+        <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
           <div className="flex flex-col items-center text-center">
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#8E1616] to-[#D84040] flex items-center justify-center text-4xl font-bold text-white border-4 border-[#8E1616]/30 overflow-hidden">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#8E1616] to-[#000000] flex items-center justify-center text-4xl font-bold text-white border-4 border-[#8E1616]/30 overflow-hidden">
                 {previewImage ? (
                   <img
                     src={previewImage}
@@ -345,7 +346,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Right Card - Personal Information */}
-        <div className="xl:col-span-2 bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+        <div className="xl:col-span-2 bg-white rounded-2xl border border-[#E8C999]/50 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl font-bold text-[#1D1616]">
@@ -366,37 +367,37 @@ const ProfilePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="text-sm text-gray-500">Nama Lengkap</label>
-              <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
+              <div className="mt-2 border border-[#E8C999]/60 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
                 {formData.fullName}
               </div>
             </div>
             <div>
               <label className="text-sm text-gray-500">Nama Pengguna</label>
-              <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
+              <div className="mt-2 border border-[#E8C999]/60 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
                 {formData.username}
               </div>
             </div>
             <div>
               <label className="text-sm text-gray-500">Alamat Email</label>
-              <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
+              <div className="mt-2 border border-[#E8C999]/60 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
                 {formData.email}
               </div>
             </div>
             <div>
               <label className="text-sm text-gray-500">Nomor Telepon</label>
-              <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
+              <div className="mt-2 border border-[#E8C999]/60 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
                 {formData.phone}
               </div>
             </div>
             <div>
               <label className="text-sm text-gray-500">Posisi</label>
-              <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50 flex items-center gap-2">
+              <div className="mt-2 border border-[#E8C999]/60 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50 flex items-center gap-2">
                 {formData.position.split(" / ")[0]}
               </div>
             </div>
             <div>
               <label className="text-sm text-gray-500">Alamat</label>
-              <div className="mt-2 border border-gray-200 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
+              <div className="mt-2 border border-[#E8C999]/60 rounded-xl px-4 py-3 text-[#1D1616] font-medium bg-gray-50">
                 {formData.address}
               </div>
             </div>

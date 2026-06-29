@@ -394,10 +394,10 @@ const Attendance = () => {
 
       {/* Attendance Table */}
       <div
-        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+        className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
-        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
+        <div className="px-6 py-4 border-b border-[#E8C999]/40 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-[#1D1616]">Absensi Hari Ini</p>
@@ -543,7 +543,7 @@ const Attendance = () => {
 
           {/* Pagination */}
           {filtered.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-[#E8C999]/50 flex items-center justify-between">
               <p className="text-xs text-[#9e7a6e]">
                 Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filtered.length)} of {filtered.length} results
               </p>

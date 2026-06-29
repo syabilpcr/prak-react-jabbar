@@ -171,7 +171,7 @@ const Promotions = () => {
 
       {/* Referral Program Card */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-gradient-to-r from-[#8E1616] to-[#D84040] rounded-2xl p-5 relative overflow-hidden group">
+        <div className="bg-gradient-to-r from-[#8E1616] to-[#000000] rounded-2xl p-5 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500" />
           <div className="relative z-10">
             <div className="flex items-center justify-between">
@@ -203,10 +203,10 @@ const Promotions = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-2xl p-5 border border-[#E8C999]/50 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#8C1007]/10 flex items-center justify-center">
-              <Trophy size={24} className="text-[#8C1007]" />
+            <div className="w-12 h-12 rounded-xl bg-[#8E1616]/10 flex items-center justify-center">
+              <Trophy size={24} className="text-[#8E1616]" />
             </div>
             <div>
               <p className="text-xs text-[#9e7a6e]">Pemasaran Digital</p>
@@ -219,10 +219,10 @@ const Promotions = () => {
 
       {/* ── Tabel Promosi ── */}
       <div
-        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+        className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
-        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
+        <div className="px-6 py-4 border-b border-[#E8C999]/40 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-[#1D1616]">Promosi Aktif</p>
@@ -240,7 +240,7 @@ const Promotions = () => {
             <select
               value={filterPromoStatus}
               onChange={(e) => setFilterPromoStatus(e.target.value)}
-              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+              className="px-3 py-1.5 bg-[#F8EEDF] border border-[#E8C999] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8E1616]/20"
             >
               <option value="all">Semua Status</option>
               <option value="Aktif">Aktif</option>
@@ -266,10 +266,10 @@ const Promotions = () => {
                     <td className="px-6 py-3.5 font-semibold text-[#1D1616] text-sm">
                       {promo.title}
                     </td>
-                    <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007]">
+                    <td className="px-6 py-3.5 font-mono text-xs text-[#8E1616]">
                       {promo.code}
                     </td>
-                    <td className="px-6 py-3.5 text-sm font-bold text-[#8C1007]">
+                    <td className="px-6 py-3.5 text-sm font-bold text-[#8E1616]">
                       {promo.discount}
                     </td>
                     <td className="px-6 py-3.5 text-xs text-[#9e7a6e]">

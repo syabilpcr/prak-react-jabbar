@@ -4,9 +4,9 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-[#E8C999]/50 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-7 py-5 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-7 py-5 border-b border-[#E8C999]/40 flex-shrink-0">
           <div>
             {title && (
               <h3 className="text-base font-bold text-[#1D1616]">{title}</h3>

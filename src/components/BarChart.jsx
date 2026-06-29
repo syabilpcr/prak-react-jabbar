@@ -8,7 +8,7 @@ const BarChart = ({ data, activeTab }) => {
   );
   const max = Math.max(...values);
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+    <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-5">
       <SectionHeader
         title={
           activeTab === "members" ? "Pertumbuhan Anggota" : "Pendapatan Bulanan"
@@ -40,14 +40,14 @@ const BarChart = ({ data, activeTab }) => {
               onMouseLeave={() => setHovered(null)}
             >
               {isHovered && (
-                <div className="absolute bottom-full mb-1 bg-[#1D1616] text-[#FFF0C4] text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap z-10 pointer-events-none">
+                <div className="absolute bottom-full mb-1 bg-[#000000] text-[#F8EEDF] text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap z-10 pointer-events-none">
                   {d.month} · {val}
                   {activeTab === "revenue" ? "Jt" : ""}
                 </div>
               )}
               <div className="relative w-full flex items-end justify-center h-full">
                 <div
-                  className={`w-full rounded-t-md transition-all duration-300 ${isHovered ? "bg-[#8C1007]" : "bg-[#8C1007]/20"}`}
+                  className={`w-full rounded-t-md transition-all duration-300 ${isHovered ? "bg-[#8E1616]" : "bg-[#8E1616]/25"}`}
                   style={{ height: `${pct}%` }}
                 />
               </div>
