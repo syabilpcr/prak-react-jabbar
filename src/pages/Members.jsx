@@ -374,11 +374,11 @@ const Members = () => {
 
       {/* ── Tabel ── */}
       <div
-        className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
         {/* Header tabel */}
-        <div className="px-6 py-4 border-b border-[#E8C999]/40 flex flex-col gap-3">
+        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-[#1D1616]">Daftar Member</p>
@@ -401,8 +401,8 @@ const Members = () => {
             <select
               value={filterStatus}
               onChange={handleFilterChange(setFilterStatus)}
-              className="px-3 py-1.5 bg-[#F8EEDF] border border-[#E8C999] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8E1616]/20"
-              >
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
               <option value="all">Semua Status</option>
               <option value="aktif">Aktif</option>
               <option value="tidak aktif">Tidak Aktif</option>
@@ -410,8 +410,8 @@ const Members = () => {
             <select
               value={filterGender}
               onChange={handleFilterChange(setFilterGender)}
-              className="px-3 py-1.5 bg-[#F8EEDF] border border-[#E8C999] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8E1616]/20"
-  >
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+            >
               <option value="all">Semua Gender</option>
               <option value="L">Laki-laki</option>
               <option value="P">Perempuan</option>
@@ -434,7 +434,7 @@ const Members = () => {
         {/* Table */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-8 h-8 border-3 border-[#8E1616] border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-3 border-[#8C1007] border-t-transparent rounded-full animate-spin" />
             <p className="text-xs text-[#9e7a6e]">
               Memuat data member dari server...
             </p>
@@ -480,7 +480,7 @@ const Members = () => {
                               <div>
                                 <Link
                                   to={`/members/${item.id}`}
-                                  className="font-semibold text-[#8E1616] hover:text-[#6f1111] hover:underline transition-colors text-sm"
+                                  className="font-semibold text-[#8C1007] hover:text-[#a01a0a] hover:underline transition-colors text-sm"
                                 >
                                   {item.nama_lengkap || item.name}
                                 </Link>
@@ -527,7 +527,7 @@ const Members = () => {
                             </Badge>
                           </td>
 
-                          <td className="px-6 py-3.5 font-mono text-xs text-[#8E1616] font-bold">
+                          <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007] font-bold">
                             {item.pin_akses || "-"}
                           </td>
                         </tr>
@@ -546,7 +546,7 @@ const Members = () => {
 
             {/* Pagination */}
             {filtered.length > 0 && (
-              <div className="px-6 py-4 border-t border-[#E8C999]/50 flex items-center justify-between">
+              <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
                 <p className="text-xs text-[#9e7a6e]">
                   Showing {indexOfFirstItem + 1} to{" "}
                   {Math.min(indexOfLastItem, filtered.length)} of{" "}
@@ -651,8 +651,8 @@ const Members = () => {
           )}
 
           {/* Data Pribadi */}
-          <div className="bg-[#F8EEDF] p-3 rounded-lg border border-[#E8C999]">
-            <p className="text-xs font-bold text-[#8E1616] mb-2">
+          <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
               📋 DATA PRIBADI
             </p>
             <div className="space-y-3">
@@ -701,8 +701,8 @@ const Members = () => {
           </div>
 
           {/* Keanggotaan */}
-          <div className="bg-[#F8EEDF] p-3 rounded-lg border border-[#E8C999]">
-            <p className="text-xs font-bold text-[#8E1616] mb-2">
+          <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
               🎫 KEANGGOTAAN
             </p>
             <div className="space-y-3">
@@ -752,8 +752,8 @@ const Members = () => {
           </div>
 
           {/* Kontak Darurat & Medis */}
-          <div className="bg-[#F8EEDF] p-3 rounded-lg border border-[#E8C999]">
-            <p className="text-xs font-bold text-[#8E1616] mb-2">
+          <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
               🏥 KONTAK DARURAT & MEDIS
             </p>
             <div className="space-y-3">

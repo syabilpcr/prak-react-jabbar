@@ -142,7 +142,7 @@ const Feedback = () => {
       </div>
 
       {/* Rating Distribution */}
-      <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-5" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 p-5" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
         <p className="text-sm font-bold text-[#1D1616] mb-4">Distribusi Rating</p>
         <div className="space-y-3">
           {[5, 4, 3, 2, 1].map((rate) => {
@@ -161,7 +161,7 @@ const Feedback = () => {
       </div>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-4" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 p-4" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex gap-2">
             {["all", "5", "4", "3", "2", "1"].map((f) => (
@@ -170,8 +170,8 @@ const Feedback = () => {
                 onClick={() => setFilter(f)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   filter === f
-                    ? "bg-[#8E1616] text-[#F8EEDF]"
-                    : "bg-[#F8EEDF] text-[#5a3030] border border-[#E8C999] hover:bg-[#f0e3cf]"
+                    ? "bg-[#8C1007] text-[#FFF0C4]"
+                    : "bg-[#f8f3ee] text-[#5a3030] border border-[#e8dfd6] hover:bg-[#f0e8e4]"
                 }`}
               >
                 {f === "all" ? "Semua" : `⭐ ${f}`}
@@ -193,7 +193,7 @@ const Feedback = () => {
           filtered.map((feedback) => (
             <div
               key={feedback.id}
-              className="bg-white rounded-2xl p-5 border border-[#E8C999]/50 hover:shadow-md transition-all"
+              className="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-md transition-all"
               style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}
             >
               <div className="flex items-start justify-between">
@@ -206,7 +206,7 @@ const Feedback = () => {
                         <Star
                           key={i}
                           size={12}
-                          className={i < feedback.rating ? "fill-[#E8C999] text-[#E8C999]" : "text-gray-300"}
+                          className={i < feedback.rating ? "fill-[#D84040] text-[#D84040]" : "text-gray-300"}
                         />
                       ))}
                     </div>

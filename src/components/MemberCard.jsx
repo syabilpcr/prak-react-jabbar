@@ -20,7 +20,7 @@ export default function MemberCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-2xl border border-[#E8C999]/50 p-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
+      className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
     >
       <div className="flex items-center gap-3 mb-3">
         <Avatar name={name} size="md" />

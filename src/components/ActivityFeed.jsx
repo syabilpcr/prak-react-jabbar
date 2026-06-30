@@ -11,7 +11,7 @@ const activityBadge = {
 };
 
 const ActivityFeed = () => (
-  <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-5">
+  <div className="bg-white rounded-2xl border border-gray-100 p-5">
     <SectionHeader title="Aktivitas Terbaru" />
     <div className="space-y-2.5">
       {recentActivities.map((a) => {

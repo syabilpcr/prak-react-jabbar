@@ -133,12 +133,12 @@ export const areaUsageData = [
 export const liveStatsItems = [
   { label: "Check-in Hari Ini", value: "127" },
   { label: "Rata-rata / Jam", value: "16" },
-  { label: "Jam Sibuk", value: "18:00 - 20:00", color: "text-[#8E1616]" },
+  { label: "Jam Sibuk", value: "18:00 - 20:00", color: "text-[#8C1007]" },
   { label: "Tingkat Hunian", value: "68%", bar: 68 },
 ];
 
 export const donutSegments = [
-  { label: "Aktif", value: 623, color: "#8E1616" },
-  { label: "Baru", value: 112, color: "#E8C999" },
-  { label: "Non-aktif", value: 112, color: "#000000" },
+  { label: "Aktif", value: 623, color: "#8C1007" },
+  { label: "Baru", value: 112, color: "#c8a020" },
+  { label: "Non-aktif", value: 112, color: "#3E0703" },
 ];

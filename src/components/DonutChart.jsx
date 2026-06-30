@@ -17,7 +17,7 @@ const DonutChart = () => {
     return { ...s, dash, offset };
   });
   return (
-    <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-5">
+    <div className="bg-white rounded-2xl border border-gray-100 p-5">
       <SectionHeader title="Info Keanggotaan" />
       <div className="flex justify-center my-4">
         <svg width="120" height="120" viewBox="0 0 120 120">

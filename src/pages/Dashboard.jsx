@@ -71,7 +71,7 @@ const Dashboard = () => {
         <h1 className="text-[22px] font-black text-[#1D1616]">
           Dashboard Beranda
         </h1>
-        <button className="flex items-center gap-2 bg-white border border-[#E8C999]/60 rounded-xl px-4 py-2 text-[12.5px] text-[#5a3030] font-medium hover:bg-[#F8EEDF] transition-colors">
+        <button className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2 text-[12.5px] text-[#5a3030] font-medium hover:bg-gray-50 transition-colors">
           <span>📅</span> Jan 2026 – Mei 2026
           <ChevronDown size={13} className="text-[#9e7a6e]" />
         </button>
@@ -104,7 +104,7 @@ const Dashboard = () => {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-xl text-[12.5px] font-semibold transition-all
-              ${activeTab === tab ? "bg-[#8E1616] text-[#F8EEDF]" : "bg-white border border-[#E8C999]/60 text-gray-500 hover:bg-[#F8EEDF]"}`}
+              ${activeTab === tab ? "bg-[#8C1007] text-[#FFF0C4]" : "bg-white border border-gray-200 text-gray-500 hover:bg-gray-50"}`}
           >
             {tab === "members" ? "Pertumbuhan Anggota" : "Pendapatan Bulanan"}
           </button>

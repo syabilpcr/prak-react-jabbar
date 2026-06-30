@@ -7,12 +7,12 @@ const sizeStyles = {
 };
 
 const colorPool = [
-  "bg-[#8E1616] text-[#F8EEDF]",
+  "bg-[#8C1007] text-[#FFF0C4]",
   "bg-amber-600 text-white",
   "bg-green-700 text-white",
   "bg-blue-700 text-white",
   "bg-purple-700 text-white",
-  "bg-[#000000] text-[#F8EEDF]",
+  "bg-[#3E0703] text-[#FFF0C4]",
 ];
 
 function getColor(name) {

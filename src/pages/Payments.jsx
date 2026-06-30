@@ -51,7 +51,7 @@ const jenisTransaksiConfig = {
     nominal: 300000,
   },
   "Perpanjangan 3 Bulan": {
-    className: "bg-[#8E1616]/10 text-[#8E1616] border border-[#8E1616]/20",
+    className: "bg-[#D84040]/10 text-[#D84040] border border-[#D84040]/20",
     icon: Calendar,
     label: "3 Bulan",
     nominal: 800000,
@@ -330,11 +330,11 @@ const Payments = () => {
 
       {/* ── Tabel ── */}
       <div
-        className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
         {/* Header tabel */}
-        <div className="px-6 py-4 border-b border-[#E8C999]/40 flex flex-col gap-3">
+        <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-[#1D1616]">
@@ -358,7 +358,7 @@ const Payments = () => {
             <select
               value={filterJenis}
               onChange={handleFilterChange(setFilterJenis)}
-              className="px-3 py-1.5 bg-[#F8EEDF] border border-[#E8C999] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8E1616]/20"
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
             >
               <option value="all">Semua Jenis Transaksi</option>
               <option value="Perpanjangan 1 Bulan">Perpanjangan 1 Bulan</option>
@@ -427,7 +427,7 @@ const Payments = () => {
                           {jenisStyle.label}
                         </Badge>
                       </td>
-                      <td className="px-6 py-3.5 text-sm font-semibold text-[#8E1616]">
+                      <td className="px-6 py-3.5 text-sm font-semibold text-[#8C1007]">
                         Rp {(payment.nominal || 0).toLocaleString("id-ID")}
                       </td>
                       <td className="px-6 py-3.5 text-xs text-[#9e7a6e]">
@@ -449,7 +449,7 @@ const Payments = () => {
 
         {/* Pagination */}
         {filtered.length > 0 && (
-          <div className="px-6 py-4 border-t border-[#E8C999]/50 flex items-center justify-between">
+          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <p className="text-xs text-[#9e7a6e]">
               Showing {indexOfFirstItem + 1} to{" "}
               {Math.min(indexOfLastItem, filtered.length)} of {filtered.length}{" "}
@@ -550,7 +550,7 @@ const Payments = () => {
           {/* Input Component dari folder ui - komponen UI Shadcn */}
           <div>
             <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
-              ID Member <span className="text-[#8E1616] ml-1">*</span>
+              ID Member <span className="text-[#8C1007] ml-1">*</span>
             </label>
             <Input
               name="id_member"
@@ -594,7 +594,7 @@ const Payments = () => {
           />
           <div>
             <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
-              Nominal (Rp) <span className="text-[#8E1616] ml-1">*</span>
+              Nominal (Rp) <span className="text-[#8C1007] ml-1">*</span>
             </label>
             <Input
               name="nominal"

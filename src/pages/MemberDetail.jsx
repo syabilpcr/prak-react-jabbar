@@ -16,9 +16,9 @@ const statusConfig = {
 
 const getAvatarGradient = (char) => {
   const code = char ? char.toUpperCase().charCodeAt(0) : 65;
-  if (code % 4 === 0) return "from-[#8E1616] to-[#000000]";
-  if (code % 4 === 1) return "from-[#000000] to-[#8E1616]";
-  if (code % 4 === 2) return "from-[#8E1616] to-[#E8C999]";
+  if (code % 4 === 0) return "from-[#8C1007] to-[#D84040]";
+  if (code % 4 === 1) return "from-[#1D1616] to-[#3E0703]";
+  if (code % 4 === 2) return "from-[#6B00D7] to-[#9B59B6]";
   return "from-[#0D4F4F] to-[#1A8A8A]";
 };
 
@@ -44,7 +44,7 @@ export default function MemberDetail() {
           <p className="text-rose-700 text-sm font-medium">{error}</p>
           <button
             onClick={() => navigate("/members")}
-            className="mt-4 flex items-center gap-2 bg-[#8E1616] text-white px-4 py-2 rounded-xl text-xs font-semibold mx-auto hover:bg-[#6f1111] transition-all"
+            className="mt-4 flex items-center gap-2 bg-[#8C1007] text-white px-4 py-2 rounded-xl text-xs font-semibold mx-auto hover:bg-[#a01a0a] transition-all"
           >
             <ArrowLeft size={14} /> Kembali ke Members
           </button>
@@ -55,7 +55,7 @@ export default function MemberDetail() {
   if (!member)
     return (
       <div className="p-6 flex items-center justify-center min-h-[40vh] w-full">
-        <div className="w-6 h-6 border-2 border-[#8E1616] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#8C1007] border-t-transparent rounded-full animate-spin" />
       </div>
     );
 
@@ -106,7 +106,7 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Hero Card ── */}
-      <div className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
         {/* Top accent bar */}
         <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-50" />
@@ -133,8 +133,8 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Data Pribadi ── */}
-      <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-[#E8C999]/50">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
           Data Pribadi
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
@@ -150,8 +150,8 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Keanggotaan ── */}
-      <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-[#E8C999]/50">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
           Informasi Keanggotaan
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
@@ -161,7 +161,7 @@ export default function MemberDetail() {
               {item.badge ? (
                 <Badge type={statusCfg.type} dot>{item.value}</Badge>
               ) : (
-                <p className={`text-sm font-medium ${item.highlight ? "text-[#8E1616] text-lg font-bold font-mono" : "text-[#1D1616]"} ${item.mono && !item.highlight ? "font-mono" : ""}`}>
+                <p className={`text-sm font-medium ${item.highlight ? "text-[#8C1007] text-lg font-bold font-mono" : "text-[#1D1616]"} ${item.mono && !item.highlight ? "font-mono" : ""}`}>
                   {item.value}
                 </p>
               )}
@@ -171,8 +171,8 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Medis & Darurat ── */}
-      <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-[#E8C999]/50">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
           Catatan Medis & Kontak Darurat
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">

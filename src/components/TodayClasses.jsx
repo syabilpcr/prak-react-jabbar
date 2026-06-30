@@ -5,7 +5,7 @@ import { todayClasses } from "../data/dashboardData";
 const TodayClasses = () => {
   const classes = todayClasses;
   return (
-    <div className="bg-white rounded-2xl border border-[#E8C999]/50 p-5">
+    <div className="bg-white rounded-2xl border border-gray-100 p-5">
       <SectionHeader title="Kelas Hari Ini" />
       <div className="space-y-2.5">
         {classes.map((c) => {

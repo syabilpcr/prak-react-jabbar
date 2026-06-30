@@ -307,10 +307,10 @@ const Users = () => {
 
       {/* ── Tabel ── */}
       <div
-        className="bg-white rounded-2xl border border-[#E8C999]/50 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
-        <div className="px-6 py-4 border-b border-[#E8C999]/40 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
           <div>
             <p className="text-sm font-bold text-[#1D1616]">Daftar User</p>
             <p className="text-xs text-[#9e7a6e]">
@@ -372,12 +372,12 @@ const Users = () => {
 
                   <td className="px-6 py-3.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-[#8E1616] font-bold">
+                      <span className="font-mono text-xs text-[#8C1007] font-bold">
                         {visible ? item.password : "••••••••"}
                       </span>
                                             <button
                         onClick={() => togglePassword(item.id_user)}
-                        className="text-[#9e7a6e] hover:text-[#8E1616] transition-colors"
+                        className="text-[#9e7a6e] hover:text-[#8C1007] transition-colors"
                         title={visible ? "Sembunyikan" : "Tampilkan"}
                       >
                         {visible ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -389,7 +389,7 @@ const Users = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openEditModal(item)}
-                        className="p-1.5 rounded-lg text-[#8E1616] hover:bg-[#8E1616]/10 transition-colors"
+                        className="p-1.5 rounded-lg text-[#8C1007] hover:bg-[#8C1007]/10 transition-colors"
                         title="Edit"
                       >
                         <Edit size={15} />
