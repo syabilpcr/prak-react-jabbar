@@ -1,11 +1,15 @@
 import React, { Suspense, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Loading from "./components/Loading";
 
 // ── Layouts ───────────────────────────────────────────────────
 const MainLayout = React.lazy(() => import("./layouts/MainLayout"));
 const AuthLayout = React.lazy(() => import("./layouts/AuthLayout"));
 const MemberLayout = React.lazy(() => import("./layouts/MemberLayout"));
+const LandingLayout = React.lazy(() => import("./layouts/LandingLayout"));
+
+// ── Landing Page (publik, tanpa login) ──────────────────────────
+const LandingPage = React.lazy(() => import("./pages/LandingPage"));
 
 // ── Pages — Main ──────────────────────────────────────────────
 const Dashboard = React.lazy(() => import("./pages/Dashboard"));
@@ -60,10 +64,12 @@ function App() {
     <Suspense fallback={<div className="min-h-screen bg-[#1D1616]" />}>
       {showContent && (
         <Routes>
-          {/* ── MainLayout: Sidebar + Header ── */}
-          {/* Root → arahkan ke halaman login lebih dulu */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* ── LandingLayout: halaman publik (marketing) ── */}
+          <Route element={<LandingLayout />}>
+            <Route path="/" element={<LandingPage />} />
+          </Route>
 
+          {/* ── MainLayout: Sidebar + Header ── */}
           <Route element={<MainLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="members" element={<Members />} />
