@@ -1,0 +1,276 @@
+/* -----------------------------------------------------------
+   GLOBAL
+----------------------------------------------------------- */
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  color: #41431B;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: radial-gradient(circle at 20% 30%, rgba(174, 183, 132, 0.25), transparent 40%),
+              radial-gradient(circle at 80% 70%, rgba(122, 132, 80, 0.25), transparent 40%),
+              linear-gradient(135deg, #F8F3E1, #EDE4C5);
+
+  background-attachment: fixed;
+  overflow: hidden;
+}
+
+/* -----------------------------------------------------------
+   BACKGROUND DECOR
+----------------------------------------------------------- */
+body::before,
+body::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  filter: blur(90px);
+  z-index: 0;
+}
+
+body::before {
+  background: #AEB784;
+  top: -60px;
+  left: -60px;
+}
+
+body::after {
+  background: #7A8450;
+  bottom: -60px;
+  right: -60px;
+}
+
+/* -----------------------------------------------------------
+   CONTAINER
+----------------------------------------------------------- */
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+}
+
+/* -----------------------------------------------------------
+   HEADER
+----------------------------------------------------------- */
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.header p {
+  margin-top: 5px;
+  font-size: 13px;
+  color: #777;
+}
+
+/* -----------------------------------------------------------
+   CARD
+----------------------------------------------------------- */
+.card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+
+  border-radius: 18px;
+  padding: 25px;
+
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.15);
+}
+
+/* -----------------------------------------------------------
+   PROFILE
+----------------------------------------------------------- */
+.profile {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile img {
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 3px solid #AEB784;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: 0.3s;
+}
+
+.profile img:hover {
+  transform: scale(1.05);
+}
+
+.profile h2 {
+  margin: 10px 0 5px;
+  font-size: 18px;
+}
+
+.profile span {
+  font-size: 13px;
+  color: #777;
+}
+
+/* -----------------------------------------------------------
+   INFO LIST
+----------------------------------------------------------- */
+.info {
+  margin-top: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 10px 14px;
+  margin: 6px 0;
+
+  background: #F9F6E8;
+  border-radius: 10px;
+  border: 1px solid #E3DBBB;
+
+  font-size: 13.5px;
+  transition: 0.2s;
+}
+
+.info-item:hover {
+  background: #EFE7C7;
+  transform: translateX(3px);
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.info-value {
+  color: #555;
+  font-weight: 500;
+}
+
+/* -----------------------------------------------------------
+   ICON
+----------------------------------------------------------- */
+i[data-lucide] {
+  width: 17px;
+  height: 17px;
+  stroke-width: 2;
+  color: #7A8450;
+  transition: 0.2s;
+}
+
+.info-item:hover i[data-lucide] {
+  color: #41431B;
+  transform: scale(1.1);
+}
+
+/* -----------------------------------------------------------
+   QUOTE
+----------------------------------------------------------- */
+.quote {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.quote p {
+  font-style: italic;
+  color: #555;
+  margin: 0;
+}
+
+.quote h3 {
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+/* -----------------------------------------------------------
+   FOOTER
+----------------------------------------------------------- */
+.footer {
+  text-align: center;
+  margin-top: 15px;
+  color: #888;
+  font-size: 12px;
+}
+
+/* -----------------------------------------------------------
+   QUOTE (UPGRADE)
+----------------------------------------------------------- */
+.quote {
+  margin-top: 25px;
+}
+
+.quote-box {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #E3DBBB;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.quote-icon {
+  font-size: 30px;
+  color: #AEB784;
+  position: absolute;
+  top: -10px;
+  left: 15px;
+}
+
+.quote-box p {
+  font-style: italic;
+  color: #555;
+  margin: 10px 0;
+}
+
+.quote-box h3 {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #41431B;
+}
+
+/* -----------------------------------------------------------
+   FOOTER (UPGRADE)
+----------------------------------------------------------- */
+.footer {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 10px;
+}
+
+.footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.footer small {
+  display: block;
+  margin-top: 4px;
+  color: #999;
+  font-size: 11px;
+}
