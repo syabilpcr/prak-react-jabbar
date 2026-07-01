@@ -2,12 +2,15 @@ import LandingHero from "../components/member/sections/LandingHero";
 import LandingAbout from "../components/member/sections/LandingAbout";
 import LandingServices from "../components/member/sections/LandingServices";
 import LandingTrainers from "../components/member/sections/LandingTrainers";
+import LandingFAQ from "../components/member/sections/LandingFAQ";
 import LandingContact from "../components/member/sections/LandingContact";
 
-// ── PRD v2 (Improved) ────────────────────────────────────────────
-// Tambahan dari v1: Area MIDDLE mulai diisi — About (problem/solution
-// & trust lewat statistik), Services (feature section, 1 card = 1 ide),
-// Trainers (bukti sosial). FAQ menyusul di PRD v3.
+// ── PRD v3 (Complete) ────────────────────────────────────────────
+// Landing Page final, lengkap sesuai struktur AIDA di materi:
+//   Area TOP    → Navbar + Hero                (Attention)
+//   Area MIDDLE → About + Services + Trainers  (Interest)
+//                 FAQ                          (Desire)
+//   Area BOTTOM → CTA akhir + Footer           (Action)
 const scrollTo = (id) => {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -23,6 +26,7 @@ export default function LandingPage() {
       <LandingAbout />
       <LandingServices />
       <LandingTrainers />
+      <LandingFAQ />
 
       {/* Area BOTTOM */}
       <LandingContact scrollTo={scrollTo} />
