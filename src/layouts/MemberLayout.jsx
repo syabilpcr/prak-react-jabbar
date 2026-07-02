@@ -7,7 +7,7 @@ const navItems = [
   { label: "Beranda", target: "home" },
   { label: "Tentang", target: "about" },
   { label: "Layanan", target: "services" },
-  { label: "Pelatih", target: "trainers" },
+  { label: "Paket", target: "pricing" },
   { label: "FAQ", target: "faq" },
 ];
 

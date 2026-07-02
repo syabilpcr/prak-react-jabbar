@@ -1,14 +1,14 @@
 import LandingHero from "../components/member/sections/LandingHero";
 import LandingAbout from "../components/member/sections/LandingAbout";
 import LandingServices from "../components/member/sections/LandingServices";
-import LandingTrainers from "../components/member/sections/LandingTrainers";
+import LandingPricing from "../components/member/sections/LandingPricing";
 import LandingFAQ from "../components/member/sections/LandingFAQ";
 import LandingContact from "../components/member/sections/LandingContact";
 
 // ── PRD v3 (Complete) ────────────────────────────────────────────
 // Landing Page final, lengkap sesuai struktur AIDA di materi:
 //   Area TOP    → Navbar + Hero                (Attention)
-//   Area MIDDLE → About + Services + Trainers  (Interest)
+//   Area MIDDLE → About + Services + Pricing   (Interest)
 //                 FAQ                          (Desire)
 //   Area BOTTOM → CTA akhir + Footer           (Action)
 const scrollTo = (id) => {
@@ -25,7 +25,7 @@ export default function LandingPage() {
       {/* Area MIDDLE */}
       <LandingAbout />
       <LandingServices />
-      <LandingTrainers />
+      <LandingPricing />
       <LandingFAQ />
 
       {/* Area BOTTOM */}
