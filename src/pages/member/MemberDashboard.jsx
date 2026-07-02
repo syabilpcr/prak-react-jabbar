@@ -1,7 +1,11 @@
 import LandingHero from "../../components/member/sections/LandingHero";
 import LandingAbout from "../../components/member/sections/LandingAbout";
 import LandingServices from "../../components/member/sections/LandingServices";
+<<<<<<< HEAD
 import LandingTrainers from "../../components/member/sections/LandingTrainers";
+=======
+import LandingPricing from "../../components/member/sections/LandingPricing";
+>>>>>>> master
 import LandingFAQ from "../../components/member/sections/LandingFAQ";
 import LandingContact from "../../components/member/sections/LandingContact";
 
@@ -17,7 +21,11 @@ export default function MemberDashboard() {
       <LandingHero scrollTo={scrollTo} />
       <LandingAbout />
       <LandingServices />
+<<<<<<< HEAD
       <LandingTrainers />
+=======
+      <LandingPricing />
+>>>>>>> master
       <LandingFAQ />
       <LandingContact scrollTo={scrollTo} />
     </div>
