@@ -60,8 +60,7 @@ export default function LandingPricing() {
   const onField = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   // Konversi durasi terpilih ke format yang dipakai admin ("harian" | "N-bulan")
-  const durasiKey =
-    selected === "harian" ? "harian" : `${selected}-bulan`;
+  // durasiKey tidak dipakai saat ini (menghilangkan error lint no-unused-vars).
   const durasiDays =
     selected === "harian" ? 1 : (typeof selected === "number" ? selected * 30 : 30);
 

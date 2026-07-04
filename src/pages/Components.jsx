@@ -63,6 +63,12 @@ const statusBadgeType = {
   Expired: "danger",
 };
 
+const planBadgeType = {
+  Gold: "success",
+  Silver: "warning",
+  Bronze: "danger",
+};
+
 // ── Komponen Section Wrapper ──────────────────────────────────
 const Section = ({ title, desc, children }) => (
   <div

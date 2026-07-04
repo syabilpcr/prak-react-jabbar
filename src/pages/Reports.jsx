@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+
 import {
   Download,
   Calendar,
@@ -23,7 +24,6 @@ import { rawRevenueData, rawMemberData, rawAttendanceData } from "../data/report
 const Reports = () => {
   const [reportType, setReportType] = useState("revenue");
   const [dateRange, setDateRange] = useState("monthly");
-  const [currentPage, setCurrentPage] = useState(0);
   const [isExporting, setIsExporting] = useState(false);
 
   const getChartData = () => {

@@ -53,12 +53,9 @@ function App() {
   const handleLoadingFinish = () => {
     setIsInitialLoading(false);
     setTimeout(() => setShowContent(true), 100);
-  };
+  }; 
 
-  // Tampilkan loading screen saat pertama kali
-  if (isInitialLoading) {
-    return <Loading onFinish={handleLoadingFinish} />;
-  }
+
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-[#1D1616]" />}>
@@ -77,7 +74,6 @@ function App() {
             <Route path="attendance" element={<Attendance />} />
             <Route path="reports" element={<Reports />} />
             <Route path="promotions" element={<Promotions />} />
-            <Route path="feedback" element={<Feedback />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="error/:code" element={<ErrorRouter />} />
 

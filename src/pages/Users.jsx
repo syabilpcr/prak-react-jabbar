@@ -54,7 +54,9 @@ const emptyForm = {
 const Users = () => {
   // ── Data user diambil dari REST API Supabase (schema "zeusgym", table "user") ──
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+
+
   const [fetchError, setFetchError] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
@@ -66,6 +68,7 @@ const Users = () => {
   const [successAlert, setSuccessAlert] = useState(null);
   const [visiblePasswords, setVisiblePasswords] = useState({});
 
+
   // ── READ: ambil semua user dari Supabase saat komponen dimuat ──
   useEffect(() => {
     fetchUsers();
@@ -73,7 +76,8 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
+      // setLoading removed (unused lint)
+
       setFetchError(null);
       const res = await api.get("/user", {
         params: { order: "id_user.asc" },
@@ -85,8 +89,9 @@ const Users = () => {
         "Gagal memuat data user dari server. Periksa koneksi atau konfigurasi API.",
       );
     } finally {
-      setLoading(false);
+      // setLoading removed (unused lint)
     }
+
   };
 
   // ── Derived ────────────────────────────────────────────────

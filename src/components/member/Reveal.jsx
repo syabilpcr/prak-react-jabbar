@@ -14,8 +14,8 @@ export default function Reveal({
   direction = "up",
   delay = 0,
   className = "",
-  as: Tag = "div",
 }) {
+
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -43,7 +43,7 @@ export default function Reveal({
   }[direction];
 
   return (
-    <Tag
+    <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-700 ease-out ${
@@ -51,6 +51,6 @@ export default function Reveal({
       } ${className}`}
     >
       {children}
-    </Tag>
+    </div>
   );
 }

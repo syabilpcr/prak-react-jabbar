@@ -50,8 +50,8 @@ const Attendance = () => {
   const [fetchError, setFetchError] = useState(null);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [scanning, setScanning] = useState(false);
   const [scannedMember, setScannedMember] = useState(null);
+
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);

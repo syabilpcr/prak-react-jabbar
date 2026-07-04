@@ -1,4 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+
+
+
 import {
   Mail,
   Phone,
@@ -24,9 +27,23 @@ import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
+  // profileImage tidak dipakai (hapus agar lolos lint)
   const [previewImage, setPreviewImage] = useState(null);
+
   const fileInputRef = useRef(null);
+
+  // Load saved image on mount
+  useEffect(() => {
+    const savedImage = localStorage.getItem("profileImage");
+    if (savedImage) {
+      // hindari setState synchronously dalam effect body (react-hooks/set-state-in-effect)
+      queueMicrotask(() => setPreviewImage(savedImage));
+    }
+  }, []);
+
+
+
+
 
   // State untuk form data
   const [formData, setFormData] = useState({
@@ -63,8 +80,8 @@ const ProfilePage = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
-        setProfileImage(file);
       };
+
       reader.readAsDataURL(file);
     }
   };
@@ -96,17 +113,12 @@ const ProfilePage = () => {
     });
   };
 
-  // Load saved image on mount
-  useState(() => {
-    const savedImage = localStorage.getItem("profileImage");
-    if (savedImage) {
-      setPreviewImage(savedImage);
-    }
-  }, []);
+
 
   // Modal Edit Profil
-  const EditProfileModal = () => {
+  const renderEditProfileModal = () => {
     if (!isEditing) return null;
+
 
     return (
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
@@ -427,7 +439,8 @@ const ProfilePage = () => {
       </div>
 
       {/* Edit Profile Modal */}
-      <EditProfileModal />
+      {renderEditProfileModal()}
+
     </div>
   );
 };

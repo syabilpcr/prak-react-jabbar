@@ -21,8 +21,10 @@ export default function MemberWorkouts() {
 
   const toggle = (idx) =>
     setExercises((prev) =>
+
       prev.map((e, i) => (i === idx ? { ...e, done: !e.done } : e)),
     );
+
 
   const completed = exercises.filter((e) => e.done).length;
   const progress = Math.round((completed / exercises.length) * 100);
@@ -87,10 +89,11 @@ export default function MemberWorkouts() {
           <Target size={18} className="text-[#8E1616]" /> Checklist Latihan
         </h2>
         <div className="space-y-2">
-          {exercises.map((e, i) => (
+          {exercises.map((e, idx) => (
             <button
               key={e.name}
-              onClick={() => toggle(i)}
+              onClick={() => toggle(idx)}
+
               className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-300
                 ${
                   e.done
@@ -121,7 +124,8 @@ export default function MemberWorkouts() {
       <div className="animate-slide-up delay-300">
         <h2 className="text-lg font-black text-[#1D1616] mb-4">Program Latihan</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {programs.map((p, i) => (
+          {programs.map((p) => (
+
             <div
               key={p.name}
               className={`group relative overflow-hidden rounded-3xl bg-gradient-to-br ${p.color} p-5 text-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
@@ -143,6 +147,7 @@ export default function MemberWorkouts() {
               </div>
             </div>
           ))}
+
         </div>
       </div>
     </div>

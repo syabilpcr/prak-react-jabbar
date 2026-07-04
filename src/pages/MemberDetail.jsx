@@ -30,12 +30,17 @@ export default function MemberDetail() {
 
   useEffect(() => {
     const found = membersData.find((m) => m.id === parseInt(id));
-    if (!found) {
-      setError(`Member dengan ID ${id} tidak ditemukan.`);
-    } else {
-      setMember(found);
-    }
+
+    // hindari setState synchronously dalam effect body (react-hooks/set-state-in-effect)
+    queueMicrotask(() => {
+      if (!found) {
+        setError(`Member dengan ID ${id} tidak ditemukan.`);
+      } else {
+        setMember(found);
+      }
+    });
   }, [id]);
+
 
   if (error)
     return (

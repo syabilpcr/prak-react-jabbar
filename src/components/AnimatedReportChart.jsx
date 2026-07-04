@@ -10,19 +10,32 @@ const AnimatedReportChart = ({
   const [animationProgress, setAnimationProgress] = useState(0);
 
   useEffect(() => {
-    setAnimationProgress(0);
+    let animationFrameId;
     let startTime = null;
     const duration = 1500;
+
     const animate = (timestamp) => {
-      if (!startTime) startTime = timestamp;
+      if (startTime === null) startTime = timestamp;
       const elapsed = timestamp - startTime;
       const progress = Math.min(1, elapsed / duration);
-      setAnimationProgress(progress);
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
 
-    return () => setAnimationProgress(0);
+      setAnimationProgress(progress);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+
+    // Schedule updates after the current render
+    animationFrameId = requestAnimationFrame((timestamp) => {
+      startTime = timestamp;
+      setAnimationProgress(0);
+      animationFrameId = requestAnimationFrame(animate);
+    });
+
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }, [data]);
 
   useEffect(() => {

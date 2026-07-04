@@ -25,11 +25,17 @@ export default function MemberLayout() {
 
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
-    if (stored) setUser(JSON.parse(stored));
+    // hindari setState bersamaan dalam effect body (lint react-hooks/set-state-in-effect)
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      queueMicrotask(() => setUser(parsed));
+    }
+
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");

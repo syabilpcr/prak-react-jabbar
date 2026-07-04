@@ -4,8 +4,6 @@ import { Dumbbell } from "lucide-react";
 export default function Loading({ onFinish, minDuration = 5000 }) {
   const [progress, setProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Menyiapkan Sistem Zeus Gym");
-  const [isComplete, setIsComplete] = useState(false);
-
   useEffect(() => {
     const startTime = Date.now();
     let animationFrameId;
@@ -39,7 +37,6 @@ export default function Loading({ onFinish, minDuration = 5000 }) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
         // Sudah 100%
-        setIsComplete(true);
         // Beri waktu 500ms untuk menampilkan 100%
         timeoutId = setTimeout(() => {
           if (onFinish) {

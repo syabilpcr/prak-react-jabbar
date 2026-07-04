@@ -1,15 +1,23 @@
 @import "tailwindcss";
 
+/* Font declarations.
+   Kalau file font di public/fonts rusak/format tidak valid,
+   browser akan menolak mendecode font (muncul warning seperti
+   "Failed to decode downloaded font"). */
 @font-face {
   font-family: "Barlow";
-  src: url("/fonts/Barlow-Regular.ttf");
+  src: url("/fonts/Barlow-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
 }
 
 @font-face {
   font-family: "Poppins";
-  src: url("/fonts/Poppins-Bold.ttf");
-  font-weight: bold;
+  src: url("/fonts/Poppins-regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
 }
+
 
 body {
   font-family: "Barlow", sans-serif;

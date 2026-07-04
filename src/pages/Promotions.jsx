@@ -32,12 +32,17 @@ const Promotions = () => {
   const [filterPromoStatus, setFilterPromoStatus] = useState("all");
   const [showReferralModal, setShowReferralModal] = useState(false);
   const [referralActive, setReferralActive] = useState(false);
-  const [referralCode, setReferralCode] = useState(
-    "ZEUSREF" + Math.floor(Math.random() * 10000),
-  );
-  const [referralLink, setReferralLink] = useState(
-    `https://zeusgym.com/ref/${"ZEUSREF" + Math.floor(Math.random() * 10000)}`,
-  );
+  const makeReferral = () => {
+    const code = "ZEUSREF" + Math.floor(Math.random() * 10000);
+    return {
+      code,
+      link: `https://zeusgym.com/ref/${code}`,
+    };
+  };
+
+  const [referralCode, setReferralCode] = useState(() => makeReferral().code);
+  const [referralLink, setReferralLink] = useState(() => makeReferral().link);
+
   const [copied, setCopied] = useState(false);
   const [referralStats] = useState({
     totalReferrals: 0,

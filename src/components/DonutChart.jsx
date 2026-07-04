@@ -8,14 +8,18 @@ const DonutChart = () => {
     cx = 60,
     cy = 60,
     circ = 2 * Math.PI * r;
-  let cumulative = 0;
-  const slices = segments.map((s) => {
-    const pct = s.value / total;
-    const dash = pct * circ;
-    const offset = -cumulative * circ;
-    cumulative += pct;
-    return { ...s, dash, offset };
-  });
+  const slices = segments.reduce(
+    (acc, s) => {
+      const pct = s.value / total;
+      const dash = pct * circ;
+      const offset = -acc.cumulative * circ;
+      return {
+        cumulative: acc.cumulative + pct,
+        slices: [...acc.slices, { ...s, dash, offset }],
+      };
+    },
+    { cumulative: 0, slices: [] },
+  ).slices;
   return (
     <div className="bg-white rounded-2xl border border-gray-100 p-5">
       <SectionHeader title="Info Keanggotaan" />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import FeedbackModal from "../components/FeedbackModal";
+import FeedbackModal from "../../components/FeedbackModal";
 import {
   Star,
   ThumbsUp,
@@ -10,19 +10,18 @@ import {
 } from "lucide-react";
 
 // ── Components ────────────────────────────────────────────────
-import SearchBar from "../components/SearchBar";
-import Badge from "../components/Badge";
-import Avatar from "../components/Avatar";
-import Card from "../components/Card";
-import EmptyState from "../components/EmptyState";
-import Button from "../components/Button";
-import StatCard from "../components/StatCard";
-import ProgressBar from "../components/ProgressBar";
+import SearchBar from "../../components/SearchBar";
+import Badge from "../../components/Badge";
+import Avatar from "../../components/Avatar";
+import Button from "../../components/Button";
+import StatCard from "../../components/StatCard";
+import ProgressBar from "../../components/ProgressBar";
+import EmptyState from "../../components/EmptyState";
 
 // Import data dari file JSON
-import feedbackData from "../data/feedbackData.js";
+import feedbackData from "../../data/feedbackData.js";
 
-const Feedback = () => {
+const MemberFeedback = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -34,7 +33,7 @@ const Feedback = () => {
       ? feedbackData
       : feedbackData.feedbacks || feedbackData.data || [];
 
-    // hindari setState synchronously dalam effect body (react-hooks/set-state-in-effect)
+    // jadikan update state asynchronous untuk menghindari react-hooks/set-state-in-effect
     queueMicrotask(() => {
       setFeedbacks(data);
       setLoading(false);
@@ -54,11 +53,13 @@ const Feedback = () => {
     setFeedbacks([fb, ...feedbacks]);
   };
 
-  const handleReply = (feedback) =>
+  const handleReply = (feedback) => {
     alert(`Balasan untuk umpan balik dari ${feedback.memberName}`);
+  };
 
-  const handleDelete = (id) =>
+  const handleDelete = (id) => {
     setFeedbacks(feedbacks.filter((f) => f.id !== id));
+  };
 
   const filtered = feedbacks
     .filter((f) => filter === "all" || f.rating === parseInt(filter))
@@ -88,7 +89,10 @@ const Feedback = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Loader size={40} className="text-[#8E1616] animate-spin mx-auto mb-4" />
+          <Loader
+            size={40}
+            className="text-[#8E1616] animate-spin mx-auto mb-4"
+          />
           <p className="text-gray-500">Memuat data umpan balik...</p>
         </div>
       </div>
@@ -97,7 +101,6 @@ const Feedback = () => {
 
   return (
     <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen">
-      {/* ── Page Title ── */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[22px] font-black text-[#1D1616]">Umpan Balik</h1>
@@ -105,12 +108,15 @@ const Feedback = () => {
             Kelola umpan balik dan ulasan anggota
           </p>
         </div>
-        <Button type="primary" icon={MessageCircle} onClick={() => setShowFeedbackModal(true)}>
+        <Button
+          type="primary"
+          icon={MessageCircle}
+          onClick={() => setShowFeedbackModal(true)}
+        >
           Tulis Umpan Balik
         </Button>
       </div>
 
-      {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           icon={Star}
@@ -146,13 +152,16 @@ const Feedback = () => {
         />
       </div>
 
-      {/* Rating Distribution */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+      <div
+        className="bg-white rounded-2xl border border-gray-100 p-5"
+        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      >
         <p className="text-sm font-bold text-[#1D1616] mb-4">Distribusi Rating</p>
         <div className="space-y-3">
           {[5, 4, 3, 2, 1].map((rate) => {
             const count = ratingDistribution[rate];
-            const percentage = totalFeedbacks > 0 ? Math.round((count / totalFeedbacks) * 100) : 0;
+            const percentage =
+              totalFeedbacks > 0 ? Math.round((count / totalFeedbacks) * 100) : 0;
             return (
               <ProgressBar
                 key={rate}
@@ -165,8 +174,10 @@ const Feedback = () => {
         </div>
       </div>
 
-      {/* Filter Section */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-4" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+      <div
+        className="bg-white rounded-2xl border border-gray-100 p-4"
+        style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
+      >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex gap-2">
             {["all", "5", "4", "3", "2", "1"].map((f) => (
@@ -192,7 +203,6 @@ const Feedback = () => {
         </div>
       </div>
 
-      {/* Feedbacks List */}
       <div className="space-y-3">
         {filtered.length > 0 ? (
           filtered.map((feedback) => (
@@ -211,7 +221,11 @@ const Feedback = () => {
                         <Star
                           key={i}
                           size={12}
-                          className={i < feedback.rating ? "fill-[#D84040] text-[#D84040]" : "text-gray-300"}
+                          className={
+                            i < feedback.rating
+                              ? "fill-[#D84040] text-[#D84040]"
+                              : "text-gray-300"
+                          }
                         />
                       ))}
                     </div>
@@ -226,10 +240,20 @@ const Feedback = () => {
               </div>
               <p className="text-[#5a3030] text-sm mt-4">{feedback.comment}</p>
               <div className="flex items-center gap-4 mt-4">
-                <Button type="ghost" size="sm" icon={Reply} onClick={() => handleReply(feedback)}>
+                <Button
+                  type="ghost"
+                  size="sm"
+                  icon={Reply}
+                  onClick={() => handleReply(feedback)}
+                >
                   Balas ({feedback.replies || 0})
                 </Button>
-                <Button type="ghost" size="sm" icon={Trash2} onClick={() => handleDelete(feedback.id)}>
+                <Button
+                  type="ghost"
+                  size="sm"
+                  icon={Trash2}
+                  onClick={() => handleDelete(feedback.id)}
+                >
                   Hapus
                 </Button>
               </div>
@@ -253,4 +277,5 @@ const Feedback = () => {
   );
 };
 
-export default Feedback;
+export default MemberFeedback;
+
