@@ -1,14 +1,14 @@
 import React, { Suspense, useState, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Dumbbell, LogOut, Menu, X } from "lucide-react";
 
-// ── Menu navigasi (scroll ke section di halaman beranda) ──────
 const navItems = [
-  { label: "Beranda", target: "home" },
-  { label: "Tentang", target: "about" },
-  { label: "Layanan", target: "services" },
-  { label: "Paket", target: "pricing" },
-  { label: "FAQ", target: "faq" },
+  { label: "Beranda", type: "scroll", target: "home" },
+  { label: "Tentang", type: "scroll", target: "about" },
+  { label: "Promosi", type: "scroll", target: "promotions" },
+  { label: "Paket", type: "scroll", target: "pricing" },
+  { label: "FAQ", type: "scroll", target: "faq" },
+  { label: "Umpan Balik", type: "scroll", target: "feedback" },
 ];
 
 const LoadingFallback = () => (
@@ -19,6 +19,7 @@ const LoadingFallback = () => (
 
 export default function MemberLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [scrolled, setScrolled] = useState(false);
@@ -44,8 +45,25 @@ export default function MemberLayout() {
 
   const scrollTo = (id) => {
     setMobileOpen(false);
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (location.pathname !== "/member") {
+      navigate("/member");
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+    } else {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleNavClick = (item) => {
+    setMobileOpen(false);
+    if (item.type === "route") {
+      navigate(item.target);
+    } else {
+      scrollTo(item.target);
+    }
   };
 
   return (
@@ -83,8 +101,13 @@ export default function MemberLayout() {
               {navItems.map((item) => (
                 <button
                   key={item.target}
-                  onClick={() => scrollTo(item.target)}
-                  className="text-sm text-white/60 hover:text-white px-4 py-1.5 rounded-full hover:bg-white/[0.06] transition-colors"
+                  onClick={() => handleNavClick(item)}
+                  className={`text-sm px-4 py-1.5 rounded-full transition-colors cursor-pointer
+                    ${
+                      location.pathname === item.target
+                        ? "bg-[#D84040] text-white font-bold"
+                        : "text-white/60 hover:text-white hover:bg-white/[0.06]"
+                    }`}
                 >
                   {item.label}
                 </button>
@@ -98,13 +121,13 @@ export default function MemberLayout() {
               </span>
               <button
                 onClick={() => scrollTo("contact")}
-                className="bg-[#D84040] hover:bg-[#8E1616] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors"
+                className="bg-[#D84040] hover:bg-[#8E1616] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors cursor-pointer"
               >
                 Free Trial
               </button>
               <button
                 onClick={handleLogout}
-                className="w-9 h-9 rounded-full border border-white/15 hover:border-white/40 text-white/70 hover:text-white flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-full border border-white/15 hover:border-white/40 text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
                 title="Keluar"
               >
                 <LogOut size={15} />
@@ -127,21 +150,26 @@ export default function MemberLayout() {
             {navItems.map((item) => (
               <button
                 key={item.target}
-                onClick={() => scrollTo(item.target)}
-                className="block text-base text-white/70 hover:text-white transition-colors"
+                onClick={() => handleNavClick(item)}
+                className={`block w-full text-left text-base transition-colors
+                  ${
+                    location.pathname === item.target
+                      ? "text-[#D84040] font-bold"
+                      : "text-white/70 hover:text-white"
+                  }`}
               >
                 {item.label}
               </button>
             ))}
             <button
               onClick={() => scrollTo("contact")}
-              className="w-full bg-[#D84040] text-white text-sm font-semibold px-5 py-3 rounded-full"
+              className="w-full bg-[#D84040] text-white text-sm font-semibold px-5 py-3 rounded-full cursor-pointer"
             >
               Free Trial
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors cursor-pointer"
             >
               <LogOut size={15} /> Keluar
             </button>

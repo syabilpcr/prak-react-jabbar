@@ -94,7 +94,7 @@ export default function MemberDetail() {
   return (
     <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen w-full">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-slide-down">
         <div>
           <h1 className="text-[22px] font-black text-[#1D1616]">Detail Anggota</h1>
           <p className="text-[12px] text-[#9e7a6e] mt-0.5">
@@ -103,7 +103,7 @@ export default function MemberDetail() {
         </div>
         <button
           onClick={() => navigate("/members")}
-          className="inline-flex items-center gap-2 font-semibold bg-white hover:bg-[#f8f3ee] text-[#5a3030] border border-[#e8dfd6] px-4 py-2.5 text-sm rounded-xl transition-all"
+          className="inline-flex items-center gap-2 font-semibold bg-white hover:bg-[#f8f3ee] text-[#5a3030] border border-[#e8dfd6] px-4 py-2.5 text-sm rounded-xl transition-all hover:scale-[1.02] shadow-sm hover:shadow"
         >
           <ArrowLeft size={15} />
           Kembali
@@ -111,7 +111,7 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Hero Card ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-slide-up delay-75 shadow-md hover:shadow-lg transition-shadow duration-300">
         {/* Top accent bar */}
         <div className={`h-24 bg-gradient-to-r ${gradient} relative`}>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] opacity-50" />
@@ -120,7 +120,7 @@ export default function MemberDetail() {
         <div className="px-8 pb-6 -mt-10 relative">
           <div className="flex items-end gap-5">
             {/* Avatar */}
-            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-lg`}>
+            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-2xl font-bold border-4 border-white shadow-lg animate-bounce-in`}>
               {nama ? nama.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() : "MB"}
             </div>
             
@@ -130,7 +130,7 @@ export default function MemberDetail() {
                   <h2 className="text-xl font-bold text-[#1D1616]">{nama}</h2>
                   <p className="text-sm text-[#9e7a6e] font-mono mt-0.5">{member.id_member || member.code}</p>
                 </div>
-                <Badge type={statusCfg.type} dot>{statusCfg.label}</Badge>
+                <Badge type={statusCfg.type} dot className="animate-pulse-ring">{statusCfg.label}</Badge>
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Data Pribadi ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-slide-up delay-100 hover-lift" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
           Data Pribadi
         </h3>
@@ -146,7 +146,7 @@ export default function MemberDetail() {
           {personalInfo.map((item) => (
             <div key={item.label} className={item.wide ? "md:col-span-2" : ""}>
               <p className="text-[10px] text-[#9e7a6e] uppercase font-bold tracking-wider mb-1">{item.label}</p>
-              <p className={`text-sm text-[#1D1616] font-medium ${item.mono ? "font-mono" : ""}`}>
+              <p className={`text-sm text-[#1D1616] font-semibold ${item.mono ? "font-mono" : ""}`}>
                 {item.value}
               </p>
             </div>
@@ -155,7 +155,7 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Keanggotaan ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-slide-up delay-150 hover-lift" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
           Informasi Keanggotaan
         </h3>
@@ -166,7 +166,7 @@ export default function MemberDetail() {
               {item.badge ? (
                 <Badge type={statusCfg.type} dot>{item.value}</Badge>
               ) : (
-                <p className={`text-sm font-medium ${item.highlight ? "text-[#8C1007] text-lg font-bold font-mono" : "text-[#1D1616]"} ${item.mono && !item.highlight ? "font-mono" : ""}`}>
+                <p className={`text-sm font-medium ${item.highlight ? "text-[#8C1007] text-lg font-black font-mono animate-glow-text" : "text-[#1D1616] font-semibold"} ${item.mono && !item.highlight ? "font-mono" : ""}`}>
                   {item.value}
                 </p>
               )}
@@ -176,7 +176,7 @@ export default function MemberDetail() {
       </div>
 
       {/* ── Medis & Darurat ── */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 animate-slide-up delay-200 hover-lift" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h3 className="text-sm font-bold text-[#1D1616] mb-5 pb-3 border-b border-gray-100">
           Catatan Medis & Kontak Darurat
         </h3>
@@ -184,7 +184,7 @@ export default function MemberDetail() {
           {emergencyInfo.map((item) => (
             <div key={item.label}>
               <p className="text-[10px] text-[#9e7a6e] uppercase font-bold tracking-wider mb-1">{item.label}</p>
-              <p className={`text-sm text-[#1D1616] font-medium ${item.mono ? "font-mono" : ""}`}>
+              <p className={`text-sm text-[#1D1616] font-semibold ${item.mono ? "font-mono" : ""}`}>
                 {item.value}
               </p>
             </div>

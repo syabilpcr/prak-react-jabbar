@@ -1,217 +1,147 @@
 import { useEffect, useState } from "react";
-import { Dumbbell } from "lucide-react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function Loading({ onFinish, minDuration = 5000 }) {
+export default function Loading({ onFinish, minDuration = 3500 }) {
   const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState("Menyiapkan Sistem Zeus Gym");
+  const [currentMessage, setCurrentMessage] = useState("ZEUS SYSTEM BOOT");
+  const [isExiting, setIsExiting] = useState(false);
+
   useEffect(() => {
     const startTime = Date.now();
     let animationFrameId;
-    let timeoutId;
 
     const loadingMessages = [
-      "Menyiapkan Sistem Zeus Gym",
-      "Memuat Data Anggota...",
-      "Menyinkronkan Pembayaran...",
-      "Memeriksa Absensi Hari Ini...",
-      "Memuat Laporan Terbaru...",
-      "Mempersiapkan Dashboard...",
-      "Hampir Selesai...",
-      "Selamat Datang di Zeus Gym! "
+      "ZEUS SYSTEM BOOT",
+      "ESTABLISHING SECURE CONNECTION...",
+      "FETCHING DATABASE SCHEMAS...",
+      "AUTHENTICATING ADMIN ACCESS...",
+      "SYNCHRONIZING SYSTEM DATA...",
+      "BUILDING WORKSPACE INTERFACE...",
+      "PREPARING SECURE PROTOCOLS...",
+      "ACCESS GRANTED",
     ];
 
     const updateProgress = () => {
       const elapsed = Date.now() - startTime;
       let percentage = Math.min((elapsed / minDuration) * 100, 100);
-      
       setProgress(percentage);
 
-      // Update message based on progress
       const messageIndex = Math.min(
         Math.floor(percentage / (100 / loadingMessages.length)),
         loadingMessages.length - 1
       );
-      setLoadingText(loadingMessages[messageIndex]);
+      setCurrentMessage(loadingMessages[messageIndex]);
 
       if (percentage < 100) {
         animationFrameId = requestAnimationFrame(updateProgress);
       } else {
-        // Sudah 100%
-        // Beri waktu 500ms untuk menampilkan 100%
-        timeoutId = setTimeout(() => {
-          if (onFinish) {
-            console.log("Loading 100% selesai, memanggil onFinish");
-            onFinish();
-          }
+        setTimeout(() => {
+          onFinish();
         }, 500);
       }
     };
 
-    // Mulai animasi
     animationFrameId = requestAnimationFrame(updateProgress);
 
-    // Cleanup
     return () => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
     };
-  }, [minDuration, onFinish]);
+  }, [minDuration]);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1D1616] via-[#8E1616] to-[#D84040] flex items-center justify-center overflow-hidden relative">
-      {/* Background Glow */}
-      <div className="absolute w-96 h-96 bg-[#D84040]/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute w-64 h-64 bg-[#D84040]/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: "1s", top: "20%", right: "10%" }}></div>
+  return createPortal(
+    <AnimatePresence onExitComplete={onFinish}>
+      {!isExiting && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ 
+            y: "-100%", 
+            transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] } 
+          }}
+          className="fixed inset-0 z-[9999] bg-[#070708] flex flex-col justify-between p-8 md:p-16 select-none overflow-hidden"
+        >
+          {/* Active Digital Noise Overlay */}
+          <div className="absolute inset-[-150%] noise-bg opacity-[0.06] pointer-events-none z-0" />
 
-      {/* Decorative Circles */}
-      <div className="absolute top-10 left-10 w-32 h-32 border border-white/10 rounded-full" style={{ animation: "spin 8s linear infinite" }}></div>
-      <div className="absolute bottom-10 right-10 w-52 h-52 border border-white/10 rounded-full" style={{ animation: "spin 12s linear infinite reverse" }}></div>
+          {/* Subtle Grid and Glow */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:5rem_5rem] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D84040]/5 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#D84040]/3 rounded-full blur-[150px] opacity-10 pointer-events-none" />
 
-      {/* Main Content */}
-      <div className="relative z-10 flex flex-col items-center px-4">
-        {/* Logo Container */}
-        <div className="relative mb-8">
-          <div className="absolute inset-0 rounded-3xl bg-white/10 blur-xl animate-ping"></div>
-          <div className="absolute inset-[-8px] rounded-3xl bg-[#D84040]/20 blur-md animate-pulse"></div>
+          {/* Top Branding */}
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="w-1.5 h-1.5 bg-[#D84040] rounded-full animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
+                ZEUS CRM // CORE SYSTEM
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-white/30 hidden sm:inline">
+              SYS_REV_8.0.3_2026
+            </span>
+          </div>
 
-          {/* Main Box */}
-          <div className="relative w-32 h-32 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl flex items-center justify-center">
-            <div className="absolute inset-0 rounded-3xl border-2 border-white/30" style={{ animation: "spin 4s linear infinite" }}></div>
-            <div 
-              className="w-24 h-24 rounded-2xl bg-[#D84040] flex items-center justify-center shadow-lg shadow-[#D84040]/50"
-              style={{
-                animation: "bounce 1.2s ease-in-out infinite"
-              }}
-            >
-              <Dumbbell size={42} className="text-white" style={{ animation: "shake 0.5s ease-in-out infinite" }} />
+          {/* Middle Layout: Huge Percentage & Floating Message */}
+          <div className="relative z-10 my-auto flex flex-col justify-center items-center mx-auto text-center space-y-6">
+            {/* Dynamic Status Text */}
+            <div className="h-6 overflow-hidden flex items-center justify-center">
+              <motion.span
+                key={currentMessage}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "-100%", opacity: 0 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="text-xs md:text-sm font-mono text-[#D84040]/80 tracking-[0.2em] uppercase font-bold block"
+              >
+                {currentMessage}
+              </motion.span>
+            </div>
+
+            {/* Massive modern percentage counter */}
+            <div className="relative leading-none">
+              <h2 className="text-[12vw] md:text-[8vw] font-black tracking-tighter text-white flex items-center justify-center">
+                {String(Math.floor(progress)).padStart(3, "0")}
+                <span className="text-[10px] md:text-xs font-bold tracking-[0.15em] text-white/40 ml-4 uppercase">
+                  % BOOTED
+                </span>
+              </h2>
             </div>
           </div>
-        </div>
 
-        {/* Brand Name */}
-        <h1 className="text-5xl font-black tracking-[0.35em] text-white drop-shadow-lg">
-          ZEUS
-          <span className="text-[#D84040]">GYM</span>
-        </h1>
-
-        <p className="text-white/70 text-sm mt-3 tracking-[0.3em] uppercase">
-          Gym Management System
-        </p>
-
-        {/* Progress Bar */}
-        <div className="w-80 relative mt-12">
-          <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/10 backdrop-blur-sm shadow-inner">
-            <div
-              className="h-full bg-gradient-to-r from-[#D84040] via-white to-[#D84040] rounded-full transition-all duration-100 ease-linear relative"
-              style={{
-                width: `${progress}%`,
-                boxShadow: "0 0 10px rgba(216, 64, 64, 0.5)"
-              }}
-            >
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent" style={{ animation: "shimmer 1.5s ease-in-out infinite" }}></div>
+          {/* Bottom Bar: Loading track line */}
+          <div className="relative z-10 space-y-6 w-full">
+            {/* Glowing Ultra-thin Progress Line */}
+            <div className="max-w-xl mx-auto w-full h-[2px] bg-white/5 relative overflow-hidden rounded-full">
+              <motion.div
+                className="absolute left-0 top-0 bottom-0 bg-[#D84040] rounded-full"
+                style={{ width: `${progress}%` }}
+                transition={{ ease: "easeOut" }}
+              />
             </div>
-          </div>
-          
-          {/* Progress Steps */}
-          <div className="absolute -top-2 w-full flex justify-between px-1">
-            {[0, 25, 50, 75, 100].map((step) => (
-              <div
-                key={step}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  progress >= step ? "bg-white shadow-lg" : "bg-white/30"
-                }`}
-              ></div>
-            ))}
-          </div>
-        </div>
 
-        {/* Bottom Info */}
-        <div className="flex justify-between items-center w-80 mt-4">
-          <div className="flex items-center gap-2 text-white/70 text-sm">
-            <div className="relative w-4 h-4">
-              <div className="absolute inset-0 border-2 border-white/20 border-t-[#D84040] rounded-full animate-spin"></div>
-              {progress >= 100 && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            {/* System Status Indicators */}
+            <div className="flex justify-between items-end text-[9px] md:text-[10px] font-mono text-white/40">
+              <div className="flex gap-6">
+                <div>
+                  <span className="block text-white/20 mb-1">STABLE VERSION</span>
+                  <span className="text-white/60">NODE_ENV: PRODUCTION</span>
                 </div>
-              )}
+                <div className="hidden sm:block">
+                  <span className="block text-white/20 mb-1">NETWORK STATUS</span>
+                  <span className="text-emerald-500 font-bold">ONLINE // 200 OK</span>
+                </div>
+              </div>
+              <div>
+                <span className="block text-white/20 text-right mb-1">SYSTEM BOOTSTRAP</span>
+                <span className="text-white/60">INITIALIZING SUBROUTINES</span>
+              </div>
             </div>
-            <span className="font-medium">
-              {progress >= 100 ? "Selesai!" : "Memuat Dashboard..."}
-            </span>
           </div>
-
-          <div className="relative">
-            <span className="text-white font-bold text-sm bg-white/10 px-3 py-1 rounded-full backdrop-blur-sm">
-              {Math.floor(progress)}%
-            </span>
-            {progress >= 100 && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-            )}
-          </div>
-        </div>
-
-        {/* Loading Text */}
-        <div className="mt-10 text-center min-h-[100px]">
-          <p className="text-white/90 text-sm tracking-widest uppercase font-medium transition-all duration-300">
-            {loadingText}
-          </p>
-
-          {/* Animated Dots */}
-          {progress < 100 && (
-            <div className="flex justify-center gap-2 mt-4">
-              <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: "0s", animationDuration: "1.4s" }}></span>
-              <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.2s", animationDuration: "1.4s" }}></span>
-              <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.4s", animationDuration: "1.4s" }}></span>
-              <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.6s", animationDuration: "1.4s" }}></span>
-            </div>
-          )}
-          
-          {/* Completion Animation */}
-          {progress >= 100 && (
-            <div className="mt-4" style={{ animation: "fadeInUp 0.5s ease-out forwards" }}>
-              <p className="text-green-400 text-xs font-bold flex items-center justify-center gap-2">
-                <span>✓</span> Load Complete!
-                <span>✓</span>
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Custom Keyframes */}
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        @keyframes shake {
-          0%, 100% { transform: rotate(0deg); }
-          25% { transform: rotate(5deg); }
-          75% { transform: rotate(-5deg); }
-        }
-        
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 }

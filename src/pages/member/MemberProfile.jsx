@@ -1,23 +1,12 @@
 import { useState, useEffect } from "react";
-import {
-  User,
-  Mail,
-  Phone,
-  Award,
-  Edit3,
-  Save,
-  X,
-  Flame,
-  Trophy,
-  CalendarCheck,
-} from "lucide-react";
+import { motion } from "framer-motion";
 import api from "../../lib/api";
 
 const achievements = [
-  { icon: Flame, label: "7 Hari Beruntun", color: "from-orange-400 to-red-500" },
-  { icon: Trophy, label: "Juara Bulanan", color: "from-amber-400 to-yellow-500" },
-  { icon: CalendarCheck, label: "50 Sesi", color: "from-emerald-400 to-teal-500" },
-  { icon: Award, label: "Member Setia", color: "from-blue-400 to-indigo-500" },
+  { label: "7 HARI BERUNTUN", focus: "Konsistensi Latihan" },
+  { label: "JUARA BULANAN", focus: "Performa Sesi Terbanyak" },
+  { label: "50 SESI LATIHAN", focus: "Pencapaian Total" },
+  { label: "MEMBER SETIA", focus: "Dedikasi Komunitas" },
 ];
 
 export default function MemberProfile() {
@@ -47,7 +36,6 @@ export default function MemberProfile() {
     if (!user?.id) return;
     try {
       setSaving(true);
-      // ── UPDATE profil member ke Supabase ──
       await api.patch(
         "/user",
         {
@@ -57,7 +45,7 @@ export default function MemberProfile() {
         },
         { params: { id_user: `eq.${user.id}` } },
       );
-      // Perbarui session lokal
+      
       const updated = {
         ...user,
         name: form.nama_lengkap,
@@ -81,115 +69,122 @@ export default function MemberProfile() {
   const initial = (user?.name || "M").charAt(0).toUpperCase();
 
   return (
-    <div className="space-y-6">
+    <div className="bg-[#0b0b0d] -mx-5 -my-8 px-5 pt-28 pb-16 md:-mx-10 md:px-10 min-h-screen text-white space-y-8">
       {savedMsg && (
-        <div className="fixed top-24 right-6 z-50 bg-[#1D1616] text-white px-5 py-3 rounded-xl shadow-2xl animate-slide-in-left">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed top-24 right-6 z-50 bg-[#1D1616] text-[#D84040] px-5 py-3 rounded-xl shadow-2xl border border-[#D84040]/30 font-bold text-sm"
+        >
           {savedMsg}
-        </div>
+        </motion.div>
       )}
 
       {/* Hero profil */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#3E0703] via-[#8E1616] to-[#D84040] animate-gradient p-8 text-white shadow-2xl animate-slide-up">
-        <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full blur-2xl animate-float" />
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#141416] to-[#1a1212] border border-white/[0.05] p-8 text-white"
+      >
+        <div className="absolute top-0 right-0 w-48 h-48 bg-[#D84040]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6">
-          <div className="w-28 h-28 rounded-full bg-white/15 backdrop-blur flex items-center justify-center text-5xl font-black border-4 border-white/30 animate-glow">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#8C1007] to-[#D84040] flex items-center justify-center text-4xl font-black border-2 border-white/10 shadow-xl">
             {initial}
           </div>
-          <div className="text-center sm:text-left">
-            <h1 className="text-3xl font-black">{user?.name || "Member"}</h1>
-            <p className="text-white/70 mt-1">{user?.email}</p>
-            <span className="inline-block mt-3 bg-white/20 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide">
-              Member {user?.role || ""}
+          <div className="text-center sm:text-left space-y-1">
+            <h1 className="text-2xl md:text-3xl font-black tracking-tight">{user?.name || "Member"}</h1>
+            <p className="text-white/40 text-xs font-semibold uppercase tracking-widest">{user?.email}</p>
+            <span className="inline-block mt-2 bg-[#D84040]/10 border border-[#D84040]/25 text-[#D84040] px-3.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              {user?.role || "MEMBER"}
             </span>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Achievements */}
-      <section className="animate-slide-up delay-100">
-        <h2 className="text-lg font-black text-[#1D1616] mb-4 flex items-center gap-2">
-          <Trophy size={18} className="text-[#8E1616]" /> Pencapaian
-        </h2>
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="space-y-4"
+      >
+        <h2 className="text-lg font-bold uppercase tracking-tight text-white/90">Pencapaian</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {achievements.map((a, i) => {
-            const Icon = a.icon;
-            return (
-              <div
-                key={a.label}
-                className={`bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center animate-slide-up delay-${(i + 1) * 100}`}
-              >
-                <div
-                  className={`w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br ${a.color} flex items-center justify-center text-white shadow-md mb-3`}
-                >
-                  <Icon size={24} />
-                </div>
-                <p className="text-xs font-bold text-[#1D1616]">{a.label}</p>
-              </div>
-            );
-          })}
+          {achievements.map((a, i) => (
+            <div
+              key={a.label}
+              className="bg-[#141416] border border-white/[0.05] rounded-xl p-5 text-center transition-all duration-300 hover:border-[#D84040]/30"
+            >
+              <p className="text-[10px] font-black text-[#D84040] tracking-widest uppercase mb-1">{a.label}</p>
+              <p className="text-xs text-white/50 font-semibold">{a.focus}</p>
+            </div>
+          ))}
         </div>
-      </section>
+      </motion.section>
 
       {/* Info pribadi + edit */}
-      <section className="bg-white rounded-3xl p-6 shadow-sm animate-slide-up delay-200">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-black text-[#1D1616]">Informasi Pribadi</h2>
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="bg-[#141416] border border-white/[0.05] rounded-2xl p-6"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold uppercase tracking-tight text-white/90">Informasi Pribadi</h2>
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 text-[#8E1616] border border-[#8E1616]/30 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#8E1616]/10 transition-all"
+              className="text-xs font-bold uppercase tracking-wider text-white bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-xl cursor-pointer transition-colors"
             >
-              <Edit3 size={15} /> Edit
+              Edit Profil
             </button>
           ) : (
             <div className="flex gap-2">
               <button
                 onClick={() => setIsEditing(false)}
-                className="flex items-center gap-1.5 text-gray-500 border border-gray-200 px-3 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all"
+                className="text-xs font-bold uppercase tracking-wider text-white/40 hover:text-white border border-white/5 hover:bg-white/5 px-3.5 py-2 rounded-xl transition-all cursor-pointer"
               >
-                <X size={15} /> Batal
+                Batal
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-1.5 bg-[#8E1616] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#D84040] transition-all disabled:opacity-50"
+                className="text-xs font-bold uppercase tracking-wider bg-[#D84040] hover:bg-[#8E1616] text-white px-4 py-2 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
               >
-                <Save size={15} /> {saving ? "Menyimpan..." : "Simpan"}
+                {saving ? "Menyimpan..." : "Simpan"}
               </button>
             </div>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: User, label: "Nama Lengkap", name: "nama_lengkap", type: "text" },
-            { icon: Mail, label: "Email", name: "email", type: "email" },
-            { icon: Phone, label: "No HP", name: "no_hp", type: "tel" },
-          ].map((field) => {
-            const Icon = field.icon;
-            return (
-              <div key={field.name}>
-                <label className="text-xs font-bold text-[#9e7a6e] uppercase tracking-wide flex items-center gap-1.5 mb-2">
-                  <Icon size={13} /> {field.label}
-                </label>
-                {isEditing ? (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={form[field.name]}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-xl text-sm text-[#1D1616] focus:outline-none focus:ring-2 focus:ring-[#8E1616]/20 transition-all"
-                  />
-                ) : (
-                  <div className="px-4 py-2.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-xl text-sm font-medium text-[#1D1616]">
-                    {form[field.name] || "-"}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+            { label: "Nama Lengkap", name: "nama_lengkap", type: "text" },
+            { label: "Email", name: "email", type: "email" },
+            { label: "No HP", name: "no_hp", type: "tel" },
+          ].map((field) => (
+            <div key={field.name} className="space-y-2">
+              <label className="text-[10px] font-black text-white/30 uppercase tracking-widest block">
+                {field.label}
+              </label>
+              {isEditing ? (
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={form[field.name]}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 bg-black/40 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                />
+              ) : (
+                <div className="px-4 py-2.5 bg-black/20 border border-white/[0.03] rounded-xl text-sm font-semibold text-white/80">
+                  {form[field.name] || "-"}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }

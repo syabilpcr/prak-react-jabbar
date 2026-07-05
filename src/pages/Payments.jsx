@@ -73,6 +73,7 @@ const jenisTransaksiConfig = {
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [memberMap, setMemberMap] = useState({}); // { id_member: nama_lengkap }
+  const [membersList, setMembersList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -125,6 +126,7 @@ const Payments = () => {
           lookup[m.id_member] = m.nama_lengkap;
         });
         setMemberMap(lookup);
+        setMembersList(memberRows);
 
         // Urutkan dari transaksi terbaru ke terlama
         transaksiRows.sort(
@@ -547,27 +549,19 @@ const Payments = () => {
             </Alert>
           )}
 
-          {/* Input Component dari folder ui - komponen UI Shadcn */}
-          <div>
-            <label className="block text-xs font-bold text-[#9e7a6e] mb-1.5 uppercase tracking-wide">
-              ID Member <span className="text-[#8C1007] ml-1">*</span>
-            </label>
-            <Input
-              name="id_member"
-              value={form.id_member}
-              onChange={handleChange}
-              placeholder="Contoh: M-1001"
-              required
-              className="bg-[#f8f3ee] border-[#e8dfd6]"
-            />
-            {form.id_member && (
-              <p className="text-[11px] mt-1 text-[#9e7a6e]">
-                {memberMap[form.id_member]
-                  ? `✓ ${memberMap[form.id_member]}`
-                  : "⚠ ID Member tidak ditemukan"}
-              </p>
-            )}
-          </div>
+          <SelectField
+            label="Pilih Anggota Gym"
+            name="id_member"
+            value={form.id_member}
+            onChange={handleChange}
+            options={[
+              { value: "", label: "Pilih Anggota..." },
+              ...membersList.map((m) => ({
+                value: m.id_member,
+                label: `${m.nama_lengkap} (${m.id_member})`,
+              })),
+            ]}
+          />
           <SelectField
             label="Jenis Transaksi"
             name="jenis_transaksi"

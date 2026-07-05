@@ -19,7 +19,6 @@ const Attendance = React.lazy(() => import("./pages/Attendance"));
 const Reports = React.lazy(() => import("./pages/Reports"));
 const Promotions = React.lazy(() => import("./pages/Promotions"));
 const Feedback = React.lazy(() => import("./pages/Feedback"));
-const ProfilePage = React.lazy(() => import("./pages/ProfilePage"));
 const ErrorRouter = React.lazy(() => import("./pages/ErrorRouter"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
@@ -47,18 +46,8 @@ const Register = React.lazy(() => import("./pages/auth/Register"));
 const Forgot = React.lazy(() => import("./pages/auth/Forgot"));
 
 function App() {
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [showContent, setShowContent] = useState(false);
-
-  const handleLoadingFinish = () => {
-    setIsInitialLoading(false);
-    setTimeout(() => setShowContent(true), 100);
-  };
-
-  // Tampilkan loading screen saat pertama kali
-  if (isInitialLoading) {
-    return <Loading onFinish={handleLoadingFinish} />;
-  }
+  const [isInitialLoading, setIsInitialLoading] = useState(false);
+  const [showContent, setShowContent] = useState(true);
 
   return (
 
@@ -79,7 +68,6 @@ function App() {
             <Route path="attendance" element={<Attendance />} />
             <Route path="reports" element={<Reports />} />
             <Route path="promotions" element={<Promotions />} />
-            <Route path="profile" element={<ProfilePage />} />
             <Route path="error/:code" element={<ErrorRouter />} />
 
             {/*

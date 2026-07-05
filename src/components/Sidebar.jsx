@@ -32,13 +32,11 @@ const menuGroups = [
     label: "Tools",
     items: [
       { label: "Promosi", icon: Megaphone, path: "/promotions" },
-      { label: "Umpan Balik", icon: MessageSquare, path: "/feedback" },
     ],
   },
   {
     label: "Support",
     items: [
-      { label: "Profil", icon: User, path: "/profile" },
       { label: "Manajemen User", icon: UserCog, path: "/users" },
     ],
   },

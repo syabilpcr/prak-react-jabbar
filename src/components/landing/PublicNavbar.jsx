@@ -7,9 +7,10 @@ import { Dumbbell, Menu, X } from "lucide-react";
 const navItems = [
   { label: "Beranda", target: "home" },
   { label: "Tentang", target: "about" },
-  { label: "Layanan", target: "services" },
+  { label: "Promosi", target: "promotions" },
   { label: "Paket", target: "pricing" },
   { label: "FAQ", target: "faq" },
+  { label: "Umpan Balik", target: "feedback" },
 ];
 
 export default function PublicNavbar() {

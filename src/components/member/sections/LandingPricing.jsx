@@ -1,15 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, Star, Crown, TrendingDown, ArrowRight, X, CheckCircle2, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Reveal from "../Reveal";
 import api from "../../../lib/api";
 
-/*
-  LandingPricing — menggantikan section Trainers.
-  Interaktif:
-  - Toggle tagihan Bulanan / Tahunan (harga ikut berubah, tahunan lebih hemat)
-  - Kartu paket bisa diklik untuk dipilih (highlight aktif)
-*/
-// Harga sesuai data membership Zeus Gym (durasi, bukan paket bertingkat)
 const durations = [
   { value: "harian", short: "Harian", display: "Akses harian", price: 50000 },
   { value: 1, short: "1 Bulan", display: "1 bulan penuh", price: 300000 },
@@ -27,24 +21,55 @@ const durations = [
 ];
 
 const highlights = [
-  { label: "Harian", icon: Zap, tagline: "Coba dulu tanpa komitmen", price: 50000, unit: "hari" },
-  { label: "Bulanan", icon: Star, tagline: "Paling fleksibel & populer", price: 300000, unit: "bulan", popular: true },
-  { label: "Tahunan", icon: Crown, tagline: "Paling hemat untuk setahun", price: 2760000, unit: "tahun" },
+  { label: "Harian", icon: Zap, tagline: "Coba dulu tanpa komitmen", price: 50000, unit: "hari", color: "from-[#8E1616] to-[#D84040]" },
+  { label: "Bulanan", icon: Star, tagline: "Paling fleksibel & populer", price: 300000, unit: "bulan", popular: true, color: "from-amber-500 to-orange-500" },
+  { label: "Tahunan", icon: Crown, tagline: "Paling hemat untuk setahun", price: 2760000, unit: "tahun", color: "from-yellow-400 to-amber-500" },
 ];
 
 const rupiah = (n) => "Rp " + n.toLocaleString("id-ID");
+
+// ── Custom Price Count Animation Component ──
+function AnimatedPrice({ value }) {
+  const [displayValue, setDisplayValue] = useState(value);
+
+  useEffect(() => {
+    let start = displayValue;
+    const end = value;
+    if (start === end) return;
+
+    const duration = 500; // ms
+    const startTime = performance.now();
+
+    const update = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutExpo
+      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      
+      const current = Math.round(start + (end - start) * eased);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    };
+
+    requestAnimationFrame(update);
+  }, [value]);
+
+  return <span>{rupiah(displayValue)}</span>;
+}
 
 export default function LandingPricing() {
   const [selected, setSelected] = useState(1); // default 1 Bulan
   const active = durations.find((d) => d.value === selected) || durations[1];
 
-  // hitung hemat dibanding harga harian/bulanan setara
   const perMonthBaseline = 300000;
   const months = typeof active.value === "number" ? active.value : 0;
   const baseline = months > 0 ? months * perMonthBaseline : 0;
   const hemat = baseline > active.price ? baseline - active.price : 0;
 
-  // ── Form pendaftaran (tersimpan ke Supabase, muncul di admin Members) ──
+  // ── Form pendaftaran ──
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(null); // { id, nama }
@@ -57,10 +82,55 @@ export default function LandingPricing() {
     alamat: "",
   });
 
+  // Promo Code States
+  const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoMessage, setPromoMessage] = useState(null);
+  const [promoError, setPromoError] = useState(null);
+
+  const handleApplyPromo = () => {
+    setPromoError(null);
+    setPromoMessage(null);
+    if (!promoCode.trim()) return;
+
+    const savedPromos = localStorage.getItem("zeus_promotions_v3");
+    if (!savedPromos) {
+      setPromoError("Belum ada kode promo aktif saat ini.");
+      return;
+    }
+
+    const promoList = JSON.parse(savedPromos);
+    const found = promoList.find(
+      (p) =>
+        p.code.toLowerCase() === promoCode.trim().toLowerCase() &&
+        p.status === "Aktif"
+    );
+
+    if (found) {
+      setAppliedPromo(found);
+      setPromoMessage(`Berhasil menggunakan kode promo "${found.title}"!`);
+    } else {
+      setAppliedPromo(null);
+      setPromoError("Kode promo tidak valid atau telah berakhir.");
+    }
+  };
+
+  const getDiscountedPrice = () => {
+    if (!appliedPromo) return active.price;
+    const discStr = String(appliedPromo.discount || "");
+    if (discStr.includes("%")) {
+      const percent = parseFloat(discStr.replace("%", ""));
+      return Math.max(0, active.price * (1 - percent / 100));
+    } else {
+      const amount = parseFloat(discStr.replace(/[^0-9]/g, ""));
+      return Math.max(0, active.price - amount);
+    }
+  };
+
+  const finalPrice = getDiscountedPrice();
+
   const onField = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Konversi durasi terpilih ke format yang dipakai admin ("harian" | "N-bulan")
-  // durasiKey tidak dipakai saat ini (menghilangkan error lint no-unused-vars).
   const durasiDays =
     selected === "harian" ? 1 : (typeof selected === "number" ? selected * 30 : 30);
 
@@ -78,7 +148,6 @@ export default function LandingPricing() {
         .split("T")[0];
       const pin = String(Math.floor(100000 + Math.random() * 900000));
 
-      // Generate id_member NUMERIK terbesar + 1 (paginasi, sama seperti admin)
       let allIds = [];
       let from = 0;
       const pageSize = 1000;
@@ -108,11 +177,11 @@ export default function LandingPricing() {
         tgl_berakhir: expiry,
         status_member: "aktif",
         pin_akses: pin,
-        catatan_medis: "Tidak ada",
+        catatan_medis: appliedPromo ? `Promo: ${appliedPromo.code}` : "Tidak ada",
         kontak_darurat: "-",
         nama_kontak_darurat: "-",
-        frekuensi_transaksi: 0,
-        total_nominal_transaksi: 0,
+        frekuensi_transaksi: 1,
+        total_nominal_transaksi: finalPrice,
       };
 
       await api.post("/member", payload, {
@@ -134,229 +203,329 @@ export default function LandingPricing() {
   };
 
   return (
-    <section id="pricing" className="bg-[#1D1616] py-24">
-      <div className="max-w-7xl mx-auto px-5 md:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+    <section id="pricing" className="bg-[#1D1616] py-24 relative overflow-hidden">
+      {/* Decorative background lights */}
+      <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#8E1616]/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#D84040]/5 rounded-full blur-[150px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-5 md:px-8 relative z-10">
+        <div className="text-center max-w-2xl mx-auto mb-16">
           <Reveal>
             <p className="text-[13px] font-semibold uppercase tracking-[0.2em] text-[#D84040] mb-4">
               Harga Keanggotaan
             </p>
           </Reveal>
           <Reveal delay={80}>
-            <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
-              MULAI DARI <span className="text-[#D84040]">Rp 50 RIBU</span>
+            <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight uppercase">
+              Investasi Kesehatan <br className="hidden md:inline" />
+              Untuk <span className="text-[#D84040]">Masa Depanmu</span>
             </h2>
           </Reveal>
           <Reveal delay={160}>
-            <p className="text-white/45 mt-5 text-[15px]">
-              Bayar sesuai durasi yang kamu mau. Makin lama, makin hemat.
+            <p className="text-white/45 mt-5 text-[15px] max-w-lg mx-auto">
+              Bayar sesuai durasi yang kamu butuhkan. Fleksibel, transparan, dan makin lama durasi makin hemat!
             </p>
           </Reveal>
         </div>
 
-        {/* Kartu highlight cepat */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch mb-14">
+        {/* ── Highlight cards with hover zoom & glow ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch mb-16">
           {highlights.map((h, i) => {
             const Icon = h.icon;
             return (
-              <Reveal key={h.label} delay={i * 120} direction="up" className="h-full">
-                <div
-                  className={`group relative h-full overflow-hidden rounded-2xl border p-7 transition-all duration-300 flex flex-col ${
+              <Reveal key={h.label} delay={i * 100} direction="up" className="h-full">
+                <motion.div
+                  whileHover={{
+                    y: -10,
+                    scale: 1.02,
+                    boxShadow: "0 25px 50px -12px rgba(216, 64, 64, 0.15)",
+                  }}
+                  className={`relative h-full overflow-hidden rounded-3xl border p-8 flex flex-col transition-colors duration-300 ${
                     h.popular
-                      ? "border-[#D84040] bg-[#2A1A1A] shadow-2xl shadow-[#D84040]/10 md:-translate-y-2"
-                      : "border-white/[0.06] bg-[#241818] hover:border-[#D84040]/40"
+                      ? "border-[#D84040] bg-[#2A1A1A] md:-translate-y-2"
+                      : "border-white/[0.06] bg-[#241818] hover:border-[#D84040]/30"
                   }`}
                 >
                   {h.popular && (
-                    <span className="absolute top-5 right-5 text-[10px] font-bold uppercase tracking-wider text-white bg-[#D84040] rounded-full px-3 py-1">
-                      Populer
-                    </span>
+                    <motion.span
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                      className="absolute top-5 right-5 text-[9px] font-extrabold uppercase tracking-widest text-white bg-[#D84040] rounded-full px-3 py-1.5 shadow-lg shadow-[#D84040]/30"
+                    >
+                      Pilihan Terbaik
+                    </motion.span>
                   )}
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors ${
-                      h.popular ? "bg-[#D84040]" : "bg-white/[0.06] group-hover:bg-[#D84040]/80"
-                    }`}
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-br ${h.color} text-white shadow-lg`}
                   >
-                    <Icon size={22} className="text-white" />
+                    <Icon size={20} />
                   </div>
-                  <h3 className="text-xl font-bold text-white">{h.label}</h3>
-                  <p className="text-white/40 text-[13px] mt-1">{h.tagline}</p>
-                  <div className="mt-5">
-                    <span className="text-3xl font-extrabold text-white">
+                  <h3 className="text-2xl font-bold text-white tracking-tight">{h.label}</h3>
+                  <p className="text-white/40 text-[13px] mt-1.5 leading-relaxed">{h.tagline}</p>
+                  
+                  <div className="mt-8 pt-6 border-t border-white/[0.04] flex items-baseline gap-1">
+                    <span className="text-3xl font-extrabold text-white tracking-tight">
                       {rupiah(h.price)}
                     </span>
-                    <span className="text-white/40 text-sm">/{h.unit}</span>
+                    <span className="text-white/40 text-xs font-semibold">/{h.unit}</span>
                   </div>
-                </div>
+                </motion.div>
               </Reveal>
             );
           })}
         </div>
 
-        {/* Kalkulator durasi interaktif */}
+        {/* ── Interactive duration selector with layout animations ── */}
         <Reveal delay={120} direction="scale">
-          <div className="max-w-3xl mx-auto rounded-2xl border border-white/[0.06] bg-[#241818] p-7 md:p-9">
-            <p className="text-center text-white/70 text-sm mb-6">
-              Pilih durasi keanggotaan untuk melihat harganya
-            </p>
-
-            {/* Tombol durasi (klik untuk memilih) */}
-            <div className="flex flex-wrap justify-center gap-2 mb-8">
-              {durations.map((d) => (
-                <button
-                  key={d.value}
-                  onClick={() => setSelected(d.value)}
-                  className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${
-                    selected === d.value
-                      ? "bg-[#D84040] text-white shadow-lg shadow-[#D84040]/20"
-                      : "bg-white/[0.06] text-white/60 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {d.short}
-                </button>
-              ))}
+          <div className="max-w-3xl mx-auto rounded-3xl border border-white/[0.06] bg-[#241818] p-6 md:p-10 shadow-2xl relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#D84040] text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+              Kalkulator Paket
             </div>
 
-            {/* Ringkasan harga terpilih */}
-            <div className="text-center border-t border-white/[0.06] pt-7">
-              <p className="text-white/40 text-[13px] uppercase tracking-wider mb-2">
+            <p className="text-center text-white/50 text-xs font-semibold uppercase tracking-wider mb-8">
+              Geser durasi keanggotaan untuk penawaran terbaik
+            </p>
+
+            {/* Slider tabs with framer-motion sliding background */}
+            <div className="flex flex-wrap justify-center gap-2 mb-10 bg-[#1D1616]/50 p-2 rounded-2xl border border-white/[0.03]">
+              {durations.map((d) => {
+                const isActive = selected === d.value;
+                return (
+                  <button
+                    key={d.value}
+                    onClick={() => setSelected(d.value)}
+                    className="relative px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    style={{ WebkitTapHighlightColor: "transparent" }}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="activePricingTab"
+                        className="absolute inset-0 bg-[#D84040] rounded-xl shadow-lg shadow-[#D84040]/20"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span className={`relative z-10 ${isActive ? "text-white" : "text-white/40 hover:text-white/70"}`}>
+                      {d.short}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Animated price display */}
+            <div className="text-center border-t border-white/[0.04] pt-8">
+              <p className="text-white/35 text-[10px] font-bold uppercase tracking-widest mb-3">
                 {active.display}
               </p>
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl md:text-5xl font-extrabold text-white">
-                  {rupiah(active.price)}
+              
+              <div className="h-14 flex items-center justify-center">
+                <span className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                  <AnimatedPrice value={active.price} />
                 </span>
               </div>
 
-              {hemat > 0 && (
-                <div className="inline-flex items-center gap-1.5 mt-4 text-[13px] font-semibold text-[#D84040] bg-[#D84040]/10 border border-[#D84040]/30 rounded-full px-3 py-1.5">
-                  <TrendingDown size={14} />
-                  Hemat {rupiah(hemat)} vs bayar bulanan
-                </div>
-              )}
+              <div className="h-10 mt-4 flex justify-center items-center">
+                <AnimatePresence mode="wait">
+                  {hemat > 0 ? (
+                    <motion.div
+                      key="saving-badge"
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#D84040] bg-[#D84040]/10 border border-[#D84040]/20 rounded-full px-4 py-2"
+                    >
+                      <TrendingDown size={13} className="animate-bounce" />
+                      Hemat {rupiah(hemat)} vs bayar bulanan
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="regular-badge"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.6 }}
+                      className="text-xs text-white/30"
+                    >
+                      Tarif standar keanggotaan
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-              <button
-                onClick={() => { setShowForm(true); setDone(null); setError(null); }}
-                className="mt-7 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#D84040] hover:bg-[#8E1616] text-white font-semibold px-8 py-3.5 rounded-xl transition-colors"
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setShowForm(true);
+                  setDone(null);
+                  setError(null);
+                  setPromoCode("");
+                  setAppliedPromo(null);
+                  setPromoMessage(null);
+                  setPromoError(null);
+                }}
+                className="mt-6 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#D84040] hover:bg-[#8E1616] text-white font-bold px-8 py-4 rounded-2xl shadow-xl shadow-[#D84040]/10 transition-colors cursor-pointer"
               >
                 Daftar Sekarang
-                <ArrowRight size={18} />
-              </button>
+                <ArrowRight size={16} />
+              </motion.button>
             </div>
           </div>
         </Reveal>
       </div>
 
-      {/* ── Modal Pendaftaran (simpan ke Supabase → muncul di admin Members) ── */}
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => !submitting && setShowForm(false)}
-          />
-          <div className="relative w-full max-w-md bg-[#241818] border border-white/10 rounded-2xl p-7 shadow-2xl">
-            <button
+      {/* ── Modal form pendaftaran dengan AnimatePresence ── */}
+      <AnimatePresence>
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
               onClick={() => !submitting && setShowForm(false)}
-              className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
-              aria-label="Tutup"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-[#241818] border border-white/10 rounded-3xl p-7 shadow-2xl z-10"
             >
-              <X size={20} />
-            </button>
+              <button
+                onClick={() => !submitting && setShowForm(false)}
+                className="absolute top-5 right-5 text-white/40 hover:text-white transition-colors"
+                aria-label="Tutup"
+              >
+                <X size={18} />
+              </button>
 
-            {done ? (
-              <div className="text-center py-4">
-                <div className="w-14 h-14 rounded-full bg-[#D84040]/15 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 size={30} className="text-[#D84040]" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Pendaftaran Berhasil!</h3>
-                <p className="text-white/50 text-sm mt-2">
-                  Selamat bergabung, <span className="text-white font-semibold">{done.nama}</span>.
-                  ID member kamu <span className="text-[#D84040] font-mono font-semibold">{done.id}</span>.
-                  Data sudah tersimpan dan muncul di panel admin.
-                </p>
-                <button
-                  onClick={() => setShowForm(false)}
-                  className="mt-6 w-full bg-[#D84040] hover:bg-[#8E1616] text-white font-semibold py-3 rounded-xl transition-colors"
-                >
-                  Selesai
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-xl font-bold text-white mb-1">Daftar Keanggotaan</h3>
-                <p className="text-white/45 text-[13px] mb-5">
-                  Paket <span className="text-[#D84040] font-semibold">{active.display}</span> · {rupiah(active.price)}
-                </p>
-
-                {error && (
-                  <div className="mb-4 text-[13px] text-red-300 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2.5">
-                    {error}
+              {done ? (
+                <div className="text-center py-6">
+                  <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <CheckCircle2 size={32} className="text-emerald-400" />
                   </div>
-                )}
-
-                <div className="space-y-3">
-                  <input
-                    name="nama_lengkap"
-                    value={form.nama_lengkap}
-                    onChange={onField}
-                    placeholder="Nama lengkap *"
-                    className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D84040] transition-colors"
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <select
-                      name="jenis_kelamin"
-                      value={form.jenis_kelamin}
-                      onChange={onField}
-                      className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-[#D84040] transition-colors"
-                    >
-                      <option value="L" className="bg-[#241818]">Laki-laki</option>
-                      <option value="P" className="bg-[#241818]">Perempuan</option>
-                    </select>
-                    <input
-                      name="tgl_lahir"
-                      type="date"
-                      value={form.tgl_lahir}
-                      onChange={onField}
-                      className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D84040] transition-colors"
-                    />
-                  </div>
-                  <input
-                    name="no_hp"
-                    value={form.no_hp}
-                    onChange={onField}
-                    placeholder="Nomor HP * (08xxxxxxxxxx)"
-                    className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D84040] transition-colors"
-                  />
-                  <input
-                    name="alamat"
-                    value={form.alamat}
-                    onChange={onField}
-                    placeholder="Alamat (opsional)"
-                    className="w-full px-4 py-2.5 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-[#D84040] transition-colors"
-                  />
+                  <h3 className="text-xl font-bold text-white">Pendaftaran Berhasil!</h3>
+                  <p className="text-white/50 text-sm mt-3 leading-relaxed">
+                    Selamat bergabung, <span className="text-white font-semibold">{done.nama}</span>.<br />
+                    ID member kamu: <span className="text-[#D84040] font-mono font-bold">{done.id}</span>
+                  </p>
+                  <p className="text-white/30 text-xs mt-2">
+                    Gunakan ID ini untuk verifikasi di meja resepsionis Zeus Gym.
+                  </p>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="mt-8 w-full bg-[#D84040] hover:bg-[#8E1616] text-white font-bold py-3.5 rounded-2xl shadow-lg transition-colors cursor-pointer"
+                  >
+                    Selesai
+                  </button>
                 </div>
+              ) : (
+                <>
+                  <h3 className="text-xl font-extrabold text-white tracking-tight">Daftar Keanggotaan</h3>
+                  <p className="text-white/40 text-xs mt-1 mb-6">
+                    Paket <span className="text-[#D84040] font-bold">{active.display}</span> ·{" "}
+                    {appliedPromo ? (
+                      <>
+                        <span className="line-through text-white/30 mr-1.5">{rupiah(active.price)}</span>
+                        <span className="text-emerald-400 font-extrabold">{rupiah(finalPrice)}</span>
+                      </>
+                    ) : (
+                      rupiah(active.price)
+                    )}
+                  </p>
 
-                <button
-                  onClick={handleDaftar}
-                  disabled={submitting}
-                  className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-[#D84040] hover:bg-[#8E1616] disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" /> Menyimpan...
-                    </>
-                  ) : (
-                    <>Daftar & Simpan</>
+                  {error && (
+                    <div className="mb-4 text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">
+                      {error}
+                    </div>
                   )}
-                </button>
-                <p className="text-white/30 text-[11px] text-center mt-3">
-                  Data disimpan ke sistem dan langsung tampil di panel admin.
-                </p>
-              </>
-            )}
+
+                  <div className="space-y-3.5">
+                    <input
+                      name="nama_lengkap"
+                      value={form.nama_lengkap}
+                      onChange={onField}
+                      placeholder="Nama lengkap *"
+                      className="w-full px-4 py-3 bg-[#1d1414] border border-white/5 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <select
+                        name="jenis_kelamin"
+                        value={form.jenis_kelamin}
+                        onChange={onField}
+                        className="w-full px-4 py-3 bg-[#1d1414] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                      >
+                        <option value="L" className="bg-[#241818]">Laki-laki</option>
+                        <option value="P" className="bg-[#241818]">Perempuan</option>
+                      </select>
+                      <input
+                        name="tgl_lahir"
+                        type="date"
+                        value={form.tgl_lahir}
+                        onChange={onField}
+                        className="w-full px-4 py-3 bg-[#1d1414] border border-white/5 rounded-xl text-sm text-white focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                      />
+                    </div>
+                    <input
+                      name="no_hp"
+                      value={form.no_hp}
+                      onChange={onField}
+                      placeholder="Nomor HP * (08xxxxxxxxxx)"
+                      className="w-full px-4 py-3 bg-[#1d1414] border border-white/5 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                    />
+                    <input
+                      name="alamat"
+                      value={form.alamat}
+                      onChange={onField}
+                      placeholder="Alamat (opsional)"
+                      className="w-full px-4 py-3 bg-[#1d1414] border border-white/5 rounded-xl text-sm text-white placeholder-white/20 focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                    />
+
+                    {/* Kode Promo Field */}
+                    <div className="space-y-1 bg-[#1d1414]/40 p-3 rounded-xl border border-white/5">
+                      <label className="text-[10px] font-bold text-white/40 uppercase tracking-wider block">
+                        Kode Promo (Opsional)
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value)}
+                          placeholder="Masukkan kode promo..."
+                          className="flex-1 px-3 py-2 bg-[#1d1414] border border-white/5 rounded-lg text-xs text-white placeholder-white/20 focus:outline-none focus:border-[#D84040]/50 transition-colors"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyPromo}
+                          className="px-3 bg-[#D84040] hover:bg-[#8E1616] text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                        >
+                          Pakai
+                        </button>
+                      </div>
+                      {promoError && <p className="text-[10px] text-red-300 font-semibold mt-1">{promoError}</p>}
+                      {promoMessage && <p className="text-[10px] text-emerald-400 font-semibold mt-1">{promoMessage}</p>}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleDaftar}
+                    disabled={submitting}
+                    className="mt-6 w-full inline-flex items-center justify-center gap-2 bg-[#D84040] hover:bg-[#8E1616] disabled:opacity-60 text-white font-bold py-3.5 rounded-2xl transition-colors cursor-pointer shadow-lg shadow-[#D84040]/10"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" /> Menyimpan...
+                      </>
+                    ) : (
+                      <>Daftar & Simpan</>
+                    )}
+                  </button>
+                  <p className="text-white/20 text-[10px] text-center mt-3">
+                    Data disimpan secara aman ke database.
+                  </p>
+                </>
+              )}
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </section>
   );
 }

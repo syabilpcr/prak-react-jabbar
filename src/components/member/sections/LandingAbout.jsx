@@ -1,9 +1,17 @@
+import { useState } from "react";
 import { Play } from "lucide-react";
 import Reveal from "../Reveal";
 import CountUp from "../CountUp";
+import VideoModal from "../../VideoModal";
 
 const ABOUT_IMG =
   "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=80";
+
+// ── CUSTOM VIDEO URL ─────────────────────────────────────────────
+// Ganti nilai ini dengan URL video Anda sendiri. 
+// Bisa berupa URL YouTube (misal: "https://www.youtube.com/watch?v=VIDEO_ID")
+// Atau file video lokal yang diletakkan di dalam folder 'public' (misal: "/videos/video-pribadi.mp4")
+const VIDEO_URL = "/videos/video-saya.mp4";
 
 const stats = [
   { end: 12, suffix: "+", label: "Tahun Pengalaman" },
@@ -13,6 +21,8 @@ const stats = [
 ];
 
 export default function LandingAbout() {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
   return (
     <section id="about" className="bg-[#1D1616] py-24">
       <div className="max-w-7xl mx-auto px-5 md:px-8">
@@ -52,7 +62,10 @@ export default function LandingAbout() {
 
         {/* Video block */}
         <Reveal direction="scale" delay={120}>
-          <div className="relative mt-16 rounded-2xl overflow-hidden aspect-[16/8] group cursor-pointer">
+          <div
+            onClick={() => setIsVideoOpen(true)}
+            className="relative mt-16 rounded-2xl overflow-hidden aspect-[16/8] group cursor-pointer"
+          >
             <img
               src={ABOUT_IMG}
               alt=""
@@ -68,6 +81,12 @@ export default function LandingAbout() {
           </div>
         </Reveal>
       </div>
+
+      <VideoModal
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+        videoUrl={VIDEO_URL}
+      />
     </section>
   );
 }

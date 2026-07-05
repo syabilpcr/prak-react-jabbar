@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   Plus,
   Users,
@@ -34,13 +34,18 @@ const Members = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [showModal, setShowModal] = useState(false);
-  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterGender, setFilterGender] = useState("all");
   const [successAlert, setSuccessAlert] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+  }, [searchParams]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [form, setForm] = useState({
@@ -55,6 +60,7 @@ const Members = () => {
     kontak_darurat: "",
     nama_kontak_darurat: "",
     durasi_membership: "1-bulan", // default 1 bulan
+    promo_code: "",
   });
 
   // ── Pertemuan 13: Consume API ──────────────────────────────
@@ -200,6 +206,50 @@ const Members = () => {
     const generatedPin =
       form.pin_akses || String(Math.floor(100000 + Math.random() * 900000));
 
+    // Calculate dynamic price based on promo
+    const priceConfig = {
+      harian: 50000,
+      "1-bulan": 300000,
+      "2-bulan": 570000,
+      "3-bulan": 810000,
+      "4-bulan": 1080000,
+      "5-bulan": 1325000,
+      "6-bulan": 1560000,
+      "7-bulan": 1785000,
+      "8-bulan": 2000000,
+      "9-bulan": 2205000,
+      "10-bulan": 2400000,
+      "11-bulan": 2585000,
+      "12-bulan": 2760000,
+    };
+    
+    let basePrice = priceConfig[form.durasi_membership] || 300000;
+    let finalPrice = basePrice;
+    let promoNote = form.catatan_medis || "Tidak ada";
+
+    if (form.promo_code && form.promo_code.trim()) {
+      const savedPromos = localStorage.getItem("zeus_promotions_v3");
+      if (savedPromos) {
+        const promoList = JSON.parse(savedPromos);
+        const found = promoList.find(
+          (p) =>
+            p.code.toLowerCase() === form.promo_code.trim().toLowerCase() &&
+            p.status === "Aktif"
+        );
+        if (found) {
+          promoNote = `Promo: ${found.code}. ${form.catatan_medis || ""}`.trim();
+          const discStr = String(found.discount || "");
+          if (discStr.includes("%")) {
+            const percent = parseFloat(discStr.replace("%", ""));
+            finalPrice = Math.max(0, basePrice * (1 - percent / 100));
+          } else {
+            const amount = parseFloat(discStr.replace(/[^0-9]/g, ""));
+            finalPrice = Math.max(0, basePrice - amount);
+          }
+        }
+      }
+    }
+
     // ── Pertemuan 13: Consume API ──────────────────────────────
     // Payload hanya berisi kolom yang memang ada di table zeusgym.member
     const buildPayload = (idMember) => ({
@@ -213,11 +263,11 @@ const Members = () => {
       tgl_berakhir: expiry,
       status_member: form.status_member,
       pin_akses: generatedPin,
-      catatan_medis: form.catatan_medis || "Tidak ada",
+      catatan_medis: promoNote,
       kontak_darurat: form.kontak_darurat,
       nama_kontak_darurat: form.nama_kontak_darurat,
-      frekuensi_transaksi: 0,
-      total_nominal_transaksi: 0,
+      frekuensi_transaksi: 1,
+      total_nominal_transaksi: finalPrice,
     });
 
     try {
@@ -273,6 +323,7 @@ const Members = () => {
         kontak_darurat: "",
         nama_kontak_darurat: "",
         durasi_membership: "1-bulan",
+        promo_code: "",
       });
       setShowModal(false);
       setSuccessAlert(
@@ -300,7 +351,7 @@ const Members = () => {
   return (
     <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen">
       {/* ── Page Title ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between animate-slide-down">
         <div>
           <h1 className="text-[22px] font-black text-[#1D1616]">Anggota Gym</h1>
           <p className="text-[12px] text-[#9e7a6e] mt-0.5">
@@ -314,43 +365,51 @@ const Members = () => {
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={Users}
-          label="Total Member"
-          value={members.length}
-          change="12.5%"
-          trend="up"
-          sub="dari bulan lalu"
-        />
-        <StatCard
-          icon={CalendarCheck}
-          label="Member Aktif"
-          value={totalActive}
-          change="5.3%"
-          trend="up"
-          sub="dari bulan lalu"
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="Tidak Aktif"
-          value={totalExpired}
-          change="2.1%"
-          trend="down"
-          sub="dari bulan lalu"
-        />
-        <StatCard
-          icon={Wallet}
-          label="Total Pendapatan"
-          value={`Rp ${(totalRevenue / 1000000).toFixed(1)} Jt`}
-          change="18.2%"
-          trend="up"
-          sub="dari bulan lalu"
-        />
+        <div className="animate-scale-in delay-75 hover-lift">
+          <StatCard
+            icon={Users}
+            label="Total Member"
+            value={members.length}
+            change="12.5%"
+            trend="up"
+            sub="dari bulan lalu"
+          />
+        </div>
+        <div className="animate-scale-in delay-100 hover-lift">
+          <StatCard
+            icon={CalendarCheck}
+            label="Member Aktif"
+            value={totalActive}
+            change="5.3%"
+            trend="up"
+            sub="dari bulan lalu"
+          />
+        </div>
+        <div className="animate-scale-in delay-150 hover-lift">
+          <StatCard
+            icon={TrendingUp}
+            label="Tidak Aktif"
+            value={totalExpired}
+            change="2.1%"
+            trend="down"
+            sub="dari bulan lalu"
+          />
+        </div>
+        <div className="animate-scale-in delay-200 hover-lift">
+          <StatCard
+            icon={Wallet}
+            label="Total Pendapatan"
+            value={`Rp ${(totalRevenue / 1000000).toFixed(1)} Jt`}
+            change="18.2%"
+            trend="up"
+            sub="dari bulan lalu"
+          />
+        </div>
       </div>
 
       {/* ── Pertemuan 13: Alert error fetch API ── */}
       {fetchError && (
-        <Alert variant="destructive" className="relative">
+        <Alert variant="destructive" className="relative animate-slide-up-alert">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Gagal Memuat Data</AlertTitle>
           <AlertDescription>{fetchError}</AlertDescription>
@@ -359,7 +418,7 @@ const Members = () => {
 
       {/* ── Alert sukses tambah member (UI Component dari folder ui) ── */}
       {successAlert && (
-        <Alert variant="success" className="relative">
+        <Alert variant="success" className="relative animate-slide-up-alert">
           <CheckCircle2 className="h-4 w-4" />
           <AlertTitle>Member Berhasil Ditambahkan!</AlertTitle>
           <AlertDescription>{successAlert}</AlertDescription>
@@ -374,7 +433,7 @@ const Members = () => {
 
       {/* ── Tabel ── */}
       <div
-        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-slide-up delay-250"
         style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
       >
         {/* Header tabel */}
@@ -401,7 +460,7 @@ const Members = () => {
             <select
               value={filterStatus}
               onChange={handleFilterChange(setFilterStatus)}
-              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20 transition-all duration-200"
             >
               <option value="all">Semua Status</option>
               <option value="aktif">Aktif</option>
@@ -410,7 +469,7 @@ const Members = () => {
             <select
               value={filterGender}
               onChange={handleFilterChange(setFilterGender)}
-              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20"
+              className="px-3 py-1.5 bg-[#f8f3ee] border border-[#e8dfd6] rounded-lg text-xs text-[#5a3030] focus:outline-none focus:ring-2 focus:ring-[#8C1007]/20 transition-all duration-200"
             >
               <option value="all">Semua Gender</option>
               <option value="L">Laki-laki</option>
@@ -433,11 +492,26 @@ const Members = () => {
 
         {/* Table */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-8 h-8 border-3 border-[#8C1007] border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs text-[#9e7a6e]">
-              Memuat data member dari server...
-            </p>
+          <div className="px-6 py-8 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex gap-4 items-center justify-between py-3 border-b border-gray-50 animate-pulse">
+                <div className="h-4 bg-gray-150 rounded w-8 skeleton" />
+                <div className="h-4 bg-gray-150 rounded w-20 skeleton" />
+                <div className="flex items-center gap-3 w-1/3">
+                  <div className="w-8 h-8 bg-gray-150 rounded-full skeleton" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-4 bg-gray-150 rounded w-3/4 skeleton" />
+                    <div className="h-3 bg-gray-150 rounded w-1/2 skeleton" />
+                  </div>
+                </div>
+                <div className="h-4 bg-gray-150 rounded w-6 skeleton" />
+                <div className="h-4 bg-gray-150 rounded w-24 skeleton" />
+                <div className="h-4 bg-gray-150 rounded w-20 skeleton" />
+                <div className="h-4 bg-gray-150 rounded w-20 skeleton" />
+                <div className="h-6 bg-gray-150 rounded-full w-16 skeleton" />
+                <div className="h-4 bg-gray-150 rounded w-12 skeleton" />
+              </div>
+            ))}
           </div>
         ) : (
           <>
@@ -461,7 +535,7 @@ const Members = () => {
                       return (
                         <tr
                           key={item.id}
-                          className="hover:bg-[#faf6f4] transition-colors"
+                          className="hover:bg-[#faf6f4] hover:translate-x-1 hover:shadow-[inset_3px_0_0_0_#8C1007] transition-all duration-200"
                         >
                           <td className="px-6 py-3.5 text-xs text-[#9e7a6e] font-medium">
                             {indexOfFirstItem + idx + 1}
@@ -747,6 +821,13 @@ const Members = () => {
                 onChange={handleChange}
                 placeholder="Kosongkan untuk generate otomatis"
                 maxLength={6}
+              />
+              <InputField
+                label="Kode Promo (Opsional)"
+                name="promo_code"
+                value={form.promo_code}
+                onChange={handleChange}
+                placeholder="Masukkan kode promo aktif..."
               />
             </div>
           </div>

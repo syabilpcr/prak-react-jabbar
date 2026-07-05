@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Clock, Users, CheckCircle2, ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 const IMG = {
   yoga: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=900&q=80",
@@ -33,81 +34,95 @@ export default function MemberClasses() {
     setBooked((prev) => ({ ...prev, [name]: !prev[name] }));
 
   return (
-    <div className="bg-[#0b0b0d] -mx-5 -my-8 px-5 py-10 md:-mx-10 md:px-10 min-h-screen">
+    <div className="bg-[#0b0b0d] -mx-5 -my-8 px-5 pt-28 pb-16 md:-mx-10 md:px-10 min-h-screen text-white">
       {/* Header */}
-      <div className="animate-slide-up">
-        <p className="text-[11px] uppercase tracking-[0.3em] text-white/40 mb-3">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="mb-8"
+      >
+        <span className="text-[10px] uppercase tracking-[0.25em] text-[#D84040] font-black block mb-2">
           Jadwal Mingguan
-        </p>
-        <h1 className="text-3xl md:text-5xl font-semibold text-white tracking-tight">
-          Pilih kelasmu.
+        </span>
+        <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none uppercase">
+          PILIH KELAS
         </h1>
-        <p className="text-white/45 mt-3 max-w-md text-[15px]">
-          Setiap sesi dirancang untuk mendorongmu selangkah lebih jauh. Pesan
-          tempatmu sebelum penuh.
+        <p className="text-white/40 mt-3 max-w-md text-sm leading-relaxed">
+          Pilih kelas sesuai tingkat performa Anda dan pesan tempat sebelum slot penuh.
         </p>
-      </div>
+      </motion.div>
 
       {/* Filter */}
-      <div className="flex items-center gap-2 flex-wrap mt-8 animate-slide-up delay-100">
+      <motion.div 
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="flex items-center gap-2 flex-wrap mb-10"
+      >
         {levels.map((l) => (
           <button
             key={l}
             onClick={() => setFilter(l)}
-            className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 border
+            className={`px-5 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all duration-300 border cursor-pointer
               ${
                 filter === l
-                  ? "bg-white text-[#0b0b0d] border-white"
-                  : "bg-transparent text-white/50 border-white/15 hover:border-white/40 hover:text-white"
+                  ? "bg-[#D84040] text-white border-[#D84040]"
+                  : "bg-transparent text-white/50 border-white/10 hover:border-white/20 hover:text-white"
               }`}
           >
             {l}
           </button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Grid kelas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+      <motion.div 
+        layout
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         {filtered.map((c, i) => {
           const isBooked = booked[c.name];
           const full = c.booked >= c.slots && !isBooked;
           const sisaPersen = Math.round((c.booked / c.slots) * 100);
+          
           return (
-            <div
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.05 }}
               key={c.name}
-              className="group relative overflow-hidden rounded-2xl bg-[#141416] border border-white/[0.06] hover:border-white/15 transition-all duration-500 animate-slide-up"
-              style={{ animationDelay: `${(i % 6) * 80}ms` }}
+              className="group relative overflow-hidden rounded-2xl bg-[#141416] border border-white/[0.05] hover:border-[#D84040]/30 transition-all duration-300 flex flex-col justify-between"
             >
               {/* Foto */}
-              <div className="relative h-44 overflow-hidden">
+              <div className="relative h-48 overflow-hidden">
                 <img
                   src={c.img}
                   alt={c.name}
-                  className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+                  className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-75 group-hover:scale-105 transition-all duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#141416] via-[#141416]/30 to-transparent" />
-                <span className="absolute top-3 left-3 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141416] via-[#141416]/40 to-transparent" />
+                <span className="absolute top-4 left-4 text-[9px] uppercase font-bold tracking-widest text-white/80 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/5">
                   {c.day}
                 </span>
-                <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                  <h3 className="text-xl font-semibold text-white">{c.name}</h3>
-                  <span className="text-sm font-medium text-white/90">{c.time}</span>
+                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                  <h3 className="text-xl font-bold text-white tracking-tight uppercase">{c.name}</h3>
+                  <span className="text-xs font-semibold text-white/70 bg-black/40 px-2 py-0.5 rounded">{c.time}</span>
                 </div>
               </div>
 
               {/* Body */}
-              <div className="p-4 space-y-4">
-                <div className="flex items-center justify-between text-[12px] text-white/40">
+              <div className="p-5 space-y-4">
+                <div className="flex items-center justify-between text-xs text-white/40 font-medium">
                   <span>Pelatih {c.trainer}</span>
-                  <span className="flex items-center gap-1">
-                    <Users size={12} /> {c.booked}/{c.slots}
-                  </span>
+                  <span>{c.booked}/{c.slots} Slot Terisi</span>
                 </div>
 
                 {/* Bar kapasitas */}
-                <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-700 ${full ? "bg-red-500" : "bg-white"}`}
+                    className={`h-full rounded-full transition-all duration-750 ${full ? "bg-[#D84040]" : "bg-[#D84040]"}`}
                     style={{ width: `${sisaPersen}%` }}
                   />
                 </div>
@@ -115,33 +130,30 @@ export default function MemberClasses() {
                 <button
                   onClick={() => !full && toggleBook(c.name)}
                   disabled={full}
-                  className={`group/btn w-full py-2.5 rounded-full text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-1.5 cursor-pointer
                     ${
                       full
-                        ? "bg-white/5 text-white/30 cursor-not-allowed"
+                        ? "bg-white/5 text-white/20 border border-transparent cursor-not-allowed"
                         : isBooked
-                          ? "bg-white/10 text-white border border-white/20"
-                          : "bg-white text-[#0b0b0d] hover:bg-white/90"
+                          ? "bg-transparent text-white border border-[#D84040] hover:bg-[#D84040]/10"
+                          : "bg-white text-[#0b0b0d] hover:bg-[#D84040] hover:text-white"
                     }`}
                 >
                   {full ? (
                     "Kelas Penuh"
                   ) : isBooked ? (
                     <>
-                      <CheckCircle2 size={15} /> Terdaftar
+                      <Check size={14} /> Terdaftar
                     </>
                   ) : (
-                    <>
-                      Pesan Kelas
-                      <ArrowRight size={15} className="group-hover/btn:translate-x-0.5 transition-transform" />
-                    </>
+                    "Pesan Kelas"
                   )}
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }

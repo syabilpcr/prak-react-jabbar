@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Send,
@@ -9,6 +9,8 @@ import {
   Users,
   Gift,
   Share2,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 // ── Components ────────────────────────────────────────────────
@@ -26,7 +28,17 @@ import StatCard from "../components/StatCard";
 import promotionsData from "../data/promotionsData";
 
 const Promotions = () => {
-  const [promotions, setPromotions] = useState(promotionsData);
+  const [promotions, setPromotions] = useState(() => {
+    const saved = localStorage.getItem("zeus_promotions_v3");
+    if (saved) return JSON.parse(saved);
+    localStorage.setItem("zeus_promotions_v3", JSON.stringify(promotionsData));
+    return promotionsData;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("zeus_promotions_v3", JSON.stringify(promotions));
+  }, [promotions]);
+
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [filterPromoStatus, setFilterPromoStatus] = useState("all");
@@ -56,6 +68,8 @@ const Promotions = () => {
     { id: 3, friendName: "Agus Wijaya", date: "2024-12-05", status: "Pending", reward: "Rp 25.000" },
   ]);
 
+  const [editingPromo, setEditingPromo] = useState(null);
+
   const [form, setForm] = useState({
     title: "",
     code: "",
@@ -68,21 +82,59 @@ const Promotions = () => {
 
   const handleSubmit = () => {
     if (!form.title || !form.code || !form.discount) return;
-    const newPromo = {
-      id: `PROMO-${String(promotions.length + 1).padStart(3, "0")}`,
-      ...form,
-      discount:
-        form.discountType === "percentage"
-          ? `${form.discount}%`
-          : `Rp ${form.discount}`,
-      type: form.discountType,
-      validUntil: "2024-12-31",
-      status: "Aktif",
-      sent: 0,
-    };
-    setPromotions([newPromo, ...promotions]);
+    
+    if (editingPromo) {
+      const updated = promotions.map((p) => {
+        if (p.id === editingPromo.id) {
+          return {
+            ...p,
+            title: form.title,
+            code: form.code,
+            type: form.discountType,
+            discount:
+              form.discountType === "percentage"
+                ? `${form.discount}%`
+                : `Rp ${form.discount}`,
+          };
+        }
+        return p;
+      });
+      setPromotions(updated);
+      setEditingPromo(null);
+    } else {
+      const newPromo = {
+        id: `PROMO-${String(promotions.length + 1).padStart(3, "0")}`,
+        ...form,
+        discount:
+          form.discountType === "percentage"
+            ? `${form.discount}%`
+            : `Rp ${form.discount}`,
+        type: form.discountType,
+        validUntil: "2025-12-31",
+        status: "Aktif",
+        sent: 0,
+      };
+      setPromotions([newPromo, ...promotions]);
+    }
     setForm({ title: "", code: "", discount: "", discountType: "percentage" });
     setShowModal(false);
+  };
+
+  const handleEditPromo = (promo) => {
+    setEditingPromo(promo);
+    setForm({
+      title: promo.title,
+      code: promo.code,
+      discount: String(promo.discount || "").replace("%", "").replace("Rp ", ""),
+      discountType: promo.type || (String(promo.discount).includes("%") ? "percentage" : "fixed"),
+    });
+    setShowModal(true);
+  };
+
+  const handleDeletePromo = (id) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus promosi ini?")) {
+      setPromotions(promotions.filter((p) => p.id !== id));
+    }
   };
 
   const handleSendPromo = (promo) => {
@@ -133,7 +185,15 @@ const Promotions = () => {
             Kelola kampanye promosi dan program referral
           </p>
         </div>
-        <Button type="primary" icon={Plus} onClick={() => setShowModal(true)}>
+        <Button
+          type="primary"
+          icon={Plus}
+          onClick={() => {
+            setEditingPromo(null);
+            setForm({ title: "", code: "", discount: "", discountType: "percentage" });
+            setShowModal(true);
+          }}
+        >
           Buat Promosi
         </Button>
       </div>

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Dumbbell, Play, CheckCircle2, Flame, Timer, Target } from "lucide-react";
+import { Play, Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 const programs = [
-  { name: "Full Body Blast", focus: "Seluruh Tubuh", duration: "45 mnt", exercises: 8, kcal: 320, color: "from-[#8E1616] to-[#D84040]" },
-  { name: "Upper Power", focus: "Dada & Lengan", duration: "35 mnt", exercises: 6, kcal: 240, color: "from-blue-500 to-indigo-500" },
-  { name: "Leg Day", focus: "Kaki & Glutes", duration: "40 mnt", exercises: 7, kcal: 290, color: "from-amber-500 to-orange-500" },
-  { name: "Core Crusher", focus: "Perut & Core", duration: "25 mnt", exercises: 5, kcal: 180, color: "from-emerald-500 to-teal-500" },
+  { name: "Full Body Blast", focus: "Seluruh Tubuh", duration: "45 mnt", exercises: 8, kcal: 320, color: "from-[#8E1616]/40 to-[#D84040]/40" },
+  { name: "Upper Power", focus: "Dada & Lengan", duration: "35 mnt", exercises: 6, kcal: 240, color: "from-blue-900/40 to-indigo-900/40" },
+  { name: "Leg Day", focus: "Kaki & Glutes", duration: "40 mnt", exercises: 7, kcal: 290, color: "from-amber-900/40 to-orange-900/40" },
+  { name: "Core Crusher", focus: "Perut & Core", duration: "25 mnt", exercises: 5, kcal: 180, color: "from-emerald-900/40 to-teal-900/40" },
 ];
 
 const todayExercises = [
@@ -21,134 +22,149 @@ export default function MemberWorkouts() {
 
   const toggle = (idx) =>
     setExercises((prev) =>
-
       prev.map((e, i) => (i === idx ? { ...e, done: !e.done } : e)),
     );
-
 
   const completed = exercises.filter((e) => e.done).length;
   const progress = Math.round((completed / exercises.length) * 100);
 
   return (
-    <div className="space-y-6">
+    <div className="bg-[#0b0b0d] -mx-5 -my-8 px-5 pt-28 pb-16 md:-mx-10 md:px-10 min-h-screen text-white space-y-8">
       {/* Header */}
-      <div className="animate-slide-up">
-        <h1 className="text-2xl font-black text-[#1D1616] flex items-center gap-2">
-          <Dumbbell size={24} className="text-[#8E1616]" /> Latihan
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <span className="text-[10px] uppercase tracking-[0.25em] text-[#D84040] font-black block mb-2">
+          Rencana Harian
+        </span>
+        <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight leading-none uppercase">
+          LATIHAN HARIAN
         </h1>
-        <p className="text-sm text-[#9e7a6e] mt-1">
-          Pilih program dan selesaikan latihan harianmu
+        <p className="text-white/40 mt-3 max-w-md text-sm leading-relaxed">
+          Selesaikan gerakan target hari ini dan pantau kemajuan aktivitas fisik Anda.
         </p>
-      </div>
+      </motion.div>
 
-      {/* Today's progress ring */}
-      <div className="bg-gradient-to-br from-[#1D1616] to-[#3E0703] rounded-3xl p-6 text-white flex items-center justify-between animate-slide-up delay-100">
-        <div>
-          <p className="text-xs text-white/50 uppercase tracking-widest font-semibold">
-            Latihan Hari Ini
+      {/* Progress ring card */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="bg-[#141416] border border-white/[0.05] rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6"
+      >
+        <div className="text-center sm:text-left space-y-2">
+          <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">
+            Target Sesi Hari Ini
           </p>
-          <h2 className="text-3xl font-black mt-1">
-            {completed}/{exercises.length}{" "}
-            <span className="text-base font-semibold text-white/60">selesai</span>
+          <h2 className="text-2xl md:text-3xl font-black">
+            {completed} dari {exercises.length} <span className="text-sm font-medium text-white/40">gerakan selesai</span>
           </h2>
-          <div className="flex gap-4 mt-4 text-sm">
-            <span className="flex items-center gap-1.5 text-white/70">
-              <Flame size={15} className="text-orange-400" /> 210 kcal
-            </span>
-            <span className="flex items-center gap-1.5 text-white/70">
-              <Timer size={15} className="text-blue-400" /> 28 mnt
-            </span>
+          <div className="flex justify-center sm:justify-start gap-4 text-xs text-white/60 pt-1">
+            <span>210 KCAL</span>
+            <span className="text-white/20">•</span>
+            <span>28 MENIT</span>
           </div>
         </div>
+
         {/* Progress ring */}
-        <div className="relative w-24 h-24">
-          <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="10" />
+        <div className="relative w-20 h-20">
+          <svg className="w-20 h-20 -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="8" />
             <circle
               cx="50"
               cy="50"
               r="42"
               fill="none"
               stroke="#D84040"
-              strokeWidth="10"
+              strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 42}
               strokeDashoffset={2 * Math.PI * 42 * (1 - progress / 100)}
               className="transition-all duration-700 ease-out"
             />
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-xl font-black">
+          <span className="absolute inset-0 flex items-center justify-center text-sm font-black">
             {progress}%
           </span>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Checklist latihan hari ini */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm animate-slide-up delay-200">
-        <h2 className="text-lg font-black text-[#1D1616] mb-4 flex items-center gap-2">
-          <Target size={18} className="text-[#8E1616]" /> Checklist Latihan
-        </h2>
-        <div className="space-y-2">
-          {exercises.map((e, idx) => (
-            <button
-              key={e.name}
-              onClick={() => toggle(idx)}
-
-              className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all duration-300
-                ${
-                  e.done
-                    ? "bg-green-50 border-green-200"
-                    : "bg-[#f8f3ee] border-transparent hover:border-[#8E1616]/20"
-                }`}
-            >
-              <span className="flex items-center gap-3">
-                <span
-                  className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300
-                    ${e.done ? "bg-green-500 text-white" : "bg-white border-2 border-gray-200"}`}
-                >
-                  {e.done && <CheckCircle2 size={16} />}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Checklist */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="lg:col-span-1 bg-[#141416] border border-white/[0.05] rounded-2xl p-6 space-y-4"
+        >
+          <h2 className="text-lg font-bold uppercase tracking-tight text-white/90">Gerakan Hari Ini</h2>
+          <div className="space-y-2">
+            {exercises.map((e, idx) => (
+              <button
+                key={e.name}
+                onClick={() => toggle(idx)}
+                className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all duration-300 hover:scale-[1.01] cursor-pointer
+                  ${
+                    e.done
+                      ? "bg-[#D84040]/5 border-[#D84040]/20 text-white/90"
+                      : "bg-black/30 border-white/[0.03] text-white hover:border-[#D84040]/30"
+                  }`}
+              >
+                <span className="flex items-center gap-3">
+                  <span
+                    className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 border
+                      ${e.done ? "bg-[#D84040] border-[#D84040] text-white" : "bg-transparent border-white/20"}`}
+                  >
+                    {e.done && <Check size={12} />}
+                  </span>
+                  <span className={`text-xs font-semibold uppercase tracking-wider ${e.done ? "line-through text-white/40" : "text-white"}`}>
+                    {e.name}
+                  </span>
                 </span>
-                <span
-                  className={`font-semibold text-sm ${e.done ? "text-green-700 line-through" : "text-[#1D1616]"}`}
-                >
-                  {e.name}
-                </span>
-              </span>
-              <span className="text-xs font-bold text-[#9e7a6e]">{e.sets}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider">{e.sets}</span>
+              </button>
+            ))}
+          </div>
+        </motion.div>
 
-      {/* Program latihan */}
-      <div className="animate-slide-up delay-300">
-        <h2 className="text-lg font-black text-[#1D1616] mb-4">Program Latihan</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {programs.map((p) => (
+        {/* Programs */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="lg:col-span-2 space-y-4"
+        >
+          <h2 className="text-lg font-bold uppercase tracking-tight text-white/90">Program Latihan</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {programs.map((p, idx) => (
+              <div
+                key={p.name}
+                className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${p.color} border border-white/[0.05] p-5 transition-all duration-300 hover:shadow-xl hover:shadow-[#D84040]/5`}
+              >
+                <div className="relative z-10 flex flex-col justify-between h-full space-y-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-white uppercase tracking-tight">{p.name}</h3>
+                    <p className="text-xs text-white/50 uppercase tracking-widest font-semibold mt-1">{p.focus}</p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex gap-3 text-[10px] text-white/50 font-bold uppercase tracking-wider">
+                      <span>{p.duration}</span>
+                      <span>•</span>
+                      <span>{p.exercises} GERAKAN</span>
+                    </div>
 
-            <div
-              key={p.name}
-              className={`group relative overflow-hidden rounded-3xl bg-gradient-to-br ${p.color} p-5 text-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}
-            >
-              <div className="absolute -right-6 -bottom-6 opacity-20 group-hover:opacity-30 group-hover:scale-110 transition-all duration-500">
-                <Dumbbell size={90} />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-xl font-black">{p.name}</h3>
-                <p className="text-sm text-white/70">{p.focus}</p>
-                <div className="flex gap-4 mt-4 text-xs text-white/80">
-                  <span>{p.duration}</span>
-                  <span>{p.exercises} gerakan</span>
-                  <span>{p.kcal} kcal</span>
+                    <button className="bg-white text-black text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-[#D84040] hover:text-white transition-colors cursor-pointer">
+                      <Play size={10} fill="currentColor" /> Mulai
+                    </button>
+                  </div>
                 </div>
-                <button className="mt-4 bg-white text-[#1D1616] font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2 hover:scale-105 transition-transform">
-                  <Play size={14} /> Mulai
-                </button>
               </div>
-            </div>
-          ))}
-
-        </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </div>
   );

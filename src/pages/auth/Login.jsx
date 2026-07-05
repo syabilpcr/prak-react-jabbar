@@ -1,22 +1,20 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, LogIn, Dumbbell } from "lucide-react";
-import Button from "../../components/Button";
+import { motion } from "framer-motion";
+import { Mail, Lock, Dumbbell } from "lucide-react";
 import api from "../../lib/api";
-
-// UI Components dari folder ui
-import { Alert, AlertTitle, AlertDescription } from "../../components/ui/alert";
+import Loading from "../../components/Loading";
 
 export default function Login() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showAdminLoading, setShowAdminLoading] = useState(false);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ── Tugas: Login langsung ke Supabase (bukan dummy/localStorage) ──
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -33,7 +31,6 @@ export default function Login() {
       const user = res.data[0];
 
       if (user) {
-        // Simpan session user (tanpa password) di localStorage
         localStorage.setItem(
           "currentUser",
           JSON.stringify({
@@ -45,12 +42,10 @@ export default function Login() {
           }),
         );
 
-        // ── Routing berdasarkan role ──
-        // role "member" → area member; role lain (admin/staff/trainer) → dashboard admin
         if (user.role === "member") {
           navigate("/member");
         } else {
-          navigate("/dashboard");
+          setShowAdminLoading(true);
         }
       } else {
         setError("Email atau kata sandi salah");
@@ -63,149 +58,166 @@ export default function Login() {
     }
   };
 
+  if (showAdminLoading) {
+    return (
+      <Loading
+        minDuration={3500}
+        onFinish={() => navigate("/dashboard")}
+      />
+    );
+  }
+
+  // Animation variants for 21dev look
+  const containerVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        duration: 0.6, 
+        ease: [0.16, 1, 0.3, 1],
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
+    }
+  };
+
   return (
-    <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-200 max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row">
-        {/* Left Side - Image */}
-        <div className="w-full md:w-1/2 relative min-h-[400px] md:min-h-[600px] overflow-hidden">
-          <img
-            src="https://i1-e.pinimg.com/1200x/b7/42/97/b74297bf782830d55728bbd3722971ed.jpg"
-            alt="Zeus Gym"
-            className="w-full h-full object-cover absolute inset-0 scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1D1616] via-[#1D1616]/55 to-[#1D1616]/30" />
-          <div className="absolute -bottom-24 -left-16 w-72 h-72 bg-[#8E1616]/40 rounded-full blur-[100px]" />
-          <div className="relative z-10 h-full flex flex-col justify-between p-10 text-white">
-            {/* Logo konsisten admin */}
-            <div className="flex items-center gap-2.5 animate-slide-up">
-              <div className="w-9 h-9 bg-[#8C1007] rounded-xl flex items-center justify-center shadow-lg">
-                <Dumbbell size={16} className="text-[#FFF0C4]" />
-              </div>
-              <h1 className="text-[14px] font-black text-[#FFF0C4] tracking-tight">
-                ZEUS GYM
-              </h1>
-            </div>
-            <div className="animate-slide-up" style={{ animationDelay: "120ms" }}>
-              <h2 className="text-4xl font-black leading-tight tracking-tight drop-shadow-lg">
-                Selamat datang
-                <br />
-                kembali, juara.
-              </h2>
-              <p className="text-white/70 text-sm mt-4 max-w-xs leading-relaxed">
-                Masuk untuk melanjutkan perjalanan kebugaranmu di Zeus Gym.
-              </p>
-            </div>
+    <div className="w-full max-w-md mx-auto relative">
+      {/* Background Decorative Rings/Blobs */}
+      <div className="absolute -top-12 -left-12 w-48 h-48 bg-[#D84040]/10 rounded-full blur-[80px] pointer-events-none" />
+      <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-[#D84040]/5 rounded-full blur-[80px] pointer-events-none" />
+
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="bg-[#0b0b0d]/80 backdrop-blur-md border border-white/[0.08] rounded-3xl p-8 md:p-10 shadow-[0_0_50px_rgba(216,64,64,0.06)] relative z-10 space-y-7"
+      >
+        {/* Header Section */}
+        <div className="text-center space-y-3">
+          <motion.div 
+            variants={itemVariants} 
+            className="inline-flex items-center justify-center w-11 h-11 bg-[#8C1007] rounded-xl shadow-lg shadow-[#8C1007]/20 flex-shrink-0"
+          >
+            <Dumbbell size={18} className="text-[#FFF0C4] rotate-45" />
+          </motion.div>
+          
+          <div className="space-y-1">
+            <motion.h1 
+              variants={itemVariants}
+              className="text-xl font-black uppercase tracking-tight text-[#FFF0C4] leading-tight"
+            >
+              ZEUS GYM
+            </motion.h1>
+            <motion.p 
+              variants={itemVariants}
+              className="text-[9px] uppercase tracking-[1.5px] text-[#FFF0C4]/40 font-semibold mt-0.5"
+            >
+              SYSTEM AUTHENTICATION
+            </motion.p>
           </div>
         </div>
 
-        {/* Right Side - Form */}
-        <div className="w-full md:w-1/2 p-8 md:p-12 bg-white flex flex-col justify-center">
-          <div className="mb-8 animate-slide-up">
-            <div className="w-14 h-14 bg-[#8E1616]/10 rounded-2xl flex items-center justify-center mb-5">
-              <LogIn size={26} className="text-[#8E1616]" />
+        {error && (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-[#D84040]/10 border border-[#D84040]/20 text-[#D84040] text-xs font-semibold px-4 py-3 rounded-xl text-center animate-shake"
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {/* Form Fields */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <motion.div variants={itemVariants} className="space-y-2">
+            <label className="block text-[10px] font-bold text-white/40 uppercase tracking-[0.12em]">
+              Alamat Email
+            </label>
+            <div className="relative flex items-center">
+              <Mail size={14} className="absolute left-3.5 text-white/30 pointer-events-none" />
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 bg-white/[0.02] border border-white/[0.08] rounded-xl text-xs text-white placeholder-white/10 focus:outline-none focus:border-[#D84040] focus:ring-1 focus:ring-[#D84040]/30 transition-all duration-300"
+                placeholder="nama@email.com"
+                required
+              />
             </div>
-            <h2 className="text-2xl font-black text-[#1D1616] tracking-tight">
-              Masuk ke akun
-            </h2>
-            <p className="text-gray-500 text-sm mt-1.5">
-              Senang melihatmu lagi. Yuk lanjutkan.
-            </p>
-          </div>
+          </motion.div>
 
-          {error && (
-            <Alert variant="destructive" className="mb-5">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {loading && (
-            <Alert variant="default" className="mb-5">
-              <AlertDescription>Memproses...</AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit} className="animate-slide-up" style={{ animationDelay: "80ms" }}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Alamat Email
-              </label>
-              <div className="relative group">
-                <Mail
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#8E1616] transition-colors"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616]/30 focus:border-[#8E1616] focus:bg-white transition-all"
-                  placeholder="admin@zeusgym.com"
-                  required
-                />
-              </div>
+          <motion.div variants={itemVariants} className="space-y-2">
+            <label className="block text-[10px] font-bold text-white/40 uppercase tracking-[0.12em]">
+              Kata Sandi
+            </label>
+            <div className="relative flex items-center">
+              <Lock size={14} className="absolute left-3.5 text-white/30 pointer-events-none" />
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full pl-10 pr-4 py-3 bg-white/[0.02] border border-white/[0.08] rounded-xl text-xs text-white placeholder-white/10 focus:outline-none focus:border-[#D84040] focus:ring-1 focus:ring-[#D84040]/30 transition-all duration-300"
+                placeholder="••••••••"
+                required
+              />
             </div>
+          </motion.div>
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kata Sandi
-              </label>
-              <div className="relative group">
-                <Lock
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#8E1616] transition-colors"
-                />
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-[#1D1616] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8E1616]/30 focus:border-[#8E1616] focus:bg-white transition-all"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
+          <motion.div 
+            variants={itemVariants}
+            className="flex justify-between items-center text-[10px] text-white/40 font-semibold"
+          >
+            <label className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
+              <input
+                type="checkbox"
+                className="rounded border-white/10 bg-white/[0.02] accent-[#D84040]"
+              />
+              INGAT SAYA
+            </label>
+            <Link
+              to="/forgot"
+              className="hover:text-[#D84040] transition-colors tracking-wide"
+            >
+              LUPA SANDI?
+            </Link>
+          </motion.div>
 
-            <div className="flex justify-between items-center mb-6">
-              <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 accent-[#8E1616]"
-                />
-                Ingat saya
-              </label>
-              <Link
-                to="/forgot"
-                className="text-sm text-[#8E1616] hover:text-[#D84040] transition-colors"
-              >
-                Lupa Kata Sandi?
-              </Link>
-            </div>
-
+          <motion.div variants={itemVariants} className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="group w-full bg-[#8E1616] hover:bg-[#D84040] text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md shadow-[#8E1616]/30 hover:shadow-lg hover:shadow-[#8E1616]/40 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-[#D84040] hover:bg-[#c43232] text-white font-bold text-xs uppercase tracking-[0.08em] py-3.5 px-4 rounded-xl transition-all duration-300 shadow-md shadow-[#D84040]/10 hover:shadow-[#D84040]/25 disabled:opacity-50 cursor-pointer"
             >
               {loading ? "Memproses..." : "Masuk ke Dashboard"}
-              {!loading && (
-                <LogIn size={17} className="group-hover:translate-x-0.5 transition-transform" />
-              )}
             </button>
-          </form>
+          </motion.div>
+        </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Belum punya akun?{" "}
-            <Link
-              to="/register"
-              className="text-[#8E1616] hover:text-[#D84040] font-semibold transition-colors"
-            >
-              Daftar Sekarang
-            </Link>
-          </p>
-        </div>
-      </div>
+        {/* Footer */}
+        <motion.p 
+          variants={itemVariants}
+          className="text-center text-[10px] text-white/30 font-bold uppercase tracking-wider"
+        >
+          Belum memiliki akun?{" "}
+          <Link
+            to="/register"
+            className="text-[#D84040] hover:text-[#ff5c5c] font-black transition-colors ml-1"
+          >
+            Daftar
+          </Link>
+        </motion.p>
+      </motion.div>
     </div>
   );
 }
