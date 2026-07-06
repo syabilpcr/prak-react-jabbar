@@ -16,8 +16,8 @@ const VIDEO_URL = "/videos/video-saya.mp4";
 const stats = [
   { end: 12, suffix: "+", label: "Tahun Pengalaman" },
   { end: 27, suffix: "K+", label: "Member Aktif" },
-  { end: 60, suffix: "+", label: "Kelas Mingguan" },
-  { end: 117, suffix: "+", label: "Pelatih Ahli" },
+  { end: 250, suffix: "+", label: "Alat Beban" },
+  { end: 18, suffix: " Jam", label: "Jam Operasional" },
 ];
 
 export default function LandingAbout() {
@@ -40,9 +40,9 @@ export default function LandingAbout() {
         <Reveal delay={160}>
           <p className="text-white/50 mt-6 max-w-2xl text-[15px] leading-relaxed">
             Di Zeus Gym, kami berkomitmen membantumu membuka potensi penuh.
-            Dengan peralatan kelas atas, pelatih berpengalaman, dan komunitas
+            Dengan peralatan kelas atas, fasilitas premium, dan komunitas
             yang hangat, kami menyediakan lingkungan sempurna untuk mendorong
-            batasmu dan meraih tujuan.
+            batasmu dan meraih tujuan kebugaran terbaikmu.
           </p>
         </Reveal>
 

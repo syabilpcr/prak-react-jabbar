@@ -21,7 +21,7 @@ const testimonials = [
     rating: 5,
     date: "2 hari lalu",
     comment:
-      "Fasilitas gym luar biasa! Peralatan lengkap dan selalu bersih. Trainer-nya sangat membantu dan sabar membimbing pemula seperti saya.",
+      "Fasilitas gym luar biasa! Peralatan lengkap dan selalu bersih. Nyaman sekali latihan di sini, tidak pernah ada alat yang rusak.",
     likes: 24,
     tag: "Fasilitas",
     gradient: "from-[#8E1616] to-[#D84040]",
@@ -45,9 +45,9 @@ const testimonials = [
     rating: 4,
     date: "1 minggu lalu",
     comment:
-      "Kelas yoga pagi sangat menenangkan. Suasananya mendukung banget untuk relaksasi. Cuma kadang agak ramai di jam sore.",
+      "Area angkat beban sangat luas dan tertata rapi. Suasananya mendukung banget untuk latihan fokus. Cuma kadang agak ramai di jam sore.",
     likes: 15,
-    tag: "Kelas",
+    tag: "Suasana",
     gradient: "from-emerald-400 to-teal-500",
   },
   {
@@ -57,9 +57,9 @@ const testimonials = [
     rating: 5,
     date: "2 minggu lalu",
     comment:
-      "Trainer Mike sangat profesional dan motivasinya selalu bikin semangat! Highly recommend buat yang mau serius latihan.",
+      "Loker room dan kamar mandi air hangatnya sangat bersih. Resepsionisnya ramah dan cepat tanggap. Highly recommend Zeus Gym!",
     likes: 33,
-    tag: "Trainer",
+    tag: "Layanan",
     gradient: "from-blue-400 to-indigo-500",
   },
   {
@@ -88,7 +88,7 @@ const testimonials = [
   },
 ];
 
-const categories = ["Semua", "Fasilitas", "Program", "Kelas", "Trainer", "Suasana"];
+const categories = ["Semua", "Fasilitas", "Peralatan", "Layanan", "Suasana"];
 
 // ── Star display ──────────────────────────────────────────────
 function Stars({ count, size = 12 }) {

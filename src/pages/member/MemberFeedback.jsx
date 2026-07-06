@@ -11,7 +11,7 @@ import {
   Quote,
 } from "lucide-react";
 
-// ── Data ulasan member yang sudah ada ─────────────────────────
+// ── Data ulasan member yang sudah ada (tanpa menyebut kelas & trainer) ─────────────────────────
 const existingReviews = [
   {
     id: 1,
@@ -19,7 +19,7 @@ const existingReviews = [
     avatar: "A",
     rating: 5,
     date: "2 hari lalu",
-    comment: "Fasilitas gym luar biasa! Peralatan lengkap dan selalu bersih. Trainer-nya juga sangat membantu dan sabar membimbing pemula seperti saya.",
+    comment: "Fasilitas gym luar biasa! Peralatan angkat beban sangat lengkap, tertata rapi, dan selalu bersih. Nyaman sekali latihan di sini.",
     likes: 24,
     tag: "Fasilitas",
   },
@@ -29,9 +29,9 @@ const existingReviews = [
     avatar: "S",
     rating: 5,
     date: "5 hari lalu",
-    comment: "Program HIIT Burn benar-benar mengubah hidup saya. Dalam 3 bulan berat badan turun 8 kg! Terima kasih Zeus Gym!",
+    comment: "Program latihan mandiri di sini terbantu sekali karena mesin kardio dan treadmill-nya modern dan semuanya berfungsi dengan baik. Sangat worth it!",
     likes: 41,
-    tag: "Program",
+    tag: "Peralatan",
   },
   {
     id: 3,
@@ -39,9 +39,9 @@ const existingReviews = [
     avatar: "B",
     rating: 4,
     date: "1 minggu lalu",
-    comment: "Kelas yoga pagi sangat menenangkan. Suasananya mendukung banget. Cuma kadang agak ramai di jam sore.",
+    comment: "Area angkat beban sangat luas. Suasananya mendukung banget untuk latihan fokus. Cuma kadang agak ramai di jam sore sepulang kerja.",
     likes: 15,
-    tag: "Kelas",
+    tag: "Suasana",
   },
   {
     id: 4,
@@ -49,9 +49,9 @@ const existingReviews = [
     avatar: "R",
     rating: 5,
     date: "2 minggu lalu",
-    comment: "Trainer Mike sangat profesional dan motivasinya selalu bikin semangat! Highly recommend buat yang mau serius latihan.",
+    comment: "Locker room dan kamar mandi air hangatnya sangat bersih dan wangi setelah lelah latihan berat. Pelayanan resepsionis juga ramah.",
     likes: 33,
-    tag: "Trainer",
+    tag: "Layanan",
   },
   {
     id: 5,
@@ -59,7 +59,7 @@ const existingReviews = [
     avatar: "D",
     rating: 4,
     date: "3 minggu lalu",
-    comment: "Tempat parkir luas dan lokasi strategis. Locker room juga rapi. Semoga bisa tambah jam operasional di weekend.",
+    comment: "Tempat parkir luas dan lokasi strategis. Locker room rapi. Semoga bisa tambah jam operasional lebih pagi lagi di akhir pekan.",
     likes: 12,
     tag: "Fasilitas",
   },
@@ -69,13 +69,13 @@ const existingReviews = [
     avatar: "F",
     rating: 5,
     date: "1 bulan lalu",
-    comment: "Best gym in town! Suasana dark-luxury-nya bikin betah latihan berlama-lama. Worth every penny!",
+    comment: "Best gym in town! Suasana dark-luxury-nya bikin betah latihan berlama-lama tanpa merasa bosan. Pilihan tepat untuk langganan.",
     likes: 56,
     tag: "Suasana",
   },
 ];
 
-const categories = ["Semua", "Fasilitas", "Program", "Kelas", "Trainer", "Suasana"];
+const categories = ["Semua", "Fasilitas", "Peralatan", "Layanan", "Suasana"];
 
 // ── Komponen bintang interaktif ──────────────────────────────
 function StarRating({ rating, onRate, interactive = false, size = 20 }) {
@@ -162,7 +162,7 @@ export default function MemberFeedback() {
   };
 
   return (
-    <div className="bg-[#0b0b0d] min-h-screen px-5 py-10 md:px-10">
+    <div className="bg-[#0b0b0d] min-h-screen px-5 py-24 md:px-10">
       {/* ── Header ── */}
       <div className="max-w-4xl mx-auto animate-slide-up">
         <p className="text-[11px] uppercase tracking-[0.3em] text-white/40 mb-3">
@@ -172,8 +172,8 @@ export default function MemberFeedback() {
           Umpan balik<span className="text-[#D84040]">.</span>
         </h1>
         <p className="text-white/45 mt-3 max-w-lg text-[15px]">
-          Bagikan pengalamanmu di Zeus Gym. Setiap ulasan membantu kami menjadi
-          lebih baik untukmu.
+          Bagikan pengalamanmu di Zeus Gym. Setiap ulasan membantu kami meningkatkan 
+          kualitas fasilitas dan pelayanan untukmu.
         </p>
       </div>
 
@@ -208,7 +208,7 @@ export default function MemberFeedback() {
       <div className="max-w-4xl mx-auto mt-8 animate-slide-up delay-200">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="w-full group relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#3E0703] via-[#8E1616] to-[#D84040] p-[1px] transition-all hover:shadow-2xl hover:shadow-[#D84040]/20"
+          className="w-full group relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#3E0703] via-[#8E1616] to-[#D84040] p-[1px] transition-all hover:shadow-2xl hover:shadow-[#D84040]/20 cursor-pointer"
         >
           <div className="bg-[#0b0b0d] rounded-2xl px-6 py-5 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -220,7 +220,7 @@ export default function MemberFeedback() {
                   Bagikan Pengalamanmu
                 </p>
                 <p className="text-white/40 text-xs mt-0.5">
-                  Tulis ulasan dan bantu sesama member
+                  Tulis ulasan mengenai fasilitas, peralatan, atau pelayanan kami
                 </p>
               </div>
             </div>
@@ -279,7 +279,7 @@ export default function MemberFeedback() {
                         key={cat}
                         type="button"
                         onClick={() => setFormCategory(cat)}
-                        className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 border ${
+                        className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 border cursor-pointer ${
                           formCategory === cat
                             ? "bg-[#D84040] text-white border-[#D84040]"
                             : "bg-transparent text-white/50 border-white/15 hover:border-white/40 hover:text-white"
@@ -299,7 +299,7 @@ export default function MemberFeedback() {
                   <textarea
                     value={formComment}
                     onChange={(e) => setFormComment(e.target.value)}
-                    placeholder="Ceritakan pengalamanmu di Zeus Gym..."
+                    placeholder="Ceritakan pengalamanmu berlatih di Zeus Gym..."
                     rows={4}
                     className="w-full bg-[#0b0b0d] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-white/25 resize-none focus:outline-none focus:border-[#D84040]/50 focus:ring-1 focus:ring-[#D84040]/20 transition-all"
                   />
@@ -309,7 +309,7 @@ export default function MemberFeedback() {
                 <button
                   type="submit"
                   disabled={formRating === 0 || !formComment.trim()}
-                  className="w-full py-3.5 rounded-full bg-white text-[#0b0b0d] font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98]"
+                  className="w-full py-3.5 rounded-full bg-white text-[#0b0b0d] font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-[0.98] cursor-pointer"
                 >
                   <Send size={16} /> Kirim Ulasan
                 </button>
@@ -325,7 +325,7 @@ export default function MemberFeedback() {
           <button
             key={cat}
             onClick={() => setFilter(cat)}
-            className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 border ${
+            className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 border cursor-pointer ${
               filter === cat
                 ? "bg-white text-[#0b0b0d] border-white"
                 : "bg-transparent text-white/50 border-white/15 hover:border-white/40 hover:text-white"
@@ -380,7 +380,7 @@ export default function MemberFeedback() {
             <div className="mt-4 flex items-center justify-between">
               <button
                 onClick={() => toggleLike(review.id)}
-                className={`flex items-center gap-1.5 text-xs font-medium transition-all duration-300 px-3 py-1.5 rounded-full border ${
+                className={`flex items-center gap-1.5 text-xs font-medium transition-all duration-300 px-3 py-1.5 rounded-full border cursor-pointer ${
                   likedIds[review.id]
                     ? "text-[#D84040] border-[#D84040]/30 bg-[#D84040]/10"
                     : "text-white/30 border-white/[0.06] hover:text-white/60 hover:border-white/15"

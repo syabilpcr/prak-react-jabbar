@@ -1,14 +1,22 @@
 import React, { Suspense, useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Dumbbell, LogOut, Menu, X } from "lucide-react";
+import { Outlet, useNavigate, useLocation, NavLink } from "react-router-dom";
+import {
+  Dumbbell,
+  LogOut,
+  Menu,
+  X,
+  LayoutDashboard,
+  Crown,
+  Zap,
+  MessageCircle,
+  User,
+} from "lucide-react";
 
 const navItems = [
-  { label: "Beranda", type: "scroll", target: "home" },
-  { label: "Tentang", type: "scroll", target: "about" },
-  { label: "Promosi", type: "scroll", target: "promotions" },
-  { label: "Paket", type: "scroll", target: "pricing" },
-  { label: "FAQ", type: "scroll", target: "faq" },
-  { label: "Umpan Balik", type: "scroll", target: "feedback" },
+  { label: "Beranda",      to: "/member",          icon: LayoutDashboard },
+  { label: "Latihan",      to: "/member/workouts", icon: Zap             },
+  { label: "Feedback",     to: "/member/feedback", icon: MessageCircle   },
+  { label: "Profil",       to: "/member/profile",  icon: User            },
 ];
 
 const LoadingFallback = () => (
@@ -26,7 +34,6 @@ export default function MemberLayout() {
 
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
-    // hindari setState bersamaan dalam effect body (lint react-hooks/set-state-in-effect)
     if (stored) {
       const parsed = JSON.parse(stored);
       queueMicrotask(() => setUser(parsed));
@@ -37,33 +44,20 @@ export default function MemberLayout() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Tutup mobile menu setiap pindah halaman
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     navigate("/login");
   };
 
-  const scrollTo = (id) => {
-    setMobileOpen(false);
-    if (location.pathname !== "/member") {
-      navigate("/member");
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 150);
-    } else {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  const handleNavClick = (item) => {
-    setMobileOpen(false);
-    if (item.type === "route") {
-      navigate(item.target);
-    } else {
-      scrollTo(item.target);
-    }
+  /** Cek apakah route sedang aktif (exact untuk /member, startsWith untuk sub-route) */
+  const isActive = (to) => {
+    if (to === "/member") return location.pathname === "/member";
+    return location.pathname.startsWith(to);
   };
 
   return (
@@ -78,10 +72,11 @@ export default function MemberLayout() {
       >
         <div className="max-w-7xl mx-auto px-5 md:px-8">
           <div className="flex items-center justify-between h-[72px]">
-            {/* Logo */}
+
+            {/* ── Logo ── */}
             <button
-              onClick={() => scrollTo("home")}
-              className="flex items-center gap-2.5"
+              onClick={() => navigate("/member")}
+              className="flex items-center gap-2.5 cursor-pointer"
             >
               <div className="w-9 h-9 bg-[#8C1007] rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                 <Dumbbell size={16} className="text-[#FFF0C4]" />
@@ -96,45 +91,54 @@ export default function MemberLayout() {
               </div>
             </button>
 
-            {/* Desktop Nav */}
+            {/* ── Desktop Nav ── */}
             <nav className="hidden md:flex items-center gap-1 bg-white/[0.04] border border-white/[0.06] rounded-full px-2 py-1.5">
-              {navItems.map((item) => (
-                <button
-                  key={item.target}
-                  onClick={() => handleNavClick(item)}
-                  className={`text-sm px-4 py-1.5 rounded-full transition-colors cursor-pointer
-                    ${
-                      location.pathname === item.target
-                        ? "bg-[#D84040] text-white font-bold"
-                        : "text-white/60 hover:text-white hover:bg-white/[0.06]"
-                    }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+              {navItems.map((item) => {
+                const active = isActive(item.to);
+                return (
+                  <button
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className={`flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-full transition-all duration-200 cursor-pointer
+                      ${
+                        active
+                          ? "bg-[#D84040] text-white font-bold shadow-md shadow-[#D84040]/20"
+                          : "text-white/60 hover:text-white hover:bg-white/[0.06]"
+                      }`}
+                  >
+                    <item.icon size={13} />
+                    {item.label}
+                  </button>
+                );
+              })}
             </nav>
 
-            {/* Right */}
+            {/* ── Right — Avatar + Logout ── */}
             <div className="hidden md:flex items-center gap-3">
-              <span className="text-[13px] text-white/50">
-                Hai, {(user?.name || "Member").split(" ")[0]}
-              </span>
+              {/* Avatar lingkaran dengan initial */}
               <button
-                onClick={() => scrollTo("contact")}
-                className="bg-[#D84040] hover:bg-[#8E1616] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors cursor-pointer"
+                onClick={() => navigate("/member/profile")}
+                className="flex items-center gap-2.5 group cursor-pointer"
               >
-                Free Trial
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#8C1007] to-[#D84040] flex items-center justify-center text-[13px] font-black text-white border-2 border-white/10 group-hover:border-[#D84040]/50 transition-colors">
+                  {(user?.name || "M").charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[13px] text-white/50 group-hover:text-white/80 transition-colors">
+                  {(user?.name || "Member").split(" ")[0]}
+                </span>
               </button>
+
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="w-9 h-9 rounded-full border border-white/15 hover:border-white/40 text-white/70 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full border border-white/15 hover:border-[#D84040]/50 text-white/50 hover:text-[#D84040] flex items-center justify-center transition-all duration-200 cursor-pointer"
                 title="Keluar"
               >
                 <LogOut size={15} />
               </button>
             </div>
 
-            {/* Mobile toggle */}
+            {/* ── Mobile toggle ── */}
             <button
               onClick={() => setMobileOpen((v) => !v)}
               className="md:hidden w-9 h-9 rounded-lg text-white flex items-center justify-center"
@@ -144,40 +148,51 @@ export default function MemberLayout() {
           </div>
         </div>
 
-        {/* Mobile Nav */}
+        {/* ── Mobile Nav ── */}
         {mobileOpen && (
-          <div className="md:hidden bg-[#1D1616] border-t border-white/[0.06] px-5 py-6 space-y-4 animate-slide-up">
-            {navItems.map((item) => (
+          <div className="md:hidden bg-[#1D1616]/95 backdrop-blur border-t border-white/[0.06] px-5 py-5 space-y-1 animate-slide-down">
+            {navItems.map((item) => {
+              const active = isActive(item.to);
+              return (
+                <button
+                  key={item.to}
+                  onClick={() => navigate(item.to)}
+                  className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer
+                    ${
+                      active
+                        ? "bg-[#D84040]/10 text-[#D84040] font-bold border border-[#D84040]/20"
+                        : "text-white/70 hover:text-white hover:bg-white/[0.04]"
+                    }`}
+                >
+                  <item.icon size={16} />
+                  <span className="text-sm font-semibold">{item.label}</span>
+                </button>
+              );
+            })}
+
+            {/* Divider */}
+            <div className="border-t border-white/[0.06] pt-4 mt-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#8C1007] to-[#D84040] flex items-center justify-center text-[13px] font-black text-white">
+                  {(user?.name || "M").charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{user?.name || "Member"}</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-wider">Member</p>
+                </div>
+              </div>
               <button
-                key={item.target}
-                onClick={() => handleNavClick(item)}
-                className={`block w-full text-left text-base transition-colors
-                  ${
-                    location.pathname === item.target
-                      ? "text-[#D84040] font-bold"
-                      : "text-white/70 hover:text-white"
-                  }`}
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-xs font-semibold text-white/40 hover:text-[#D84040] transition-colors cursor-pointer px-3 py-2 rounded-lg hover:bg-[#D84040]/10"
               >
-                {item.label}
+                <LogOut size={14} /> Keluar
               </button>
-            ))}
-            <button
-              onClick={() => scrollTo("contact")}
-              className="w-full bg-[#D84040] text-white text-sm font-semibold px-5 py-3 rounded-full cursor-pointer"
-            >
-              Free Trial
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors cursor-pointer"
-            >
-              <LogOut size={15} /> Keluar
-            </button>
+            </div>
           </div>
         )}
       </header>
 
-      {/* ── Content (full-bleed, landing mengatur lebarnya sendiri) ── */}
+      {/* ── Content ── */}
       <main>
         <Suspense fallback={<LoadingFallback />}>
           <Outlet />

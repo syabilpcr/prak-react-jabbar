@@ -12,8 +12,8 @@ const faqs = [
     a: "Zeus Gym buka setiap hari dari pukul 05.00 hingga 23.00. Beberapa cabang utama buka 24 jam untuk member Pro.",
   },
   {
-    q: "Apakah pelatih pribadi termasuk dalam membership?",
-    a: "Membership reguler sudah termasuk akses kelas grup. Sesi personal training tersedia sebagai paket tambahan dengan harga khusus member.",
+    q: "Apakah peralatan gym selalu tersedia dan terawat?",
+    a: "Ya. Semua peralatan diperiksa dan dirawat secara rutin setiap hari. Jika ada peralatan yang memerlukan perbaikan, langsung diganti sementara agar tidak mengganggu latihan anggota.",
   },
   {
     q: "Bisakah saya membekukan membership?",

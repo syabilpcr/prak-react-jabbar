@@ -36,9 +36,10 @@ const Users = React.lazy(() => import("./pages/Users"));
 
 // ── Halaman Member (role: member) ─────────────────────────────
 const MemberDashboard = React.lazy(() => import("./pages/member/MemberDashboard"));
-const MemberClasses = React.lazy(() => import("./pages/member/MemberClasses"));
+const MemberPricing = React.lazy(() => import("./pages/member/MemberPricing"));
 const MemberWorkouts = React.lazy(() => import("./pages/member/MemberWorkouts"));
 const MemberProfile = React.lazy(() => import("./pages/member/MemberProfile"));
+const MemberFeedback = React.lazy(() => import("./pages/member/MemberFeedback"));
 
 // ── Pages — Auth ──────────────────────────────────────────────
 const Login = React.lazy(() => import("./pages/auth/Login"));
@@ -97,9 +98,9 @@ function App() {
           {/* ── MemberLayout: area khusus user dengan role "member" ── */}
           <Route element={<MemberLayout />}>
             <Route path="member" element={<MemberDashboard />} />
-            <Route path="member/classes" element={<MemberClasses />} />
             <Route path="member/workouts" element={<MemberWorkouts />} />
             <Route path="member/profile" element={<MemberProfile />} />
+            <Route path="member/feedback" element={<MemberFeedback />} />
           </Route>
 
           {/* ── AuthLayout ── */}
