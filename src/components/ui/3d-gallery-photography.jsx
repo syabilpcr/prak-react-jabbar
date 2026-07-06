@@ -1,5 +1,5 @@
 import { useRef, useMemo, useCallback, useState, useEffect, Component } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const DEFAULT_DEPTH_RANGE = 50;
@@ -135,7 +135,7 @@ const createClothMaterial = () =>
   });
 
 // ── Single mesh plane ─────────────────────────────────────────────
-function ImagePlane({ texture, position, scale, material }) {
+function ImagePlane({ meshRef, texture, position, scale, material }) {
   const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
@@ -148,6 +148,7 @@ function ImagePlane({ texture, position, scale, material }) {
 
   return (
     <mesh
+      ref={meshRef}
       position={position}
       scale={scale}
       material={material}
@@ -161,10 +162,13 @@ function ImagePlane({ texture, position, scale, material }) {
 
 // ── Inner scene ───────────────────────────────────────────────────
 function GalleryScene({ images, speed, visibleCount, fadeSettings, blurSettings }) {
+  const { gl } = useThree();
+  const canvas = gl.domElement;
   const elapsedRef = useRef(0);
   const velRef = useRef(0);
   const autoRef = useRef(true);
   const lastInteract = useRef(Date.now());
+  const meshRefs = useRef([]);
 
   const normalized = useMemo(
     () => images.map((img) => (typeof img === 'string' ? { src: img, alt: '' } : img)),
@@ -215,14 +219,14 @@ function GalleryScene({ images, speed, visibleCount, fadeSettings, blurSettings 
   }, [speed]);
 
   useEffect(() => {
-    const canvas = document.querySelector('canvas');
-    canvas?.addEventListener('wheel', handleWheel, { passive: false });
+    if (!canvas) return;
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
     document.addEventListener('keydown', handleKey);
     return () => {
-      canvas?.removeEventListener('wheel', handleWheel);
+      canvas.removeEventListener('wheel', handleWheel);
       document.removeEventListener('keydown', handleKey);
     };
-  }, [handleWheel, handleKey]);
+  }, [canvas, handleWheel, handleKey]);
 
   useEffect(() => {
     const iv = setInterval(() => {
@@ -269,6 +273,22 @@ function GalleryScene({ images, speed, visibleCount, fadeSettings, blurSettings 
 
       const m = materials[i];
       if (m?.uniforms) { m.uniforms.opacity.value = op; m.uniforms.blurAmount.value = blur; }
+
+      // Update mesh position, scale, and texture imperatively
+      const mesh = meshRefs.current[i];
+      if (mesh) {
+        mesh.position.set(plane.x, plane.y, plane.z - depthRange / 2);
+        const tex = textures[plane.imageIndex];
+        if (tex) {
+          if (m && m.uniforms.map.value !== tex) {
+            m.uniforms.map.value = tex;
+            const img = tex.image;
+            const aspect = img?.width && img?.height ? img.width / img.height : 1.5;
+            const sc = aspect >= 1 ? [2 * aspect, 2, 1] : [2, 2 / aspect, 1];
+            mesh.scale.set(sc[0], sc[1], sc[2]);
+          }
+        }
+      }
     });
   });
 
@@ -286,6 +306,7 @@ function GalleryScene({ images, speed, visibleCount, fadeSettings, blurSettings 
         return (
           <ImagePlane
             key={plane.index}
+            meshRef={(el) => { meshRefs.current[i] = el; }}
             texture={tex}
             position={[plane.x, plane.y, plane.z - depthRange / 2]}
             scale={sc}

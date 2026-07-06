@@ -7,6 +7,7 @@ import { Dumbbell, Menu, X } from "lucide-react";
 const navItems = [
   { label: "Beranda", target: "home" },
   { label: "Tentang", target: "about" },
+  { label: "Galeri", target: "gallery" },
   { label: "Promosi", target: "promotions" },
   { label: "Paket", target: "pricing" },
   { label: "FAQ", target: "faq" },
@@ -32,7 +33,7 @@ export default function PublicNavbar() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 inset-x-0 z-[100] transition-all duration-300 ${
         scrolled
           ? "bg-[#1D1616]/90 backdrop-blur border-b border-white/[0.06]"
           : "bg-transparent"

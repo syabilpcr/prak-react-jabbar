@@ -59,9 +59,9 @@ export default function LandingPage() {
       <LandingAbout />
 
       {/* ── 3D Gallery Section ── */}
-      <section className="relative bg-[#0b0b0d] py-0">
+      <section id="gallery" className="relative bg-[#0b0b0d] py-0">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-20 flex flex-col items-center justify-center pt-16 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 z-20 flex flex-col items-center justify-center pt-28 pointer-events-none">
           <p className="text-[11px] uppercase tracking-[0.3em] text-[#D84040] font-black mb-3">
             Jelajahi Fasilitas
           </p>
