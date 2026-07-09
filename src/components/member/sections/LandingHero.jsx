@@ -10,7 +10,7 @@ const HERO_IMG =
 // Ganti nilai ini dengan URL video Anda sendiri. 
 // Bisa berupa URL YouTube (misal: "https://www.youtube.com/watch?v=VIDEO_ID")
 // Atau file video lokal yang diletakkan di dalam folder 'public' (misal: "/videos/video-pribadi.mp4")
-const VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-athletic-man-lifting-barbell-in-the-gym-42289-large.mp4";
+const VIDEO_URL = "/videos/video-saya.mp4";
 
 const tags = [
   "Personal Training",

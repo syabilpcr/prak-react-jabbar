@@ -25,12 +25,19 @@ export default function LandingPromotions() {
         setPromotions(JSON.parse(saved));
       }
     };
+    
+    // Listen to standard storage events (across tabs)
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    // Listen to custom local tab events (same tab)
+    window.addEventListener("local-storage-promo-update", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("local-storage-promo-update", handleStorageChange);
+    };
   }, []);
 
-  // Filter out non-active promotions if we want to show only active ones in the landing page, 
-  // or show all. Let's show all but highlight the active ones.
+  // Filter out non-active promotions so we only show "Aktif" on the landing page
   const activePromos = promotions.filter(p => p.status === "Aktif");
 
   if (activePromos.length === 0) return null; // Hide section if no active promos

@@ -8,6 +8,8 @@ import {
   TrendingUp,
   CheckCircle2,
   AlertTriangle,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import api from "../lib/api";
 
@@ -26,56 +28,97 @@ import EmptyState from "../components/EmptyState";
 // ── UI Components dari folder ui ──────────────────────────────
 import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 
+// ── Durasi & harga config (reusable) ─────────────────────────
+const durasiConfig = {
+  harian: { days: 1 },
+  "1-bulan": { days: 30 },
+  "2-bulan": { days: 60 },
+  "3-bulan": { days: 90 },
+  "4-bulan": { days: 120 },
+  "5-bulan": { days: 150 },
+  "6-bulan": { days: 180 },
+  "7-bulan": { days: 210 },
+  "8-bulan": { days: 240 },
+  "9-bulan": { days: 270 },
+  "10-bulan": { days: 300 },
+  "11-bulan": { days: 330 },
+  "12-bulan": { days: 365 },
+};
+
+const priceConfig = {
+  harian: 50000,
+  "1-bulan": 300000,
+  "2-bulan": 570000,
+  "3-bulan": 810000,
+  "4-bulan": 1080000,
+  "5-bulan": 1325000,
+  "6-bulan": 1560000,
+  "7-bulan": 1785000,
+  "8-bulan": 2000000,
+  "9-bulan": 2205000,
+  "10-bulan": 2400000,
+  "11-bulan": 2585000,
+  "12-bulan": 2760000,
+};
+
+const emptyForm = {
+  nama_lengkap: "",
+  jenis_kelamin: "L",
+  tgl_lahir: "",
+  no_hp: "",
+  alamat: "",
+  status_member: "aktif",
+  pin_akses: "",
+  catatan_medis: "",
+  kontak_darurat: "",
+  nama_kontak_darurat: "",
+  durasi_membership: "1-bulan",
+  promo_code: "",
+};
+
 // ── Main Component ────────────────────────────────────────────
 const Members = () => {
-  // ── Pertemuan 13: Consume API ──────────────────────────────
-  // members diambil dari REST API Supabase (schema "zeusgym", table "member"),
-  // bukan dari file data statis lagi.
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
-  const [showModal, setShowModal] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterGender, setFilterGender] = useState("all");
   const [successAlert, setSuccessAlert] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
+  // ── Modal Tambah ──
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  // ── Modal Edit ──
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTarget, setEditTarget] = useState(null); // member yang sedang diedit
+  const [editForm, setEditForm] = useState({});
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState(null);
+
+  // ── Modal Konfirmasi Hapus ──
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null); // member yang akan dihapus
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => {
     setSearch(searchParams.get("search") || "");
   }, [searchParams]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [form, setForm] = useState({
-    nama_lengkap: "",
-    jenis_kelamin: "L",
-    tgl_lahir: "",
-    no_hp: "",
-    alamat: "",
-    status_member: "aktif",
-    pin_akses: "",
-    catatan_medis: "",
-    kontak_darurat: "",
-    nama_kontak_darurat: "",
-    durasi_membership: "1-bulan", // default 1 bulan
-    promo_code: "",
-  });
 
-  // ── Pertemuan 13: Consume API ──────────────────────────────
-  // Ambil data member dari REST API Supabase saat komponen pertama kali dimuat.
-  // Endpoint: GET {SUPABASE_URL}/rest/v1/member (schema "zeusgym")
+  // ── Fetch semua member dari Supabase (dengan paginasi) ──────
   useEffect(() => {
     const fetchMembers = async () => {
       try {
         setLoading(true);
         setFetchError(null);
 
-        // Supabase membatasi maksimal 1000 baris per request (lihat setting
-        // "Max rows" di Data API). Karena jumlah member sudah melebihi 1000,
-        // data diambil bertahap (paginasi) memakai header "Range" sampai
-        // semua baris benar-benar terambil — bukan hanya 1000 baris pertama.
         let allRows = [];
         let from = 0;
         const pageSize = 1000;
@@ -88,18 +131,12 @@ const Members = () => {
           from += pageSize;
         }
 
-        // Urutkan berdasarkan angka pada id_member (bukan ORDER BY di server,
-        // yang akan mengurutkan "M-999" vs "M-2001" secara teks/string —
-        // hasilnya salah karena bukan urutan angka yang sebenarnya).
         allRows.sort((a, b) => {
           const numA = parseInt((a.id_member || "").replace("M-", ""), 10);
           const numB = parseInt((b.id_member || "").replace("M-", ""), 10);
           return numA - numB;
         });
 
-        // Tambahkan field bantu "id" (numerik) supaya tetap kompatibel
-        // dengan komponen lain yang masih mengandalkan urutan index,
-        // tanpa mengubah data asli dari Supabase.
         const withId = allRows.map((m, idx) => ({ id: idx + 1, ...m }));
         setMembers(withId);
       } catch (err) {
@@ -115,6 +152,7 @@ const Members = () => {
     fetchMembers();
   }, []);
 
+  // ── Filter & Pagination ──────────────────────────────────────
   const filtered = members.filter((m) => {
     const nama = (m.nama_lengkap || m.name || "").toLowerCase();
     const kode = (m.id_member || m.code || "").toLowerCase();
@@ -129,7 +167,6 @@ const Members = () => {
     return matchSearch && matchStatus && matchGender;
   });
 
-  // Pagination
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -143,7 +180,6 @@ const Members = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  // Reset ke halaman 1 saat filter berubah
   const handleFilterChange = (setter) => (e) => {
     setter(e.target.value);
     setCurrentPage(1);
@@ -154,18 +190,29 @@ const Members = () => {
     setCurrentPage(1);
   };
 
+  // ── Stat helpers ─────────────────────────────────────────────
   const totalActive = members.filter(
     (m) => (m.status_member || m.status) === "aktif" || m.status === "Active",
   ).length;
   const totalExpired = members.filter(
     (m) =>
-      (m.status_member || m.status) === "tidak aktif" || m.status === "Expired",
+      (m.status_member || m.status) === "tidak aktif" ||
+      m.status === "Expired",
   ).length;
   const totalRevenue = members.reduce(
     (s, m) => s + (m.total_nominal_transaksi ?? m.price ?? 0),
     0,
   );
 
+  // ── Helper: show success alert ────────────────────────────────
+  const showSuccess = (msg) => {
+    setSuccessAlert(msg);
+    setTimeout(() => setSuccessAlert(null), 4000);
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // CREATE — Tambah Member
+  // ══════════════════════════════════════════════════════════════
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -177,23 +224,6 @@ const Members = () => {
 
     const today = new Date().toISOString().split("T")[0];
 
-    // Hitung tanggal berakhir berdasarkan durasi
-    const durasiConfig = {
-      harian: { days: 1 },
-      "1-bulan": { days: 30 },
-      "2-bulan": { days: 60 },
-      "3-bulan": { days: 90 },
-      "4-bulan": { days: 120 },
-      "5-bulan": { days: 150 },
-      "6-bulan": { days: 180 },
-      "7-bulan": { days: 210 },
-      "8-bulan": { days: 240 },
-      "9-bulan": { days: 270 },
-      "10-bulan": { days: 300 },
-      "11-bulan": { days: 330 },
-      "12-bulan": { days: 365 },
-    };
-
     const selectedDurasi =
       durasiConfig[form.durasi_membership] || durasiConfig["1-bulan"];
     const expiry = new Date(
@@ -202,56 +232,69 @@ const Members = () => {
       .toISOString()
       .split("T")[0];
 
-    // Generate PIN jika tidak diisi
     const generatedPin =
       form.pin_akses || String(Math.floor(100000 + Math.random() * 900000));
 
-    // Calculate dynamic price based on promo
-    const priceConfig = {
-      harian: 50000,
-      "1-bulan": 300000,
-      "2-bulan": 570000,
-      "3-bulan": 810000,
-      "4-bulan": 1080000,
-      "5-bulan": 1325000,
-      "6-bulan": 1560000,
-      "7-bulan": 1785000,
-      "8-bulan": 2000000,
-      "9-bulan": 2205000,
-      "10-bulan": 2400000,
-      "11-bulan": 2585000,
-      "12-bulan": 2760000,
-    };
-    
     let basePrice = priceConfig[form.durasi_membership] || 300000;
     let finalPrice = basePrice;
     let promoNote = form.catatan_medis || "Tidak ada";
 
+    let isReferralApplied = false;
+    let refDataToUpdate = null;
+
     if (form.promo_code && form.promo_code.trim()) {
-      const savedPromos = localStorage.getItem("zeus_promotions_v3");
-      if (savedPromos) {
-        const promoList = JSON.parse(savedPromos);
-        const found = promoList.find(
-          (p) =>
-            p.code.toLowerCase() === form.promo_code.trim().toLowerCase() &&
-            p.status === "Aktif"
-        );
-        if (found) {
-          promoNote = `Promo: ${found.code}. ${form.catatan_medis || ""}`.trim();
-          const discStr = String(found.discount || "");
-          if (discStr.includes("%")) {
-            const percent = parseFloat(discStr.replace("%", ""));
-            finalPrice = Math.max(0, basePrice * (1 - percent / 100));
-          } else {
-            const amount = parseFloat(discStr.replace(/[^0-9]/g, ""));
-            finalPrice = Math.max(0, basePrice - amount);
+      const codeTrimmed = form.promo_code.trim().toUpperCase();
+      
+      // 1. Coba cari di program referral terlebih dahulu
+      const referralConfig = localStorage.getItem("zeus_referral_config");
+      if (referralConfig) {
+        const refData = JSON.parse(referralConfig);
+        if (refData.active && codeTrimmed === refData.code.toUpperCase()) {
+          isReferralApplied = true;
+          promoNote = `Referral: ${refData.code}. ${form.catatan_medis || ""}`.trim();
+          finalPrice = Math.max(0, basePrice * 0.8); // 20% discount sesuai aturan program referral
+          
+          // Siapkan data teman diajak untuk ditambahkan
+          const newFriend = {
+            id: Date.now(),
+            friendName: form.nama_lengkap,
+            date: today,
+            status: "Aktif",
+            reward: "Rp 25.000"
+          };
+          
+          refDataToUpdate = {
+            ...refData,
+            history: [newFriend, ...refData.history]
+          };
+        }
+      }
+
+      // 2. Jika bukan referral, cari di promosi umum
+      if (!isReferralApplied) {
+        const savedPromos = localStorage.getItem("zeus_promotions_v3");
+        if (savedPromos) {
+          const promoList = JSON.parse(savedPromos);
+          const found = promoList.find(
+            (p) =>
+              p.code.toLowerCase() === form.promo_code.trim().toLowerCase() &&
+              p.status === "Aktif",
+          );
+          if (found) {
+            promoNote = `Promo: ${found.code}. ${form.catatan_medis || ""}`.trim();
+            const discStr = String(found.discount || "");
+            if (discStr.includes("%")) {
+              const percent = parseFloat(discStr.replace("%", ""));
+              finalPrice = Math.max(0, basePrice * (1 - percent / 100));
+            } else {
+              const amount = parseFloat(discStr.replace(/[^0-9]/g, ""));
+              finalPrice = Math.max(0, basePrice - amount);
+            }
           }
         }
       }
     }
 
-    // ── Pertemuan 13: Consume API ──────────────────────────────
-    // Payload hanya berisi kolom yang memang ada di table zeusgym.member
     const buildPayload = (idMember) => ({
       id_member: idMember,
       nama_lengkap: form.nama_lengkap,
@@ -274,15 +317,6 @@ const Members = () => {
       setSubmitting(true);
       setSubmitError(null);
 
-      // Ambil SEMUA id_member langsung dari Supabase (bukan dari state lokal
-      // yang bisa basi), lalu cari angka terbesar secara NUMERIK di JavaScript.
-      // Catatan: id_member adalah kolom text, jadi "ORDER BY id_member DESC"
-      // di server akan mengurutkan secara string (mis. "M-999" > "M-2001"),
-      // BUKAN secara angka — itu sebabnya perhitungan harus dilakukan di sini.
-      // Catatan: Supabase membatasi maksimal 1000 baris per request (lihat
-      // setting "Max rows" di Data API). Karena jumlah member sudah/akan
-      // melebihi 1000, kita ambil semua id_member dengan paginasi memakai
-      // header "Range" sampai tidak ada baris baru lagi.
       let allIds = [];
       let from = 0;
       const pageSize = 1000;
@@ -303,44 +337,35 @@ const Members = () => {
         (existingNumbers.length ? Math.max(...existingNumbers) : 1000) + 1;
       const newIdMember = `M-${nextNumber}`;
 
-      // POST ke REST API Supabase — "Prefer: return=representation" agar
-      // baris yang baru dibuat dikembalikan oleh server (termasuk default value-nya).
       const res = await api.post("/member", buildPayload(newIdMember), {
         headers: { Prefer: "return=representation" },
       });
 
       const inserted = res.data[0] || buildPayload(newIdMember);
       setMembers([{ id: members.length + 1, ...inserted }, ...members]);
-      setForm({
-        nama_lengkap: "",
-        jenis_kelamin: "L",
-        tgl_lahir: "",
-        no_hp: "",
-        alamat: "",
-        status_member: "aktif",
-        pin_akses: "",
-        catatan_medis: "",
-        kontak_darurat: "",
-        nama_kontak_darurat: "",
-        durasi_membership: "1-bulan",
-        promo_code: "",
-      });
+      
+      // Jika kode referral berhasil diproses, simpan data riwayat baru
+      if (isReferralApplied && refDataToUpdate) {
+        localStorage.setItem("zeus_referral_config", JSON.stringify(refDataToUpdate));
+        window.dispatchEvent(new Event("local-storage-promo-update"));
+      }
+
+      setForm(emptyForm);
       setShowModal(false);
-      setSuccessAlert(
+      showSuccess(
         `Member ${form.nama_lengkap} berhasil ditambahkan dengan ID ${newIdMember} dan tersimpan ke database.`,
       );
-      setTimeout(() => setSuccessAlert(null), 4000);
     } catch (err) {
       console.error("Gagal menambahkan member:", err);
       const apiMessage = err.response?.data?.message || "";
       if (apiMessage.includes("duplicate key")) {
         setSubmitError(
-          "ID Member yang digenerate ternyata sudah dipakai (kemungkinan ada penambahan data lain barengan). Silakan klik 'Simpan Member' sekali lagi.",
+          "ID Member yang digenerate ternyata sudah dipakai. Silakan klik 'Simpan Member' sekali lagi.",
         );
       } else {
         setSubmitError(
           apiMessage ||
-            "Gagal menyimpan member baru ke server. Periksa koneksi atau hak akses (GRANT INSERT).",
+            "Gagal menyimpan member baru ke server. Periksa koneksi atau hak akses.",
         );
       }
     } finally {
@@ -348,6 +373,157 @@ const Members = () => {
     }
   };
 
+  // ══════════════════════════════════════════════════════════════
+  // UPDATE — Edit Member
+  // ══════════════════════════════════════════════════════════════
+  const openEditModal = (member) => {
+    setEditTarget(member);
+    setEditForm({
+      nama_lengkap: member.nama_lengkap || "",
+      jenis_kelamin: member.jenis_kelamin || "L",
+      tgl_lahir: member.tgl_lahir || "",
+      no_hp: member.no_hp || "",
+      alamat: member.alamat || "",
+      tgl_berakhir: member.tgl_berakhir || "",
+      status_member: member.status_member || "aktif",
+      pin_akses: member.pin_akses || "",
+      catatan_medis: member.catatan_medis || "",
+      kontak_darurat: member.kontak_darurat || "",
+      nama_kontak_darurat: member.nama_kontak_darurat || "",
+    });
+    setEditError(null);
+    setShowEditModal(true);
+  };
+
+  const handleEditChange = (e) =>
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+
+  const handleEditSubmit = async () => {
+    if (!editForm.nama_lengkap || !editForm.no_hp) {
+      alert("Nama lengkap dan nomor HP wajib diisi!");
+      return;
+    }
+
+    try {
+      setEditSubmitting(true);
+      setEditError(null);
+
+      // PATCH ke Supabase: filter by id_member
+      await api.patch(
+        "/member",
+        {
+          nama_lengkap: editForm.nama_lengkap,
+          jenis_kelamin: editForm.jenis_kelamin,
+          tgl_lahir: editForm.tgl_lahir,
+          no_hp: editForm.no_hp,
+          alamat: editForm.alamat,
+          tgl_berakhir: editForm.tgl_berakhir,
+          status_member: editForm.status_member,
+          pin_akses: editForm.pin_akses,
+          catatan_medis: editForm.catatan_medis,
+          kontak_darurat: editForm.kontak_darurat,
+          nama_kontak_darurat: editForm.nama_kontak_darurat,
+        },
+        {
+          params: { id_member: `eq.${editTarget.id_member}` },
+          headers: { Prefer: "return=representation" },
+        },
+      );
+
+      // Update state lokal
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id_member === editTarget.id_member
+            ? { ...m, ...editForm }
+            : m,
+        ),
+      );
+
+      setShowEditModal(false);
+      setEditTarget(null);
+      showSuccess(
+        `Data member ${editForm.nama_lengkap} (${editTarget.id_member}) berhasil diperbarui.`,
+      );
+    } catch (err) {
+      console.error("Gagal mengupdate member:", err);
+      setEditError(
+        err.response?.data?.message ||
+          "Gagal menyimpan perubahan ke server. Periksa koneksi atau hak akses.",
+      );
+    } finally {
+      setEditSubmitting(false);
+    }
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // DELETE — Hapus Member
+  // ══════════════════════════════════════════════════════════════
+  const openDeleteModal = (member) => {
+    setDeleteTarget(member);
+    setDeleteError(null);
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setDeleteSubmitting(true);
+      setDeleteError(null);
+
+      const idMember = deleteTarget.id_member;
+
+      // ── Langkah 1: Hapus dulu semua data absensi yang terkait member ini
+      // (foreign key: absensi.id_member → member.id_member)
+      try {
+        await api.delete("/absensi", {
+          params: { id_member: `eq.${idMember}` },
+        });
+      } catch (e) {
+        // Jika tabel absensi tidak ada atau tidak ada data, lanjut saja
+        console.warn("Hapus absensi (opsional):", e?.response?.data?.message || e.message);
+      }
+
+      // ── Langkah 2: Hapus dulu semua data transaksi yang terkait member ini
+      // (foreign key: transaksi.id_member → member.id_member)
+      try {
+        await api.delete("/transaksi", {
+          params: { id_member: `eq.${idMember}` },
+        });
+      } catch (e) {
+        // Jika tabel transaksi tidak ada atau tidak ada data, lanjut saja
+        console.warn("Hapus transaksi (opsional):", e?.response?.data?.message || e.message);
+      }
+
+      // ── Langkah 3: Baru hapus member-nya dari Supabase
+      await api.delete("/member", {
+        params: { id_member: `eq.${idMember}` },
+      });
+
+      // ── Update state lokal
+      setMembers((prev) =>
+        prev.filter((m) => m.id_member !== idMember),
+      );
+
+      setShowDeleteModal(false);
+      showSuccess(
+        `Member ${deleteTarget.nama_lengkap} (${idMember}) beserta data absensi & transaksinya berhasil dihapus dari database.`,
+      );
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error("Gagal menghapus member:", err);
+      setDeleteError(
+        err.response?.data?.message ||
+          "Gagal menghapus member dari server. Periksa koneksi atau hak akses.",
+      );
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
+
+  // ══════════════════════════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════════════════════════
   return (
     <div className="p-6 space-y-5 bg-[#f5f0eb] min-h-screen">
       {/* ── Page Title ── */}
@@ -407,7 +583,7 @@ const Members = () => {
         </div>
       </div>
 
-      {/* ── Pertemuan 13: Alert error fetch API ── */}
+      {/* ── Alert error fetch API ── */}
       {fetchError && (
         <Alert variant="destructive" className="relative animate-slide-up-alert">
           <AlertTriangle className="h-4 w-4" />
@@ -416,11 +592,11 @@ const Members = () => {
         </Alert>
       )}
 
-      {/* ── Alert sukses tambah member (UI Component dari folder ui) ── */}
+      {/* ── Alert sukses ── */}
       {successAlert && (
         <Alert variant="success" className="relative animate-slide-up-alert">
           <CheckCircle2 className="h-4 w-4" />
-          <AlertTitle>Member Berhasil Ditambahkan!</AlertTitle>
+          <AlertTitle>Berhasil!</AlertTitle>
           <AlertDescription>{successAlert}</AlertDescription>
           <button
             onClick={() => setSuccessAlert(null)}
@@ -510,6 +686,7 @@ const Members = () => {
                 <div className="h-4 bg-gray-150 rounded w-20 skeleton" />
                 <div className="h-6 bg-gray-150 rounded-full w-16 skeleton" />
                 <div className="h-4 bg-gray-150 rounded w-12 skeleton" />
+                <div className="h-6 bg-gray-150 rounded w-16 skeleton" />
               </div>
             ))}
           </div>
@@ -527,6 +704,7 @@ const Members = () => {
                   "Tgl Berakhir",
                   "Status",
                   "Pin Akses",
+                  "Aksi",
                 ]}
               >
                 {currentItems.length === 0
@@ -534,7 +712,7 @@ const Members = () => {
                   : currentItems.map((item, idx) => {
                       return (
                         <tr
-                          key={item.id}
+                          key={item.id_member}
                           className="hover:bg-[#faf6f4] hover:translate-x-1 hover:shadow-[inset_3px_0_0_0_#8C1007] transition-all duration-200"
                         >
                           <td className="px-6 py-3.5 text-xs text-[#9e7a6e] font-medium">
@@ -553,7 +731,7 @@ const Members = () => {
                               />
                               <div>
                                 <Link
-                                  to={`/members/${item.id}`}
+                                  to={`/members/${encodeURIComponent(item.id_member || item.id)}`}
                                   className="font-semibold text-[#8C1007] hover:text-[#a01a0a] hover:underline transition-colors text-sm"
                                 >
                                   {item.nama_lengkap || item.name}
@@ -604,6 +782,29 @@ const Members = () => {
                           <td className="px-6 py-3.5 font-mono text-xs text-[#8C1007] font-bold">
                             {item.pin_akses || "-"}
                           </td>
+
+                          {/* ── Kolom Aksi ── */}
+                          <td className="px-6 py-3.5">
+                            <div className="flex items-center gap-1.5">
+                              {/* Tombol Edit */}
+                              <button
+                                onClick={() => openEditModal(item)}
+                                title="Edit member"
+                                className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 hover:scale-110 transition-all duration-150"
+                              >
+                                <Pencil size={13} />
+                              </button>
+
+                              {/* Tombol Delete */}
+                              <button
+                                onClick={() => openDeleteModal(item)}
+                                title="Hapus member"
+                                className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 hover:scale-110 transition-all duration-150"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
                         </tr>
                       );
                     })}
@@ -637,7 +838,6 @@ const Members = () => {
 
                   {[...Array(totalPages)].map((_, index) => {
                     const pageNumber = index + 1;
-                    // Tampilkan halaman pertama, terakhir, current, dan 2 halaman di sekitar current
                     if (
                       pageNumber === 1 ||
                       pageNumber === totalPages ||
@@ -687,7 +887,9 @@ const Members = () => {
         )}
       </div>
 
-      {/* ── Modal Tambah Member ── */}
+      {/* ══════════════════════════════════════════════════════
+          MODAL: Tambah Member (Create)
+      ══════════════════════════════════════════════════════ */}
       <Modal
         open={showModal}
         onClose={() => !submitting && setShowModal(false)}
@@ -715,7 +917,6 @@ const Members = () => {
         }
       >
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-          {/* ── Pertemuan 13: Error simpan ke API ── */}
           {submitError && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
@@ -868,6 +1069,234 @@ const Members = () => {
               berakhir akan dibuat otomatis berdasarkan durasi yang dipilih. PIN
               akan di-generate jika tidak diisi. Harga disesuaikan dengan durasi
               membership.
+            </p>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ══════════════════════════════════════════════════════
+          MODAL: Edit Member (Update)
+      ══════════════════════════════════════════════════════ */}
+      <Modal
+        open={showEditModal}
+        onClose={() => !editSubmitting && setShowEditModal(false)}
+        title={`Edit Member — ${editTarget?.id_member}`}
+        subtitle={`Perbarui data anggota ${editTarget?.nama_lengkap}`}
+        footer={
+          <div className="flex gap-3">
+            <Button
+              type="secondary"
+              fullWidth
+              disabled={editSubmitting}
+              onClick={() => setShowEditModal(false)}
+            >
+              Batal
+            </Button>
+            <Button
+              type="primary"
+              fullWidth
+              onClick={handleEditSubmit}
+              disabled={editSubmitting}
+            >
+              {editSubmitting ? "Menyimpan..." : "Simpan Perubahan"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+          {editError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Gagal Menyimpan</AlertTitle>
+              <AlertDescription>{editError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Data Pribadi */}
+          <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
+              📋 DATA PRIBADI
+            </p>
+            <div className="space-y-3">
+              <InputField
+                label="Nama Lengkap"
+                name="nama_lengkap"
+                value={editForm.nama_lengkap || ""}
+                onChange={handleEditChange}
+                placeholder="Nama lengkap member..."
+                required
+              />
+              <SelectField
+                label="Jenis Kelamin"
+                name="jenis_kelamin"
+                value={editForm.jenis_kelamin || "L"}
+                onChange={handleEditChange}
+                options={[
+                  { value: "L", label: "Laki-laki" },
+                  { value: "P", label: "Perempuan" },
+                ]}
+              />
+              <InputField
+                label="Tanggal Lahir"
+                name="tgl_lahir"
+                type="date"
+                value={editForm.tgl_lahir || ""}
+                onChange={handleEditChange}
+              />
+              <InputField
+                label="Nomor HP"
+                name="no_hp"
+                value={editForm.no_hp || ""}
+                onChange={handleEditChange}
+                placeholder="08xxxxxxxxxx"
+                required
+              />
+              <InputField
+                label="Alamat Lengkap"
+                name="alamat"
+                value={editForm.alamat || ""}
+                onChange={handleEditChange}
+                placeholder="Jl. Nama Jalan No. XX, Kelurahan, Kota"
+              />
+            </div>
+          </div>
+
+          {/* Keanggotaan */}
+          <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
+              🎫 KEANGGOTAAN
+            </p>
+            <div className="space-y-3">
+              <InputField
+                label="Tanggal Berakhir"
+                name="tgl_berakhir"
+                type="date"
+                value={editForm.tgl_berakhir || ""}
+                onChange={handleEditChange}
+              />
+              <SelectField
+                label="Status Member"
+                name="status_member"
+                value={editForm.status_member || "aktif"}
+                onChange={handleEditChange}
+                options={[
+                  { value: "aktif", label: "Aktif" },
+                  { value: "tidak aktif", label: "Tidak Aktif" },
+                ]}
+              />
+              <InputField
+                label="PIN Akses (6 digit)"
+                name="pin_akses"
+                value={editForm.pin_akses || ""}
+                onChange={handleEditChange}
+                placeholder="PIN akses member"
+                maxLength={6}
+              />
+            </div>
+          </div>
+
+          {/* Kontak Darurat & Medis */}
+          <div className="bg-[#f8f3ee] p-3 rounded-lg border border-[#e8dfd6]">
+            <p className="text-xs font-bold text-[#8C1007] mb-2">
+              🏥 KONTAK DARURAT & MEDIS
+            </p>
+            <div className="space-y-3">
+              <InputField
+                label="Nama Kontak Darurat"
+                name="nama_kontak_darurat"
+                value={editForm.nama_kontak_darurat || ""}
+                onChange={handleEditChange}
+                placeholder="Nama keluarga / kerabat"
+              />
+              <InputField
+                label="Nomor Kontak Darurat"
+                name="kontak_darurat"
+                value={editForm.kontak_darurat || ""}
+                onChange={handleEditChange}
+                placeholder="08xxxxxxxxxx"
+              />
+              <InputField
+                label="Catatan Medis"
+                name="catatan_medis"
+                value={editForm.catatan_medis || ""}
+                onChange={handleEditChange}
+                placeholder="Riwayat penyakit, alergi, dll (opsional)"
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ══════════════════════════════════════════════════════
+          MODAL: Konfirmasi Hapus (Delete)
+      ══════════════════════════════════════════════════════ */}
+      <Modal
+        open={showDeleteModal}
+        onClose={() => !deleteSubmitting && setShowDeleteModal(false)}
+        title="Konfirmasi Hapus Member"
+        subtitle="Tindakan ini tidak dapat dibatalkan"
+        footer={
+          <div className="flex gap-3">
+            <Button
+              type="secondary"
+              fullWidth
+              disabled={deleteSubmitting}
+              onClick={() => setShowDeleteModal(false)}
+            >
+              Batal
+            </Button>
+            <button
+              onClick={handleDelete}
+              disabled={deleteSubmitting}
+              className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition-all"
+            >
+              {deleteSubmitting ? "Menghapus..." : "Ya, Hapus Member"}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {deleteError && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Gagal Menghapus</AlertTitle>
+              <AlertDescription>{deleteError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Tampilkan info member yang akan dihapus */}
+          <div className="flex items-center gap-4 p-4 bg-rose-50 border border-rose-200 rounded-xl">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8C1007] to-[#D84040] flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+              {deleteTarget?.nama_lengkap?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+            <div>
+              <p className="font-bold text-[#1D1616] text-sm">
+                {deleteTarget?.nama_lengkap}
+              </p>
+              <p className="text-xs text-[#9e7a6e] font-mono">
+                {deleteTarget?.id_member}
+              </p>
+              <p className="text-xs text-[#9e7a6e] mt-0.5">
+                {deleteTarget?.no_hp} · Status:{" "}
+                <span
+                  className={
+                    deleteTarget?.status_member === "aktif"
+                      ? "text-green-600 font-semibold"
+                      : "text-rose-600 font-semibold"
+                  }
+                >
+                  {deleteTarget?.status_member}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-xs text-amber-700 font-medium">
+              ⚠️ <strong>Perhatian:</strong> Menghapus member ini akan
+              menghapusnya dari database Supabase secara permanen. Data di
+              halaman Pembayaran dan Absensi yang terkait member ini juga tidak
+              akan tampil lagi.
             </p>
           </div>
         </div>

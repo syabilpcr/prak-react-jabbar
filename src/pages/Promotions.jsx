@@ -8,7 +8,6 @@ import {
   Check,
   Users,
   Gift,
-  Share2,
   Edit,
   Trash2,
 } from "lucide-react";
@@ -37,36 +36,61 @@ const Promotions = () => {
 
   useEffect(() => {
     localStorage.setItem("zeus_promotions_v3", JSON.stringify(promotions));
+    window.dispatchEvent(new Event("local-storage-promo-update"));
   }, [promotions]);
+
+  // ── Persistent Referral Configuration State ──
+  const [referralConfig, setReferralConfig] = useState(() => {
+    const saved = localStorage.getItem("zeus_referral_config");
+    if (saved) return JSON.parse(saved);
+    const code = "ZEUSREF" + Math.floor(1000 + Math.random() * 9000);
+    const initialConfig = {
+      active: true,
+      code: code,
+      link: `https://zeusgym.com/ref/${code}`,
+      history: [
+        { id: 1, friendName: "Budi Santoso", date: "2026-06-15", status: "Aktif", reward: "Rp 25.000" },
+        { id: 2, friendName: "Siti Rahayu", date: "2026-07-02", status: "Aktif", reward: "Rp 25.000" },
+      ],
+    };
+    localStorage.setItem("zeus_referral_config", JSON.stringify(initialConfig));
+    return initialConfig;
+  });
+
+  // Sync state modifications to localStorage
+  useEffect(() => {
+    localStorage.setItem("zeus_referral_config", JSON.stringify(referralConfig));
+    window.dispatchEvent(new Event("local-storage-promo-update"));
+  }, [referralConfig]);
+
+  // Listen to external triggers (e.g. signup utilizing code from Members.jsx)
+  useEffect(() => {
+    const handleSync = () => {
+      const saved = localStorage.getItem("zeus_referral_config");
+      if (saved) {
+        setReferralConfig(JSON.parse(saved));
+      }
+    };
+    window.addEventListener("local-storage-promo-update", handleSync);
+    window.addEventListener("storage", handleSync);
+    return () => {
+      window.removeEventListener("local-storage-promo-update", handleSync);
+      window.removeEventListener("storage", handleSync);
+    };
+  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [filterPromoStatus, setFilterPromoStatus] = useState("all");
   const [showReferralModal, setShowReferralModal] = useState(false);
-  const [referralActive, setReferralActive] = useState(false);
-  const makeReferral = () => {
-    const code = "ZEUSREF" + Math.floor(Math.random() * 10000);
-    return {
-      code,
-      link: `https://zeusgym.com/ref/${code}`,
-    };
-  };
-
-  const [referralCode, setReferralCode] = useState(() => makeReferral().code);
-  const [referralLink, setReferralLink] = useState(() => makeReferral().link);
-
   const [copied, setCopied] = useState(false);
-  const [referralStats] = useState({
-    totalReferrals: 0,
-    activeReferrals: 0,
-    rewardsEarned: 0,
-    pendingRewards: 0,
-  });
-  const [referralHistory] = useState([
-    { id: 1, friendName: "Budi Santoso", date: "2024-12-01", status: "Aktif", reward: "Rp 25.000" },
-    { id: 2, friendName: "Siti Rahayu", date: "2024-12-03", status: "Aktif", reward: "Rp 25.000" },
-    { id: 3, friendName: "Agus Wijaya", date: "2024-12-05", status: "Pending", reward: "Rp 25.000" },
-  ]);
+
+  // Dynamic statistics calculations
+  const totalReferrals = referralConfig.history.length;
+  const activeReferrals = referralConfig.history.filter((h) => h.status === "Aktif").length;
+  const pendingReferrals = referralConfig.history.filter((h) => h.status === "Pending").length;
+  const rewardsEarned = activeReferrals * 25000;
+  const pendingRewards = pendingReferrals * 25000;
 
   const [editingPromo, setEditingPromo] = useState(null);
 
@@ -75,6 +99,8 @@ const Promotions = () => {
     code: "",
     discount: "",
     discountType: "percentage",
+    status: "Aktif",
+    validUntil: "2026-12-31",
   });
 
   const handleChange = (e) =>
@@ -91,10 +117,12 @@ const Promotions = () => {
             title: form.title,
             code: form.code,
             type: form.discountType,
+            status: form.status,
+            validUntil: form.validUntil,
             discount:
               form.discountType === "percentage"
                 ? `${form.discount}%`
-                : `Rp ${form.discount}`,
+                : `Rp ${Number(form.discount).toLocaleString("id-ID")}`,
           };
         }
         return p;
@@ -104,19 +132,20 @@ const Promotions = () => {
     } else {
       const newPromo = {
         id: `PROMO-${String(promotions.length + 1).padStart(3, "0")}`,
-        ...form,
+        title: form.title,
+        code: form.code,
+        type: form.discountType,
+        status: form.status,
+        validUntil: form.validUntil,
         discount:
           form.discountType === "percentage"
             ? `${form.discount}%`
-            : `Rp ${form.discount}`,
-        type: form.discountType,
-        validUntil: "2025-12-31",
-        status: "Aktif",
+            : `Rp ${Number(form.discount).toLocaleString("id-ID")}`,
         sent: 0,
       };
       setPromotions([newPromo, ...promotions]);
     }
-    setForm({ title: "", code: "", discount: "", discountType: "percentage" });
+    setForm({ title: "", code: "", discount: "", discountType: "percentage", status: "Aktif", validUntil: "2026-12-31" });
     setShowModal(false);
   };
 
@@ -125,8 +154,10 @@ const Promotions = () => {
     setForm({
       title: promo.title,
       code: promo.code,
-      discount: String(promo.discount || "").replace("%", "").replace("Rp ", ""),
+      discount: String(promo.discount || "").replace("%", "").replace("Rp ", "").replace(/\./g, ""),
       discountType: promo.type || (String(promo.discount).includes("%") ? "percentage" : "fixed"),
+      status: promo.status || "Aktif",
+      validUntil: promo.validUntil || "2026-12-31",
     });
     setShowModal(true);
   };
@@ -143,34 +174,43 @@ const Promotions = () => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(referralLink);
+    navigator.clipboard.writeText(referralConfig.link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleShareWhatsApp = () => {
-    const message = `🎉 Ayo bergabung dengan Zeus Gym! Gunakan kode referral saya: ${referralCode} untuk mendapatkan diskon 20% untuk bulan pertama! 🏋️‍♂️\n\nKlik link: ${referralLink}`;
+    const message = `🎉 Ayo bergabung dengan Zeus Gym! Gunakan kode referral saya: ${referralConfig.code} untuk mendapatkan diskon 20% untuk bulan pertama! 🏋️‍♂️\n\nKlik link: ${referralConfig.link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const handleRegenerateCode = () => {
-    const newCode = "ZEUSREF" + Math.floor(Math.random() * 10000);
-    setReferralCode(newCode);
-    setReferralLink(`https://zeusgym.com/ref/${newCode}`);
-    alert(`Kode referral baru: ${newCode}`);
+    const code = "ZEUSREF" + Math.floor(1000 + Math.random() * 9000);
+    setReferralConfig({
+      ...referralConfig,
+      code: code,
+      link: `https://zeusgym.com/ref/${code}`,
+    });
+    alert(`Kode referral baru telah dibuat: ${code}`);
   };
 
-  const handleDeactivateReferral = () => {
-    if (window.confirm("Apakah Anda yakin ingin menonaktifkan program referral?")) {
-      setReferralActive(false);
+  const handleToggleReferral = () => {
+    const nextState = !referralConfig.active;
+    setReferralConfig({
+      ...referralConfig,
+      active: nextState,
+    });
+    if (!nextState) {
       setShowReferralModal(false);
-      alert("Program referral telah dinonaktifkan.");
     }
+    alert(`Program referral telah ${nextState ? "diaktifkan" : "dinonaktifkan"}.`);
   };
 
   const filtered = promotions.filter((p) => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase());
+    const title = p.title || "";
+    const code = p.code || "";
+    const matchSearch = title.toLowerCase().includes(search.toLowerCase()) ||
+      code.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterPromoStatus === "all" || p.status === filterPromoStatus;
     return matchSearch && matchStatus;
   });
@@ -190,7 +230,7 @@ const Promotions = () => {
           icon={Plus}
           onClick={() => {
             setEditingPromo(null);
-            setForm({ title: "", code: "", discount: "", discountType: "percentage" });
+            setForm({ title: "", code: "", discount: "", discountType: "percentage", status: "Aktif", validUntil: "2026-12-31" });
             setShowModal(true);
           }}
         >
@@ -211,7 +251,7 @@ const Promotions = () => {
         <StatCard
           icon={Send}
           label="Total Terkirim"
-          value={promotions.reduce((s, p) => s + p.sent, 0)}
+          value={promotions.reduce((s, p) => s + (p.sent || 0), 0)}
           change="+12.3%"
           trend="up"
           sub="dari bulan lalu"
@@ -219,18 +259,18 @@ const Promotions = () => {
         <StatCard
           icon={Users}
           label="Referral Aktif"
-          value={referralStats.totalReferrals}
-          change="+8.1%"
+          value={totalReferrals}
+          change={`+${activeReferrals}`}
           trend="up"
-          sub="dari bulan lalu"
+          sub="total teman diajak"
         />
         <StatCard
           icon={Trophy}
-          label="Promosi Aktif"
-          value={promotions.filter((p) => p.status === "Aktif").length}
-          change="+3.2%"
+          label="Reward Diklaim"
+          value={`Rp ${(rewardsEarned / 1000).toFixed(0)}k`}
+          change={`+Rp ${pendingRewards / 1000}k pending`}
           trend="up"
-          sub="dari bulan lalu"
+          sub="estimasi insentif"
         />
       </div>
 
@@ -248,10 +288,10 @@ const Promotions = () => {
                   <p className="text-xs text-white/80 font-semibold">Program Referral</p>
                 </div>
                 <p className="text-xl font-bold text-white">Ajak Teman, Dapat Diskon!</p>
-                <p className="text-xs text-white/80 mt-1 max-w-[200px]">
-                  Dapatkan diskon 20% untuk setiap teman yang bergabung!
+                <p className="text-xs text-white/80 mt-1 max-w-[220px]">
+                  Gunakan kode <span className="font-mono font-black text-white">{referralConfig.code}</span> untuk dapat diskon 20% !
                 </p>
-                {referralActive && (
+                {referralConfig.active && (
                   <div className="mt-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                     <span className="text-[10px] text-white/90">Program Aktif</span>
@@ -259,25 +299,28 @@ const Promotions = () => {
                 )}
               </div>
               <Button
-                type={referralActive ? "danger" : "secondary"}
-                onClick={() => { setReferralActive(true); setShowReferralModal(true); }}
+                type={referralConfig.active ? "primary" : "secondary"}
+                onClick={() => {
+                  if (!referralConfig.active) {
+                    setReferralConfig({ ...referralConfig, active: true });
+                  }
+                  setShowReferralModal(true);
+                }}
               >
-                {referralActive ? "Kelola" : "Aktifkan"}
+                {referralConfig.active ? "Kelola" : "Aktifkan"}
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#8C1007]/10 flex items-center justify-center">
-              <Trophy size={24} className="text-[#8C1007]" />
-            </div>
-            <div>
-              <p className="text-xs text-[#9e7a6e]">Pemasaran Digital</p>
-              <p className="text-sm font-bold text-[#1D1616]">Kampanye SMS & Email</p>
-              <p className="text-xs text-[#9e7a6e]">Terkirim otomatis ke anggota kadaluarsa</p>
-            </div>
+        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-[#8C1007]/10 flex items-center justify-center">
+            <Trophy size={24} className="text-[#8C1007]" />
+          </div>
+          <div>
+            <p className="text-xs text-[#9e7a6e]">Pemasaran Digital</p>
+            <p className="text-sm font-bold text-[#1D1616]">Program Referral Aktif</p>
+            <p className="text-xs text-[#9e7a6e]">Masukkan kode referral saat pendaftaran member untuk potongan biaya 20%.</p>
           </div>
         </div>
       </div>
@@ -290,7 +333,7 @@ const Promotions = () => {
         <div className="px-6 py-4 border-b border-gray-50 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-[#1D1616]">Promosi Aktif</p>
+              <p className="text-sm font-bold text-[#1D1616]">Daftar Promosi</p>
               <p className="text-xs text-[#9e7a6e]">{filtered.length} kampanye</p>
             </div>
             <SearchBar
@@ -341,7 +384,7 @@ const Promotions = () => {
                       {promo.validUntil}
                     </td>
                     <td className="px-6 py-3.5 text-xs text-[#9e7a6e]">
-                      {promo.sent} anggota
+                      {promo.sent || 0} anggota
                     </td>
                     <td className="px-6 py-3.5">
                       <Badge type={promo.status === "Aktif" ? "success" : "danger"} dot>
@@ -349,15 +392,31 @@ const Promotions = () => {
                       </Badge>
                     </td>
                     <td className="px-6 py-3.5">
-                      <Button
-                        type="ghost"
-                        size="sm"
-                        icon={Send}
-                        onClick={() => handleSendPromo(promo)}
-                        disabled={promo.status !== "Aktif"}
-                      >
-                        Kirim
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="ghost"
+                          size="sm"
+                          icon={Send}
+                          onClick={() => handleSendPromo(promo)}
+                          disabled={promo.status !== "Aktif"}
+                        >
+                          Kirim
+                        </Button>
+                        <button
+                          onClick={() => handleEditPromo(promo)}
+                          className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                          title="Edit promo"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePromo(promo.id)}
+                          className="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                          title="Hapus promo"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -378,14 +437,12 @@ const Promotions = () => {
         open={showReferralModal}
         onClose={() => setShowReferralModal(false)}
         title="Program Referral - Ajak Teman"
-        subtitle="Dapatkan diskon 20% untuk setiap teman yang bergabung!"
+        subtitle="Bagikan kode referral Anda untuk mengklaim insentif bonus!"
         footer={
           <div className="flex gap-3">
-            {referralActive && (
-              <Button type="danger" fullWidth onClick={handleDeactivateReferral}>
-                Nonaktifkan Program
-              </Button>
-            )}
+            <Button type="danger" fullWidth onClick={handleToggleReferral}>
+              {referralConfig.active ? "Nonaktifkan Program" : "Aktifkan Program"}
+            </Button>
             <Button type="primary" fullWidth onClick={() => setShowReferralModal(false)}>
               Tutup
             </Button>
@@ -403,7 +460,7 @@ const Promotions = () => {
                 <LinkIcon size={16} className="text-[#9e7a6e] mr-2" />
                 <input
                   type="text"
-                  value={referralLink}
+                  value={referralConfig.link}
                   readOnly
                   className="flex-1 bg-transparent text-sm text-[#1D1616] outline-none"
                 />
@@ -419,18 +476,23 @@ const Promotions = () => {
             <Button type="primary" fullWidth onClick={handleShareWhatsApp}>
               WhatsApp
             </Button>
-            <Button type="secondary" onClick={handleRegenerateCode}>
-              🔄
+            <Button type="secondary" onClick={handleRegenerateCode} title="Regenerasi Kode">
+              🔄 Buat Baru
             </Button>
           </div>
 
           {/* Referral History */}
           <div>
-            <p className="text-sm font-bold text-[#1D1616] mb-3">Riwayat Referral</p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm font-bold text-[#1D1616]">Riwayat Teman Diajak</p>
+              <span className="text-[10px] bg-red-50 text-[#8C1007] px-2 py-0.5 rounded-full font-bold">
+                {referralConfig.history.length} Orang
+              </span>
+            </div>
             <Table headers={["Teman", "Tanggal", "Status", "Reward"]}>
-              {referralHistory.map((item) => (
+              {referralConfig.history.map((item) => (
                 <tr key={item.id} className="hover:bg-[#faf6f4] transition-colors">
-                  <td className="px-6 py-2.5 text-sm text-[#1D1616]">{item.friendName}</td>
+                  <td className="px-6 py-2.5 text-sm text-[#1D1616] font-semibold">{item.friendName}</td>
                   <td className="px-6 py-2.5 text-xs text-[#9e7a6e]">{item.date}</td>
                   <td className="px-6 py-2.5">
                     <Badge type={item.status === "Aktif" ? "success" : "warning"} dot>
@@ -445,19 +507,19 @@ const Promotions = () => {
         </div>
       </Modal>
 
-      {/* ── Modal Buat Promosi ── */}
+      {/* ── Modal Buat/Edit Promosi ── */}
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        title="Buat Promosi"
-        subtitle="Kirim otomatis ke anggota target"
+        title={editingPromo ? "Edit Promosi" : "Buat Promosi"}
+        subtitle={editingPromo ? "Ubah detail kampanye promosi" : "Kirim otomatis ke anggota target"}
         footer={
           <div className="flex gap-3">
             <Button type="secondary" fullWidth onClick={() => setShowModal(false)}>
               Batal
             </Button>
             <Button type="primary" fullWidth onClick={handleSubmit}>
-              Buat & Publikasikan
+              {editingPromo ? "Simpan Perubahan" : "Buat & Publikasikan"}
             </Button>
           </div>
         }
@@ -485,8 +547,8 @@ const Promotions = () => {
             value={form.discountType}
             onChange={handleChange}
             options={[
-              { value: "percentage", label: "Persentase" },
-              { value: "fixed", label: "Nominal" },
+              { value: "percentage", label: "Persentase (%)" },
+              { value: "fixed", label: "Nominal (Rupiah)" },
             ]}
           />
           <InputField
@@ -496,6 +558,24 @@ const Promotions = () => {
             onChange={handleChange}
             placeholder={form.discountType === "percentage" ? "20" : "50000"}
             required
+          />
+          <InputField
+            label="Berlaku Hingga"
+            name="validUntil"
+            type="date"
+            value={form.validUntil}
+            onChange={handleChange}
+            required
+          />
+          <SelectField
+            label="Status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            options={[
+              { value: "Aktif", label: "Aktif" },
+              { value: "Kadaluarsa", label: "Kadaluarsa" },
+            ]}
           />
         </div>
       </Modal>

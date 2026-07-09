@@ -227,7 +227,7 @@ const Reports = () => {
   const highestItem = chartData.reduce((max, item) => (item.value > max.value ? item : max), chartData[0] || { label: "-", value: 0 });
 
   // Demographics and top spenders indicators
-  const totalActive = members.filter((m) => m.status_member === "aktif").length;
+  const totalActive = members.filter((m) => m.status_member === "aktif" || m.status === "Active" || m.status === "aktif").length;
   const maleCount = members.filter((m) => m.jenis_kelamin === "L").length;
   const femaleCount = members.filter((m) => m.jenis_kelamin === "P").length;
   
@@ -430,7 +430,7 @@ const Reports = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#f5f0eb]">
+              <tbody className="divide-y divide-gray-100">
                 {chartData.map((item, index) => {
                   const percentage = totalValue > 0 ? (item.value / totalValue) * 100 : 0;
                   return (
@@ -473,7 +473,7 @@ const Reports = () => {
           </div>
         </div>
 
-        {/* Top Contributors Spenders */}
+        {/* Top Contributors */}
         <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-[#1D1616] uppercase tracking-wider flex items-center gap-2">
             <Award size={16} className="text-[#8C1007]" /> Kontributor Terbesar
